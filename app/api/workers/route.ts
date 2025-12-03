@@ -99,11 +99,12 @@ export async function POST(request: Request) {
             }
         }
 
-        // Check if RUT already exists in the company
+        // Check if RUT already exists in the company (only active workers)
         const existingWorker = await prisma.worker.findFirst({
             where: {
                 companyId: validatedData.companyId,
                 rut: validatedData.rut,
+                isActive: true,
             },
         });
 
