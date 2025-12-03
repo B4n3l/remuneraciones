@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { formatRut, cleanRut, validateRut } from "@/lib/utils/rut";
 
 export default function NuevaEmpresaPage() {
     const router = useRouter();
@@ -12,8 +13,35 @@ export default function NuevaEmpresaPage() {
         direccion: "",
         comuna: "",
     });
+    const [rutError, setRutError] = useState("");
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+
+    const handleRutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const formatted = formatRut(e.target.value);
+        setFormData({
+            ...formData,
+            rut: formatted,
+        });
+
+        // Validate RUT if it's complete
+        if (formatted.length >= 9) {
+            if (validateRut(formatted)) {
+                setRutError("");
+            } else {
+                setRutError("RUT inválido");
+            }
+        } else {
+            setRutError("");
+        }
+    };
+
+    const handleRazonSocialChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({
+            ...formData,
+            razonSocial: e.target.value.toUpperCase(),
+        });
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -25,6 +53,13 @@ export default function NuevaEmpresaPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+
+        // Validate RUT before submitting
+        if (!validateRut(formData.rut)) {
+            setError("El RUT ingresado no es válido");
+            return;
+        }
+
         setIsLoading(true);
 
         try {
@@ -33,7 +68,10 @@ export default function NuevaEmpresaPage() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({
+                    ...formData,
+                    rut: cleanRut(formData.rut), // Store without formatting
+                }),
             });
 
             const data = await response.json();
@@ -82,10 +120,18 @@ export default function NuevaEmpresaPage() {
                             type="text"
                             required
                             value={formData.rut}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            onChange={handleRutChange}
                             placeholder="76.xxx.xxx-x"
+                            maxLength={12}
+                            className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${rutError ? "border-red-500" : "border-gray-300"
+                                }`}
                         />
+                        {rutError && (
+                            <p className="mt-1 text-sm text-red-600">{rutError}</p>
+                        )}
+                        <p className="mt-1 text-xs text-gray-500">
+                            Ingresa el RUT sin puntos ni guión, se formateará automáticamente
+                        </p>
                     </div>
 
                     <div>
@@ -101,10 +147,13 @@ export default function NuevaEmpresaPage() {
                             type="text"
                             required
                             value={formData.razonSocial}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Empresa S.A."
+                            onChange={handleRazonSocialChange}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
+                            placeholder="EMPRESA S.A."
                         />
+                        <p className="mt-1 text-xs text-gray-500">
+                            Se convertirá automáticamente a mayúsculas
+                        </p>
                     </div>
 
                     <div>
@@ -148,7 +197,7 @@ export default function NuevaEmpresaPage() {
                     <div className="flex gap-4">
                         <button
                             type="submit"
-                            disabled={isLoading}
+                            disabled={isLoading || !!rutError}
                             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading ? "Creando..." : "Crear Empresa"}
