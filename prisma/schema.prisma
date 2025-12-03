@@ -1,0 +1,307 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Authentication & User Management
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String // hashed
+  role          UserRole  @default(USER)
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  accounts     Account[]
+  sessions     Session[]
+  companies    UserCompany[]
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  USER
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// Multi-tenancy: Companies & Access
+// ============================================
+
+model Company {
+  id        String   @id @default(cuid())
+  rut       String   @unique
+  razonSocial String
+  direccion String
+  comuna    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  users         UserCompany[]
+  workers       Worker[]
+  payrollPeriods PayrollPeriod[]
+}
+
+model UserCompany {
+  id        String   @id @default(cuid())
+  userId    String
+  companyId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, companyId])
+}
+
+// ============================================
+// Workers (Employees)
+// ============================================
+
+model Worker {
+  id              String        @id @default(cuid())
+  companyId       String
+  
+  // Personal Data
+  nombres         String
+  apellidoPaterno String
+  apellidoMaterno String
+  rut             String
+  
+  // Employment Data
+  cargo           String
+  fechaIngreso    DateTime
+  tipoContrato    TipoContrato
+  isActive        Boolean       @default(true)
+  
+  // Salary Data
+  sueldoBase      Decimal       @db.Decimal(12, 2)
+  tipoGratificacion TipoGratificacion
+  gratificacionPactada Decimal?  @db.Decimal(12, 2) // only if PACTADA
+  
+  // AFP
+  afpId           String
+  
+  // Health
+  tipoSalud       TipoSalud
+  isapreId        String?       // if ISAPRE
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  company         Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  afp             AFP           @relation(fields: [afpId], references: [id])
+  healthPlan      WorkerHealthPlan?
+  payrollItems    PayrollItem[]
+
+  @@unique([companyId, rut])
+}
+
+enum TipoContrato {
+  INDEFINIDO
+  PLAZO_FIJO
+  OBRA
+}
+
+enum TipoGratificacion {
+  PACTADA
+  LEGAL_25
+}
+
+enum TipoSalud {
+  FONASA
+  ISAPRE
+}
+
+model WorkerHealthPlan {
+  id              String   @id @default(cuid())
+  workerId        String   @unique
+  isapre          String   // nombre de la isapre
+  planUF          Decimal  @db.Decimal(8, 2) // valor adicional en UF
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  worker Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// Configuration: AFP, Tax Brackets, System Values
+// ============================================
+
+model AFP {
+  id         String   @id @default(cuid())
+  nombre     String   @unique
+  porcentaje Decimal  @db.Decimal(5, 2) // e.g., 10.00 for 10%
+  comision   Decimal  @db.Decimal(5, 2) // e.g., 1.44 for 1.44%
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  workers Worker[]
+}
+
+model TaxBracket {
+  id         String   @id @default(cuid())
+  year       Int      // año vigencia (e.g., 2024)
+  fromUTM    Decimal  @db.Decimal(10, 2) // desde X UTM
+  toUTM      Decimal? @db.Decimal(10, 2) // hasta X UTM (null = sin tope)
+  factor     Decimal  @db.Decimal(10, 6) // factor multiplicador
+  deduction  Decimal  @db.Decimal(10, 2) // rebaja en UTM
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([year, fromUTM])
+}
+
+model SystemValue {
+  id        String   @id @default(cuid())
+  tipo      SystemValueType
+  valor     Decimal  @db.Decimal(12, 2)
+  fecha     DateTime // fecha de vigencia
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tipo, fecha])
+}
+
+enum SystemValueType {
+  UF
+  UTM
+  SUELDO_MINIMO
+}
+
+// ============================================
+// Payroll Management
+// ============================================
+
+model PayrollPeriod {
+  id          String           @id @default(cuid())
+  companyId   String
+  yearMonth   String           // YYYY-MM format
+  fechaInicio DateTime
+  fechaFin    DateTime
+  status      PayrollStatus    @default(BORRADOR)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  company      Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  payrollItems PayrollItem[]
+
+  @@unique([companyId, yearMonth])
+}
+
+enum PayrollStatus {
+  BORRADOR
+  LIQUIDADA
+  PAGADA
+}
+
+model PayrollItem {
+  id              String          @id @default(cuid())
+  periodId        String
+  workerId        String
+  
+  // Variable data for this period
+  diasTrabajados  Int
+  horasExtra      Int             @default(0)
+  valorHoraExtra  Decimal         @db.Decimal(10, 2) @default(0)
+  
+  // Calculated values
+  totalHaberes    Decimal         @db.Decimal(12, 2)
+  totalDescuentosLegales Decimal  @db.Decimal(12, 2)
+  totalDescuentosVoluntarios Decimal @db.Decimal(12, 2)
+  liquidoPagar    Decimal         @db.Decimal(12, 2)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  period   PayrollPeriod     @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  worker   Worker            @relation(fields: [workerId], references: [id])
+  earnings PayrollEarning[]
+  deductions PayrollDeduction[]
+
+  @@unique([periodId, workerId])
+}
+
+model PayrollEarning {
+  id            String      @id @default(cuid())
+  payrollItemId String
+  tipo          EarningType
+  concepto      String
+  monto         Decimal     @db.Decimal(12, 2)
+  createdAt     DateTime    @default(now())
+
+  payrollItem PayrollItem @relation(fields: [payrollItemId], references: [id], onDelete: Cascade)
+}
+
+enum EarningType {
+  SUELDO_BASE
+  HORAS_EXTRA
+  GRATIFICACION
+  BONO_COLACION
+  BONO_MOVILIZACION
+  BONO_VIATICO
+  OTRO
+}
+
+model PayrollDeduction {
+  id            String        @id @default(cuid())
+  payrollItemId String
+  tipo          DeductionType
+  concepto      String
+  monto         Decimal       @db.Decimal(12, 2)
+  createdAt     DateTime      @default(now())
+
+  payrollItem PayrollItem @relation(fields: [payrollItemId], references: [id], onDelete: Cascade)
+}
+
+enum DeductionType {
+  AFP
+  SALUD
+  CESANTIA
+  IMPUESTO_UNICO
+  ANTICIPO
+  PRESTAMO
+  OTRO
+}
