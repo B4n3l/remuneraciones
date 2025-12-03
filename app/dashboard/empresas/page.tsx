@@ -16,13 +16,6 @@ export default async function EmpresasPage() {
                     },
                 },
             },
-        include: {
-            _count: {
-                select: {
-                    workers: true,
-                },
-            },
-        },
         orderBy: {
             razonSocial: "asc",
         },
@@ -74,9 +67,6 @@ export default async function EmpresasPage() {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Comuna
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Trabajadores
-                                </th>
                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Acciones
                                 </th>
@@ -93,9 +83,6 @@ export default async function EmpresasPage() {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {company.comuna}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {company._count.workers}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <Link
