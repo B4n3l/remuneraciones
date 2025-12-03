@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await auth();
@@ -12,8 +12,10 @@ export async function GET(
             return NextResponse.json({ error: "No autorizado" }, { status: 401 });
         }
 
+        const { id } = await params;
+
         const company = await prisma.company.findUnique({
-            where: { id: params.id },
+            where: { id },
         });
 
         if (!company) {
@@ -25,7 +27,7 @@ export async function GET(
             const hasAccess = await prisma.userCompany.findFirst({
                 where: {
                     userId: session.user.id,
-                    companyId: params.id,
+                    companyId: id,
                 },
             });
 
@@ -43,7 +45,7 @@ export async function GET(
 
 export async function PUT(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await auth();
@@ -51,12 +53,14 @@ export async function PUT(
             return NextResponse.json({ error: "No autorizado" }, { status: 401 });
         }
 
+        const { id } = await params;
+
         // Check access
         if (session.user.role !== "SUPER_ADMIN") {
             const hasAccess = await prisma.userCompany.findFirst({
                 where: {
                     userId: session.user.id,
-                    companyId: params.id,
+                    companyId: id,
                 },
             });
 
@@ -69,7 +73,7 @@ export async function PUT(
         const { razonSocial, rut, direccion, comuna } = body;
 
         const company = await prisma.company.update({
-            where: { id: params.id },
+            where: { id },
             data: {
                 razonSocial,
                 rut,
@@ -87,7 +91,7 @@ export async function PUT(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await auth();
@@ -95,12 +99,14 @@ export async function DELETE(
             return NextResponse.json({ error: "No autorizado" }, { status: 401 });
         }
 
+        const { id } = await params;
+
         // Check access
         if (session.user.role !== "SUPER_ADMIN") {
             const hasAccess = await prisma.userCompany.findFirst({
                 where: {
                     userId: session.user.id,
-                    companyId: params.id,
+                    companyId: id,
                 },
             });
 
@@ -111,7 +117,7 @@ export async function DELETE(
 
         // Check if company has workers
         const workerCount = await prisma.worker.count({
-            where: { companyId: params.id },
+            where: { companyId: id },
         });
 
         if (workerCount > 0) {
@@ -122,7 +128,7 @@ export async function DELETE(
         }
 
         await prisma.company.delete({
-            where: { id: params.id },
+            where: { id },
         });
 
         return NextResponse.json({ success: true });

@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { formatRut, cleanRut, validateRut } from "@/lib/utils/rut";
+import { use } from "react";
 
-export default function EditarEmpresaPage({ params }: { params: { id: string } }) {
+export default function EditarEmpresaPage({ params }: { params: Promise<{ id: string }> }) {
+    const resolvedParams = use(params);
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({
@@ -21,7 +23,7 @@ export default function EditarEmpresaPage({ params }: { params: { id: string } }
     useEffect(() => {
         async function fetchCompany() {
             try {
-                const response = await fetch(`/api/companies/${params.id}`);
+                const response = await fetch(`/api/companies/${resolvedParams.id}`);
                 if (response.ok) {
                     const data = await response.json();
                     setFormData({
@@ -41,7 +43,7 @@ export default function EditarEmpresaPage({ params }: { params: { id: string } }
         }
 
         fetchCompany();
-    }, [params.id]);
+    }, [resolvedParams.id]);
 
     const handleRutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const formatted = formatRut(e.target.value);
@@ -84,7 +86,7 @@ export default function EditarEmpresaPage({ params }: { params: { id: string } }
         setIsSubmitting(true);
 
         try {
-            const response = await fetch(`/api/companies/${params.id}`, {
+            const response = await fetch(`/api/companies/${resolvedParams.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
