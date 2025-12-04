@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
         paddingTop: 4,
     },
     confirmationText: {
-        marginTop: 15,
+        marginTop: 50,
         fontSize: 9,
         textAlign: "center",
         fontStyle: "italic",
