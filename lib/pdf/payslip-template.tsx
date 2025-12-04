@@ -133,6 +133,12 @@ const styles = StyleSheet.create({
         marginTop: 40,
         paddingTop: 5,
     },
+    confirmationText: {
+        marginTop: 20,
+        fontSize: 10,
+        textAlign: "center",
+        fontStyle: "italic",
+    },
 });
 
 interface PayslipData {
@@ -162,6 +168,68 @@ function formatCurrency(value: number): string {
         currency: "CLP",
         minimumFractionDigits: 0,
     }).format(value);
+}
+
+// Convert number to words in Spanish
+function numberToWords(num: number): string {
+    const units = ["", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
+    const teens = ["diez", "once", "doce", "trece", "catorce", "quince", "dieciséis", "diecisiete", "dieciocho", "diecinueve"];
+    const tens = ["", "", "veinte", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"];
+    const hundreds = ["", "cien", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos", "setecientos", "ochocientos", "novecientos"];
+
+    if (num === 0) return "cero";
+    if (num < 0) return "menos " + numberToWords(-num);
+
+    num = Math.floor(num);
+
+    function convertHundreds(n: number): string {
+        if (n === 0) return "";
+        if (n < 10) return units[n];
+        if (n < 20) return teens[n - 10];
+        if (n < 30) {
+            if (n === 20) return "veinte";
+            return "veinti" + units[n - 20];
+        }
+        if (n < 100) {
+            const ten = Math.floor(n / 10);
+            const unit = n % 10;
+            return tens[ten] + (unit ? " y " + units[unit] : "");
+        }
+        const hundred = Math.floor(n / 100);
+        const rest = n % 100;
+        if (hundred === 1 && rest > 0) return "ciento " + convertHundreds(rest);
+        return hundreds[hundred] + (rest ? " " + convertHundreds(rest) : "");
+    }
+
+    function convertThousands(n: number): string {
+        if (n < 1000) return convertHundreds(n);
+        const thousands = Math.floor(n / 1000);
+        const rest = n % 1000;
+        let result = "";
+        if (thousands === 1) {
+            result = "mil";
+        } else {
+            result = convertHundreds(thousands) + " mil";
+        }
+        if (rest > 0) result += " " + convertHundreds(rest);
+        return result;
+    }
+
+    function convertMillions(n: number): string {
+        if (n < 1000000) return convertThousands(n);
+        const millions = Math.floor(n / 1000000);
+        const rest = n % 1000000;
+        let result = "";
+        if (millions === 1) {
+            result = "un millón";
+        } else {
+            result = convertHundreds(millions) + " millones";
+        }
+        if (rest > 0) result += " " + convertThousands(rest);
+        return result;
+    }
+
+    return convertMillions(num) + " pesos";
 }
 
 // Format RUT with dots and dash (12345678-9 -> 12.345.678-9)
@@ -301,7 +369,13 @@ export function PayslipPDF({ data }: { data: PayslipData }) {
                         <Text style={styles.signatureLine}>Firma Trabajador</Text>
                     </View>
                 </View>
+
+                {/* Confirmation Text */}
+                <Text style={styles.confirmationText}>
+                    Recibí conforme la cantidad de {numberToWords(data.liquido)}
+                </Text>
             </Page>
         </Document>
     );
 }
+
