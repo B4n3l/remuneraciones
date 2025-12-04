@@ -26,58 +26,30 @@ async function main() {
     });
   }
 
-  // Create current system values (valores aproximados de Diciembre 2025)
+  // Create current system values for December 2024
   console.log('Creating system values...');
-  const today = new Date();
-  
+
   await prisma.systemValue.upsert({
     where: {
-      tipo_fecha: {
-        tipo: 'UF',
-        fecha: today,
+      year_month: {
+        year: 2024,
+        month: 12,
       },
     },
     update: {},
     create: {
-      tipo: 'UF',
-      valor: 37880.50, // Valor aproximado
-      fecha: today,
+      year: 2024,
+      month: 12,
+      valorUF: 38129.63,
+      valorUTM: 66507,
+      sueldoMinimo: 500000,
     },
   });
 
-  await prisma.systemValue.upsert({
-    where: {
-      tipo_fecha: {
-        tipo: 'UTM',
-        fecha: today,
-      },
-    },
-    update: {},
-    create: {
-      tipo: 'UTM',
-      valor: 66613, // Valor aproximado
-      fecha: today,
-    },
-  });
 
-  await prisma.systemValue.upsert({
-    where: {
-      tipo_fecha: {
-        tipo: 'SUELDO_MINIMO',
-        fecha: today,
-      },
-    },
-    update: {},
-    create: {
-      tipo: 'SUELDO_MINIMO',
-      valor: 500000, // Valor aproximado
-      fecha: today,
-    },
-  });
-
-  // Create tax brackets for 2025 (valores aproximados - deben actualizarse)
-  console.log('Creating tax brackets for 2025...');
-  const taxBrackets2025 = [
+  // Create tax brackets for 2024
+  console.log('Creating tax brackets for 2024...');
+  const taxBrackets2024 = [
     { fromUTM: 0, toUTM: 13.5, factor: 0, deduction: 0 },
     { fromUTM: 13.5, toUTM: 30, factor: 0.04, deduction: 0.54 },
     { fromUTM: 30, toUTM: 50, factor: 0.08, deduction: 1.74 },
@@ -88,17 +60,17 @@ async function main() {
     { fromUTM: 310, toUTM: null, factor: 0.40, deduction: 38.82 },
   ];
 
-  for (const bracket of taxBrackets2025) {
+  for (const bracket of taxBrackets2024) {
     await prisma.taxBracket.upsert({
       where: {
         year_fromUTM: {
-          year: 2025,
+          year: 2024,
           fromUTM: bracket.fromUTM,
         },
       },
       update: {},
       create: {
-        year: 2025,
+        year: 2024,
         ...bracket,
       },
     });
