@@ -23,6 +23,9 @@ export default function EditarTrabajadorPage({ params }: { params: Promise<{ id:
         sueldoBase: "",
         tipoGratificacion: "LEGAL_25",
         gratificacionPactada: "",
+        bonoColacion: "",
+        bonoMovilizacion: "",
+        bonoViatico: "",
         afpId: "",
         tipoSalud: "FONASA",
         isapre: "",
@@ -54,6 +57,9 @@ export default function EditarTrabajadorPage({ params }: { params: Promise<{ id:
                         sueldoBase: worker.sueldoBase.toString(),
                         tipoGratificacion: worker.tipoGratificacion,
                         gratificacionPactada: worker.gratificacionPactada?.toString() || "",
+                        bonoColacion: worker.bonoColacion?.toString() || "0",
+                        bonoMovilizacion: worker.bonoMovilizacion?.toString() || "0",
+                        bonoViatico: worker.bonoViatico?.toString() || "0",
                         afpId: worker.afpId,
                         tipoSalud: worker.tipoSalud,
                         isapre: worker.healthPlan?.isapre || "",
@@ -120,6 +126,9 @@ export default function EditarTrabajadorPage({ params }: { params: Promise<{ id:
                 tipoContrato: formData.tipoContrato,
                 sueldoBase: parseFloat(formData.sueldoBase),
                 tipoGratificacion: formData.tipoGratificacion,
+                bonoColacion: parseFloat(formData.bonoColacion) || 0,
+                bonoMovilizacion: parseFloat(formData.bonoMovilizacion) || 0,
+                bonoViatico: parseFloat(formData.bonoViatico) || 0,
                 afpId: formData.afpId,
                 tipoSalud: formData.tipoSalud,
             };
@@ -324,6 +333,49 @@ export default function EditarTrabajadorPage({ params }: { params: Promise<{ id:
                                 />
                             </div>
                         )}
+                    </div>
+                </div>
+
+                {/* Bonos Fijos Mensuales */}
+                <div className="bg-white shadow rounded-lg p-6">
+                    <h2 className="text-lg font-semibold mb-4">Bonos Fijos Mensuales (No Imponibles)</h2>
+                    <div className="grid grid-cols-3 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Colación (CLP)</label>
+                            <input
+                                type="number"
+                                name="bonoColacion"
+                                min="0"
+                                value={formData.bonoColacion}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                                placeholder="0"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Movilización (CLP)</label>
+                            <input
+                                type="number"
+                                name="bonoMovilizacion"
+                                min="0"
+                                value={formData.bonoMovilizacion}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                                placeholder="0"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Viático (CLP)</label>
+                            <input
+                                type="number"
+                                name="bonoViatico"
+                                min="0"
+                                value={formData.bonoViatico}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                                placeholder="0"
+                            />
+                        </div>
                     </div>
                 </div>
 
