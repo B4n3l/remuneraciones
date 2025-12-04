@@ -97,7 +97,7 @@ export async function GET(
         const workerName = `${payrollItem.worker.apellidoPaterno}_${payrollItem.worker.nombres}`.replace(/\s+/g, "_");
         const filename = `Liquidacion_${periodStr.replace(" ", "_")}_${workerName}.pdf`;
 
-        return new Response(pdfBuffer, {
+        return new Response(new Uint8Array(pdfBuffer), {
             headers: {
                 "Content-Type": "application/pdf",
                 "Content-Disposition": `attachment; filename="${filename}"`,
