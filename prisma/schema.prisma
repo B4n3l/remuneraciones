@@ -196,20 +196,17 @@ model TaxBracket {
 
 model SystemValue {
   id        String   @id @default(cuid())
-  tipo      SystemValueType
-  valor     Decimal  @db.Decimal(12, 2)
-  fecha     DateTime // fecha de vigencia
+  year      Int      // año (e.g., 2024)
+  month     Int      // mes (1-12)
+  valorUF   Decimal  @db.Decimal(12, 2)
+  valorUTM  Decimal  @db.Decimal(12, 2)
+  sueldoMinimo Decimal @db.Decimal(12, 2)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([tipo, fecha])
+  @@unique([year, month])
 }
 
-enum SystemValueType {
-  UF
-  UTM
-  SUELDO_MINIMO
-}
 
 // ============================================
 // Payroll Management
