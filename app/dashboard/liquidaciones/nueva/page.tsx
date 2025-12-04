@@ -1,0 +1,393 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+
+interface Worker {
+    id: string;
+    nombres: string;
+    apellidoPaterno: string;
+    apellidoMaterno: string;
+    rut: string;
+    cargo: string;
+    sueldoBase: number;
+}
+
+export default function NuevaLiquidacionPage() {
+    const router = useRouter();
+    const currentDate = new Date();
+
+    const [companies, setCompanies] = useState<any[]>([]);
+    const [workers, setWorkers] = useState<Worker[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [calculating, setCalculating] = useState(false);
+    const [payrollResults, setPayrollResults] = useState<any>(null);
+
+    const [formData, setFormData] = useState({
+        companyId: "",
+        year: currentDate.getFullYear(),
+        month: currentDate.getMonth() + 1,
+    });
+
+    const [workerInputs, setWorkerInputs] = useState<Record<string, {
+        horasExtras50: number;
+        horasExtras100: number;
+        bonos: number;
+    }>>({});
+
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        async function fetchCompanies() {
+            try {
+                const response = await fetch("/api/companies");
+                if (response.ok) {
+                    const data = await response.json();
+                    setCompanies(data);
+                }
+            } catch (err) {
+                console.error("Error fetching companies:", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchCompanies();
+    }, []);
+
+    useEffect(() => {
+        async function fetchWorkers() {
+            if (!formData.companyId) {
+                setWorkers([]);
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/workers?companyId=${formData.companyId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setWorkers(data);
+
+                    // Initialize worker inputs
+                    const inputs: typeof workerInputs = {};
+                    data.forEach((worker: Worker) => {
+                        inputs[worker.id] = {
+                            horasExtras50: 0,
+                            horasExtras100: 0,
+                            bonos: 0,
+                        };
+                    });
+                    setWorkerInputs(inputs);
+                }
+            } catch (err) {
+                console.error("Error fetching workers:", err);
+            }
+        }
+        fetchWorkers();
+    }, [formData.companyId]);
+
+    const handleWorkerInputChange = (workerId: string, field: string, value: string) => {
+        setWorkerInputs({
+            ...workerInputs,
+            [workerId]: {
+                ...workerInputs[workerId],
+                [field]: parseFloat(value) || 0,
+            },
+        });
+    };
+
+    const handleCalculate = async () => {
+        if (!formData.companyId) {
+            setError("Debe seleccionar una empresa");
+            return;
+        }
+
+        setError("");
+        setCalculating(true);
+
+        try {
+            const response = await fetch("/api/payroll/calculate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    companyId: formData.companyId,
+                    year: formData.year,
+                    month: formData.month,
+                    workerInputs,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                setError(data.error || "Error al calcular liquidaciones");
+                return;
+            }
+
+            setPayrollResults(data);
+        } catch (err) {
+            setError("Error al calcular liquidaciones");
+        } finally {
+            setCalculating(false);
+        }
+    };
+
+    const formatCurrency = (value: number) => {
+        return new Intl.NumberFormat("es-CL", {
+            style: "currency",
+            currency: "CLP",
+            minimumFractionDigits: 0,
+        }).format(value);
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <p className="text-gray-600">Cargando...</p>
+            </div>
+        );
+    }
+
+    if (companies.length === 0) {
+        return (
+            <div className="max-w-2xl">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                    <h3 className="text-sm font-medium text-yellow-800 mb-2">
+                        No hay empresas disponibles
+                    </h3>
+                    <p className="text-sm text-yellow-700 mb-4">
+                        Primero debes crear una empresa.
+                    </p>
+                    <Link
+                        href="/dashboard/empresas/nueva"
+                        className="inline-flex px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-md"
+                    >
+                        Crear Empresa
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="max-w-7xl">
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-gray-900">Nueva Liquidación</h1>
+                <p className="mt-2 text-sm text-gray-600">
+                    Genera las liquidaciones de sueldo del período seleccionado
+                </p>
+            </div>
+
+            {error && (
+                <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+                    {error}
+                </div>
+            )}
+
+            {/* Selección de empresa y período */}
+            <div className="bg-white shadow rounded-lg p-6 mb-6">
+                <h2 className="text-lg font-semibold mb-4">Empresa y Período</h2>
+                <div className="grid grid-cols-3 gap-4">
+                    <div className="col-span-3 md:col-span-1">
+                        <label className="block text-sm font-medium mb-2">Empresa *</label>
+                        <select
+                            value={formData.companyId}
+                            onChange={(e) => setFormData({ ...formData, companyId: e.target.value })}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                        >
+                            <option value="">Seleccionar empresa</option>
+                            {companies.map((company) => (
+                                <option key={company.id} value={company.id}>
+                                    {company.razonSocial}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Año *</label>
+                        <input
+                            type="number"
+                            value={formData.year}
+                            onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                            min="2020"
+                            max="2030"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Mes *</label>
+                        <select
+                            value={formData.month}
+                            onChange={(e) => setFormData({ ...formData, month: parseInt(e.target.value) })}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                        >
+                            {[
+                                "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+                            ].map((mes, idx) => (
+                                <option key={idx} value={idx + 1}>{mes}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            {/* Input de horas extras y bonos */}
+            {workers.length > 0 && !payrollResults && (
+                <div className="bg-white shadow rounded-lg p-6 mb-6">
+                    <h2 className="text-lg font-semibold mb-4">Horas Extras y Bonos</h2>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Trabajador
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Sueldo Base
+                                    </th>
+                                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                                        HE 50%
+                                    </th>
+                                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                                        HE 100%
+                                    </th>
+                                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                                        Bonos (CLP)
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {workers.map((worker) => (
+                                    <tr key={worker.id}>
+                                        <td className="px-4 py-3 text-sm text-gray-900">
+                                            {worker.nombres} {worker.apellidoPaterno}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-gray-500">
+                                            {formatCurrency(worker.sueldoBase)}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value={workerInputs[worker.id]?.horasExtras50 || 0}
+                                                onChange={(e) => handleWorkerInputChange(worker.id, "horasExtras50", e.target.value)}
+                                                className="w-20 px-2 py-1 border border-gray-300 rounded text-center"
+                                            />
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value={workerInputs[worker.id]?.horasExtras100 || 0}
+                                                onChange={(e) => handleWorkerInputChange(worker.id, "horasExtras100", e.target.value)}
+                                                className="w-20 px-2 py-1 border border-gray-300 rounded text-center"
+                                            />
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value={workerInputs[worker.id]?.bonos || 0}
+                                                onChange={(e) => handleWorkerInputChange(worker.id, "bonos", e.target.value)}
+                                                className="w-24 px-2 py-1 border border-gray-300 rounded text-center"
+                                            />
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className="mt-6 flex justify-end">
+                        <button
+                            onClick={handleCalculate}
+                            disabled={calculating}
+                            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md disabled:opacity-50"
+                        >
+                            {calculating ? "Calculando..." : "Calcular Liquidaciones"}
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {workers.length === 0 && formData.companyId && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                    <h3 className="text-sm font-medium text-yellow-800 mb-2">
+                        No hay trabajadores en esta empresa
+                    </h3>
+                    <p className="text-sm text-yellow-700 mb-4">
+                        Primero debes agregar trabajadores a la empresa.
+                    </p>
+                    <Link
+                        href="/dashboard/trabajadores/nuevo"
+                        className="inline-flex px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-md"
+                    >
+                        Crear Trabajador
+                    </Link>
+                </div>
+            )}
+
+            {/* Preview de resultados */}
+            {payrollResults && (
+                <div className="bg-white shadow rounded-lg p-6">
+                    <h2 className="text-lg font-semibold mb-4">
+                        Resultados - {payrollResults.payrolls.length} Liquidación(es)
+                    </h2>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Trabajador
+                                    </th>
+                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                                        Total Haberes
+                                    </th>
+                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                                        Total Descuentos
+                                    </th>
+                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                                        Líquido a Pagar
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {payrollResults.payrolls.map((payroll: any) => (
+                                    <tr key={payroll.workerId}>
+                                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                            {payroll.workerName}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-right text-gray-700">
+                                            {formatCurrency(payroll.totalHaberes)}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-right text-red-600">
+                                            -{formatCurrency(payroll.totalDescuentos)}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-right font-semibold text-green-600">
+                                            {formatCurrency(payroll.liquido)}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className="mt-6 flex gap-4">
+                        <button
+                            onClick={() => setPayrollResults(null)}
+                            className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-md"
+                        >
+                            Volver a Editar
+                        </button>
+                        <button
+                            className="flex-1 px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md"
+                        >
+                            Guardar Período
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
