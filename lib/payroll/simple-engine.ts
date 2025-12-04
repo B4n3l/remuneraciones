@@ -168,7 +168,10 @@ export function calculatePayroll(input: PayrollInput): PayrollResult {
     const valorHE100 = calcularValorHoraExtra(sueldoBase, 2.0);
     const horasExtras = (horasExtras50 * valorHE50) + (horasExtras100 * valorHE100);
 
-    const totalHaberes = sueldoBase + horasExtras + gratificacion + bonos;
+    // Total bonos (fijos + variables, NO imponibles)
+    const totalBonos = bonoColacion + bonoMovilizacion + bonoViatico + bonosVariables;
+
+    const totalHaberes = sueldoBase + horasExtras + gratificacion + totalBonos;
 
     // Base imponible (sueldo + horas extras + gratificación, NO bonos)
     const imponible = sueldoBase + horasExtras + gratificacion;
@@ -208,8 +211,20 @@ export function calculatePayroll(input: PayrollInput): PayrollResult {
         monto: gratificacion
     });
 
-    if (bonos > 0) {
-        detalleHaberes.push({ concepto: "Bonos", monto: bonos });
+    if (bonoColacion > 0) {
+        detalleHaberes.push({ concepto: "Bono Colación", monto: bonoColacion });
+    }
+
+    if (bonoMovilizacion > 0) {
+        detalleHaberes.push({ concepto: "Bono Movilización", monto: bonoMovilizacion });
+    }
+
+    if (bonoViatico > 0) {
+        detalleHaberes.push({ concepto: "Bono Viático", monto: bonoViatico });
+    }
+
+    if (bonosVariables > 0) {
+        detalleHaberes.push({ concepto: "Bonos Variables", monto: bonosVariables });
     }
 
     const detalleDescuentos = [
@@ -226,7 +241,7 @@ export function calculatePayroll(input: PayrollInput): PayrollResult {
         sueldoBase,
         horasExtras,
         gratificacion,
-        bonos,
+        bonos: totalBonos,
         totalHaberes,
         imponible,
         afp,
