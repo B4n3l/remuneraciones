@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
         width: "60%",
     },
     section: {
-        marginBottom: 15,
+        marginBottom: 10,
     },
     sectionTitle: {
         fontSize: 11,
@@ -58,6 +58,13 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         backgroundColor: "#e0e0e0",
         padding: 5,
+    },
+    subSectionTitle: {
+        fontSize: 10,
+        fontWeight: "bold",
+        marginBottom: 5,
+        marginTop: 5,
+        color: "#444",
     },
     itemRow: {
         flexDirection: "row",
@@ -79,6 +86,14 @@ const styles = StyleSheet.create({
         paddingTop: 5,
         borderTop: "1 solid #000",
         fontWeight: "bold",
+    },
+    subtotalRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: 3,
+        paddingTop: 3,
+        borderTop: "1 dashed #999",
+        fontSize: 9,
     },
     liquidoSection: {
         marginTop: 20,
@@ -149,7 +164,36 @@ function formatCurrency(value: number): string {
     }).format(value);
 }
 
+// Format RUT with dots and dash (12345678-9 -> 12.345.678-9)
+function formatRut(rut: string): string {
+    // Clean the RUT first (remove any existing formatting)
+    const clean = rut.replace(/\./g, "").replace(/-/g, "").toUpperCase();
+
+    if (clean.length < 2) return rut;
+
+    const body = clean.slice(0, -1);
+    const dv = clean.slice(-1);
+
+    // Add dots every 3 digits from right to left
+    const formatted = body.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+    return `${formatted}-${dv}`;
+}
+
+// Check if an earning is "imponible" (taxable) based on concept name
+function isImponible(concepto: string): boolean {
+    const noImponibles = ["Colación", "Movilización", "Viático", "Bono Colación", "Bono Movilización", "Bono Viático", "Bonos Variables"];
+    return !noImponibles.some(ni => concepto.includes(ni));
+}
+
 export function PayslipPDF({ data }: { data: PayslipData }) {
+    // Separate earnings into imponibles and no imponibles
+    const haberesImponibles = data.earnings.filter(e => isImponible(e.concepto));
+    const haberesNoImponibles = data.earnings.filter(e => !isImponible(e.concepto));
+
+    const totalImponibles = haberesImponibles.reduce((sum, e) => sum + e.monto, 0);
+    const totalNoImponibles = haberesNoImponibles.reduce((sum, e) => sum + e.monto, 0);
+
     return (
         <Document>
             <Page size="LETTER" style={styles.page}>
@@ -162,7 +206,7 @@ export function PayslipPDF({ data }: { data: PayslipData }) {
                 {/* Company Info */}
                 <View style={styles.companyInfo}>
                     <Text style={styles.companyName}>{data.company.razonSocial}</Text>
-                    <Text>RUT: {data.company.rut}</Text>
+                    <Text>RUT: {formatRut(data.company.rut)}</Text>
                     {data.company.direccion && <Text>{data.company.direccion}</Text>}
                 </View>
 
@@ -173,7 +217,7 @@ export function PayslipPDF({ data }: { data: PayslipData }) {
                     </Text>
                     <View style={styles.row}>
                         <Text style={styles.label}>RUT:</Text>
-                        <Text style={styles.value}>{data.worker.rut}</Text>
+                        <Text style={styles.value}>{formatRut(data.worker.rut)}</Text>
                     </View>
                     <View style={styles.row}>
                         <Text style={styles.label}>Cargo:</Text>
@@ -184,12 +228,41 @@ export function PayslipPDF({ data }: { data: PayslipData }) {
                 {/* Earnings Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>HABERES</Text>
-                    {data.earnings.map((item, idx) => (
-                        <View key={idx} style={styles.itemRow}>
-                            <Text style={styles.itemLabel}>{item.concepto}</Text>
-                            <Text style={styles.itemValue}>{formatCurrency(item.monto)}</Text>
-                        </View>
-                    ))}
+
+                    {/* Haberes Imponibles */}
+                    {haberesImponibles.length > 0 && (
+                        <>
+                            <Text style={styles.subSectionTitle}>Haberes Imponibles</Text>
+                            {haberesImponibles.map((item, idx) => (
+                                <View key={idx} style={styles.itemRow}>
+                                    <Text style={styles.itemLabel}>{item.concepto}</Text>
+                                    <Text style={styles.itemValue}>{formatCurrency(item.monto)}</Text>
+                                </View>
+                            ))}
+                            <View style={styles.subtotalRow}>
+                                <Text>Subtotal Imponibles</Text>
+                                <Text style={styles.itemValue}>{formatCurrency(totalImponibles)}</Text>
+                            </View>
+                        </>
+                    )}
+
+                    {/* Haberes No Imponibles */}
+                    {haberesNoImponibles.length > 0 && (
+                        <>
+                            <Text style={styles.subSectionTitle}>Haberes No Imponibles</Text>
+                            {haberesNoImponibles.map((item, idx) => (
+                                <View key={idx} style={styles.itemRow}>
+                                    <Text style={styles.itemLabel}>{item.concepto}</Text>
+                                    <Text style={styles.itemValue}>{formatCurrency(item.monto)}</Text>
+                                </View>
+                            ))}
+                            <View style={styles.subtotalRow}>
+                                <Text>Subtotal No Imponibles</Text>
+                                <Text style={styles.itemValue}>{formatCurrency(totalNoImponibles)}</Text>
+                            </View>
+                        </>
+                    )}
+
                     <View style={styles.totalRow}>
                         <Text>TOTAL HABERES</Text>
                         <Text style={styles.itemValue}>{formatCurrency(data.totalHaberes)}</Text>
