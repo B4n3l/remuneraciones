@@ -119,6 +119,11 @@ model Worker {
   tipoGratificacion TipoGratificacion
   gratificacionPactada Decimal?  @db.Decimal(12, 2) // only if PACTADA
   
+  // Bonos fijos mensuales (no imponibles)
+  bonoColacion    Decimal       @db.Decimal(12, 2) @default(0)
+  bonoMovilizacion Decimal      @db.Decimal(12, 2) @default(0)
+  bonoViatico     Decimal       @db.Decimal(12, 2) @default(0)
+  
   // AFP
   afpId           String
   
