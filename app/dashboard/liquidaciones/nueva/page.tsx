@@ -330,58 +330,109 @@ export default function NuevaLiquidacionPage() {
 
             {/* Preview de resultados */}
             {payrollResults && (
-                <div className="bg-white shadow rounded-lg p-6">
-                    <h2 className="text-lg font-semibold mb-4">
-                        Resultados - {payrollResults.payrolls.length} Liquidación(es)
-                    </h2>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        Trabajador
-                                    </th>
-                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                                        Total Haberes
-                                    </th>
-                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                                        Total Descuentos
-                                    </th>
-                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                                        Líquido a Pagar
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {payrollResults.payrolls.map((payroll: any) => (
-                                    <tr key={payroll.workerId}>
-                                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                                            {payroll.workerName}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-right text-gray-700">
-                                            {formatCurrency(payroll.totalHaberes)}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-right text-red-600">
-                                            -{formatCurrency(payroll.totalDescuentos)}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-right font-semibold text-green-600">
-                                            {formatCurrency(payroll.liquido)}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                <div className="space-y-6">
+                    <div className="bg-white shadow rounded-lg p-6">
+                        <h2 className="text-lg font-semibold mb-4">
+                            Resultados - {payrollResults.payrolls.length} Liquidación(es)
+                        </h2>
+                        <p className="text-sm text-gray-500 mb-4">
+                            UF: {formatCurrency(payrollResults.systemValue.valorUF)} |
+                            UTM: {formatCurrency(payrollResults.systemValue.valorUTM)} |
+                            Sueldo Mínimo: {formatCurrency(payrollResults.systemValue.sueldoMinimo)}
+                        </p>
                     </div>
 
-                    <div className="mt-6 flex gap-4">
+                    {payrollResults.payrolls.map((payroll: any) => (
+                        <div key={payroll.workerId} className="bg-white shadow rounded-lg p-6">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                                {payroll.workerName}
+                                <span className="text-sm font-normal text-gray-500 ml-2">({payroll.workerRut})</span>
+                            </h3>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {/* Haberes */}
+                                <div className="bg-green-50 rounded-lg p-4">
+                                    <h4 className="font-semibold text-green-800 mb-3">HABERES</h4>
+                                    <div className="space-y-2">
+                                        {payroll.detalleHaberes?.map((item: any, idx: number) => (
+                                            <div key={idx} className="flex justify-between text-sm">
+                                                <span className="text-gray-600">{item.concepto}</span>
+                                                <span className="font-medium">{formatCurrency(item.monto)}</span>
+                                            </div>
+                                        ))}
+                                        <div className="border-t border-green-200 pt-2 mt-2">
+                                            <div className="flex justify-between font-semibold text-green-800">
+                                                <span>Total Haberes</span>
+                                                <span>{formatCurrency(payroll.totalHaberes)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Descuentos */}
+                                <div className="bg-red-50 rounded-lg p-4">
+                                    <h4 className="font-semibold text-red-800 mb-3">DESCUENTOS</h4>
+                                    <div className="space-y-2">
+                                        {payroll.detalleDescuentos?.map((item: any, idx: number) => (
+                                            <div key={idx} className="flex justify-between text-sm">
+                                                <span className="text-gray-600">{item.concepto}</span>
+                                                <span className="font-medium">-{formatCurrency(item.monto)}</span>
+                                            </div>
+                                        ))}
+                                        <div className="border-t border-red-200 pt-2 mt-2">
+                                            <div className="flex justify-between font-semibold text-red-800">
+                                                <span>Total Descuentos</span>
+                                                <span>-{formatCurrency(payroll.totalDescuentos)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Resumen */}
+                                <div className="bg-blue-50 rounded-lg p-4">
+                                    <h4 className="font-semibold text-blue-800 mb-3">RESUMEN</h4>
+                                    <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Sueldo Base</span>
+                                            <span>{formatCurrency(payroll.sueldoBase)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Horas Extras</span>
+                                            <span>{formatCurrency(payroll.horasExtras)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Gratificación</span>
+                                            <span>{formatCurrency(payroll.gratificacion)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Bonos</span>
+                                            <span>{formatCurrency(payroll.bonos)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Base Imponible</span>
+                                            <span>{formatCurrency(payroll.imponible)}</span>
+                                        </div>
+                                        <div className="border-t border-blue-200 pt-2 mt-2">
+                                            <div className="flex justify-between font-bold text-xl text-blue-800">
+                                                <span>LÍQUIDO</span>
+                                                <span>{formatCurrency(payroll.liquido)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+
+                    <div className="flex gap-4">
                         <button
                             onClick={() => setPayrollResults(null)}
-                            className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-md"
+                            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-md"
                         >
                             Volver a Editar
                         </button>
                         <button
-                            className="flex-1 px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md"
+                            className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md"
                         >
                             Guardar Período
                         </button>
