@@ -22,6 +22,7 @@ export default function NuevaLiquidacionPage() {
     const [workers, setWorkers] = useState<Worker[]>([]);
     const [loading, setLoading] = useState(true);
     const [calculating, setCalculating] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [payrollResults, setPayrollResults] = useState<any>(null);
 
     const [formData, setFormData] = useState({
@@ -138,6 +139,42 @@ export default function NuevaLiquidacionPage() {
             currency: "CLP",
             minimumFractionDigits: 0,
         }).format(value);
+    };
+
+    const handleSave = async () => {
+        if (!payrollResults) return;
+
+        setError("");
+        setSaving(true);
+
+        try {
+            const response = await fetch("/api/payroll/save", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    companyId: formData.companyId,
+                    year: formData.year,
+                    month: formData.month,
+                    payrolls: payrollResults.payrolls,
+                    systemValue: payrollResults.systemValue,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                setError(data.error || "Error al guardar el período");
+                return;
+            }
+
+            // Redirect to liquidaciones list
+            router.push("/dashboard/liquidaciones");
+            router.refresh();
+        } catch (err) {
+            setError("Error al guardar el período");
+        } finally {
+            setSaving(false);
+        }
     };
 
     if (loading) {
@@ -427,14 +464,17 @@ export default function NuevaLiquidacionPage() {
                     <div className="flex gap-4">
                         <button
                             onClick={() => setPayrollResults(null)}
-                            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-md"
+                            disabled={saving}
+                            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-md disabled:opacity-50"
                         >
                             Volver a Editar
                         </button>
                         <button
-                            className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md"
+                            onClick={handleSave}
+                            disabled={saving}
+                            className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md disabled:opacity-50"
                         >
-                            Guardar Período
+                            {saving ? "Guardando..." : "Guardar Período"}
                         </button>
                     </div>
                 </div>
