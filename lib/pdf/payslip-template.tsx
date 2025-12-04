@@ -2,14 +2,14 @@ import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 
 const styles = StyleSheet.create({
     page: {
-        padding: 30,
-        fontSize: 10,
+        padding: 25,
+        fontSize: 9,
         fontFamily: "Helvetica",
     },
     header: {
-        marginBottom: 20,
+        marginBottom: 12,
         borderBottom: "2 solid #000",
-        paddingBottom: 10,
+        paddingBottom: 8,
     },
     title: {
         fontSize: 16,
@@ -23,21 +23,21 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     companyInfo: {
-        marginBottom: 10,
+        marginBottom: 8,
     },
     companyName: {
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: "bold",
     },
     workerSection: {
-        marginBottom: 15,
-        padding: 10,
+        marginBottom: 10,
+        padding: 8,
         backgroundColor: "#f5f5f5",
     },
     workerName: {
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: "bold",
-        marginBottom: 5,
+        marginBottom: 3,
     },
     row: {
         flexDirection: "row",
@@ -50,20 +50,20 @@ const styles = StyleSheet.create({
         width: "60%",
     },
     section: {
-        marginBottom: 10,
+        marginBottom: 8,
     },
     sectionTitle: {
-        fontSize: 11,
-        fontWeight: "bold",
-        marginBottom: 8,
-        backgroundColor: "#e0e0e0",
-        padding: 5,
-    },
-    subSectionTitle: {
         fontSize: 10,
         fontWeight: "bold",
         marginBottom: 5,
-        marginTop: 5,
+        backgroundColor: "#e0e0e0",
+        padding: 4,
+    },
+    subSectionTitle: {
+        fontSize: 9,
+        fontWeight: "bold",
+        marginBottom: 3,
+        marginTop: 3,
         color: "#444",
     },
     itemRow: {
@@ -96,8 +96,8 @@ const styles = StyleSheet.create({
         fontSize: 9,
     },
     liquidoSection: {
-        marginTop: 20,
-        padding: 15,
+        marginTop: 12,
+        padding: 10,
         backgroundColor: "#d4edda",
         borderRadius: 5,
     },
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     signatureSection: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginTop: 40,
+        marginTop: 25,
     },
     signatureBox: {
         width: "40%",
@@ -130,12 +130,12 @@ const styles = StyleSheet.create({
     },
     signatureLine: {
         borderTop: "1 solid #000",
-        marginTop: 40,
-        paddingTop: 5,
+        marginTop: 30,
+        paddingTop: 4,
     },
     confirmationText: {
-        marginTop: 20,
-        fontSize: 10,
+        marginTop: 15,
+        fontSize: 9,
         textAlign: "center",
         fontStyle: "italic",
     },
