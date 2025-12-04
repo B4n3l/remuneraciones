@@ -164,13 +164,20 @@ export default function PeriodDetailPage({ params }: { params: Promise<{ id: str
                                 <td className="px-6 py-4 text-sm text-right font-semibold text-green-600">
                                     {formatCurrency(Number(item.liquidoPagar))}
                                 </td>
-                                <td className="px-6 py-4 text-center">
+                                <td className="px-6 py-4 text-center space-x-2">
                                     <button
                                         onClick={() => setSelectedItem(item)}
                                         className="text-blue-600 hover:text-blue-900 text-sm font-medium"
                                     >
                                         Ver Detalle
                                     </button>
+                                    <a
+                                        href={`/api/payroll/periods/${period.id}/pdf/${item.id}`}
+                                        className="inline-flex items-center gap-1 text-green-600 hover:text-green-900 text-sm font-medium"
+                                    >
+                                        <DocumentArrowDownIcon className="h-4 w-4" />
+                                        PDF
+                                    </a>
                                 </td>
                             </tr>
                         ))}
@@ -250,10 +257,17 @@ export default function PeriodDetailPage({ params }: { params: Promise<{ id: str
                             </div>
                         </div>
 
-                        <div className="p-6 border-t bg-gray-50">
+                        <div className="p-6 border-t bg-gray-50 flex gap-4">
+                            <a
+                                href={`/api/payroll/periods/${period.id}/pdf/${selectedItem.id}`}
+                                className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md text-center inline-flex items-center justify-center gap-2"
+                            >
+                                <DocumentArrowDownIcon className="h-5 w-5" />
+                                Descargar PDF
+                            </a>
                             <button
                                 onClick={() => setSelectedItem(null)}
-                                className="w-full px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-md"
+                                className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-md"
                             >
                                 Cerrar
                             </button>
