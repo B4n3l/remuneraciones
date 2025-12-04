@@ -94,9 +94,13 @@ export async function PUT(
             tipoContrato: body.tipoContrato,
             sueldoBase: body.sueldoBase,
             tipoGratificacion: body.tipoGratificacion,
+            bonoColacion: body.bonoColacion || 0,
+            bonoMovilizacion: body.bonoMovilizacion || 0,
+            bonoViatico: body.bonoViatico || 0,
             afpId: body.afpId,
             tipoSalud: body.tipoSalud,
         };
+
 
         if (body.gratificacionPactada) {
             updateData.gratificacionPactada = body.gratificacionPactada;

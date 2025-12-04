@@ -15,6 +15,9 @@ const workerSchema = z.object({
     sueldoBase: z.number().positive(),
     tipoGratificacion: z.enum(["PACTADA", "LEGAL_25"]),
     gratificacionPactada: z.number().positive().optional(),
+    bonoColacion: z.number().nonnegative().optional(),
+    bonoMovilizacion: z.number().nonnegative().optional(),
+    bonoViatico: z.number().nonnegative().optional(),
     afpId: z.string().min(1),
     tipoSalud: z.enum(["FONASA", "ISAPRE"]),
     healthPlan: z.object({
@@ -127,6 +130,9 @@ export async function POST(request: Request) {
             tipoContrato: validatedData.tipoContrato,
             sueldoBase: validatedData.sueldoBase,
             tipoGratificacion: validatedData.tipoGratificacion,
+            bonoColacion: validatedData.bonoColacion || 0,
+            bonoMovilizacion: validatedData.bonoMovilizacion || 0,
+            bonoViatico: validatedData.bonoViatico || 0,
             afpId: validatedData.afpId,
             tipoSalud: validatedData.tipoSalud,
         };

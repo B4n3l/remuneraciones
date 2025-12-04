@@ -17,6 +17,7 @@ interface PayrollInput {
 
     // System values
     valorUF: number;
+    sueldoMinimo: number;
 
     // Additional inputs (monthly variables)
     horasExtras50?: number;  // Cantidad de horas extras al 50%
@@ -67,18 +68,22 @@ function calcularValorHoraExtra(sueldoBase: number, factor: 1.5 | 2.0): number {
 
 /**
  * Calculate gratificación based on type
+ * For LEGAL_25: (sueldoBase + horasExtras) * 25% with cap of 4.75 minimum wages
  */
 function calcularGratificacion(
     tipo: "PACTADA" | "LEGAL_25",
     sueldoBase: number,
+    horasExtras: number,
+    sueldoMinimo: number,
     montoPactado?: number
 ): number {
     if (tipo === "PACTADA" && montoPactado) {
         return Math.round(montoPactado);
     }
-    // Legal 25% (tope 4.75 sueldos mínimos - approx 2.2M)
-    const gratificacion25 = Math.round(sueldoBase * 0.25);
-    const tope = 2200000; // Aproximado, debería venir de SystemValue
+    // Legal 25%: (sueldo + horas extras) * 25%, tope 4.75 sueldos mínimos
+    const baseCalculo = sueldoBase + horasExtras;
+    const gratificacion25 = Math.round(baseCalculo * 0.25);
+    const tope = Math.round(sueldoMinimo * 4.75 / 12); // Tope mensual
     return Math.min(gratificacion25, tope);
 }
 
@@ -153,6 +158,7 @@ export function calculatePayroll(input: PayrollInput): PayrollResult {
         tipoSalud,
         isapreUF,
         valorUF,
+        sueldoMinimo,
         horasExtras50 = 0,
         horasExtras100 = 0,
         bonoColacion = 0,
@@ -161,12 +167,13 @@ export function calculatePayroll(input: PayrollInput): PayrollResult {
         bonosVariables = 0,
     } = input;
 
-    // Calculate haberes
-    const gratificacion = calcularGratificacion(tipoGratificacion, sueldoBase, gratificacionPactada);
-
+    // Primero calcular horas extras
     const valorHE50 = calcularValorHoraExtra(sueldoBase, 1.5);
     const valorHE100 = calcularValorHoraExtra(sueldoBase, 2.0);
     const horasExtras = (horasExtras50 * valorHE50) + (horasExtras100 * valorHE100);
+
+    // Luego calcular gratificación (necesita horas extras)
+    const gratificacion = calcularGratificacion(tipoGratificacion, sueldoBase, horasExtras, sueldoMinimo, gratificacionPactada);
 
     // Total bonos (fijos + variables, NO imponibles)
     const totalBonos = bonoColacion + bonoMovilizacion + bonoViatico + bonosVariables;
