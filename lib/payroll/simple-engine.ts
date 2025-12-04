@@ -21,7 +21,14 @@ interface PayrollInput {
     // Additional inputs (monthly variables)
     horasExtras50?: number;  // Cantidad de horas extras al 50%
     horasExtras100?: number; // Cantidad de horas extras al 100%
-    bonos?: number;          // Bonos adicionales
+
+    // Bonos fijos (from worker data, non-taxable)
+    bonoColacion?: number;
+    bonoMovilizacion?: number;
+    bonoViatico?: number;
+
+    // Bonos variables (manual entry for this period)
+    bonosVariables?: number;
 }
 
 interface PayrollResult {
@@ -148,7 +155,10 @@ export function calculatePayroll(input: PayrollInput): PayrollResult {
         valorUF,
         horasExtras50 = 0,
         horasExtras100 = 0,
-        bonos = 0,
+        bonoColacion = 0,
+        bonoMovilizacion = 0,
+        bonoViatico = 0,
+        bonosVariables = 0,
     } = input;
 
     // Calculate haberes

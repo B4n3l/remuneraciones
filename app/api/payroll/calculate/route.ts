@@ -76,7 +76,12 @@ export async function POST(request: Request) {
         valorUF: Number(systemValue.valorUF),
         horasExtras50: Number(workerInput.horasExtras50) || 0,
         horasExtras100: Number(workerInput.horasExtras100) || 0,
-        bonos: Number(workerInput.bonos) || 0,
+        // Bonos fijos del trabajador (no imponibles)
+        bonoColacion: Number(worker.bonoColacion) || 0,
+        bonoMovilizacion: Number(worker.bonoMovilizacion) || 0,
+        bonoViatico: Number(worker.bonoViatico) || 0,
+        // Bonos variables ingresados para este período
+        bonosVariables: Number(workerInput.bonos) || 0,
       };
 
       const calculation = calculatePayroll(baseData);
