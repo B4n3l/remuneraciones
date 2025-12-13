@@ -321,8 +321,8 @@ export default function LandingPage() {
                 <Link
                   href="/register"
                   className={`block w-full py-3 px-6 rounded-lg font-semibold text-center transition-colors ${plan.highlighted
-                      ? 'bg-white text-blue-600 hover:bg-gray-100'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                    ? 'bg-white text-blue-600 hover:bg-gray-100'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
                     }`}
                 >
                   {plan.cta}
@@ -406,8 +406,8 @@ export default function LandingPage() {
           <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
             <p>&copy; {new Date().getFullYear()} Centro Contable. Todos los derechos reservados.</p>
           </div>
+        </div>
       </footer>
-    </footer>
-        </div >
-    );
+    </div>
+  );
 }
