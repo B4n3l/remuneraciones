@@ -25,6 +25,11 @@ export default function Sidebar() {
             icon: UsersIcon,
         },
         {
+            name: "Contratos",
+            href: "/dashboard/contratos",
+            icon: DocumentTextIcon,
+        },
+        {
             name: "Liquidaciones",
             href: "/dashboard/liquidaciones",
             icon: DocumentTextIcon,
