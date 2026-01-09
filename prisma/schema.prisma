@@ -73,6 +73,8 @@ model Company {
   razonSocial String
   direccion String
   comuna    String
+  legalRep  String?  // Representante legal
+  legalRepRut String? // RUT del representante
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -80,6 +82,7 @@ model Company {
   users         UserCompany[]
   workers       Worker[]
   payrollPeriods PayrollPeriod[]
+  contracts     Contract[]
 }
 
 model UserCompany {
@@ -139,6 +142,7 @@ model Worker {
   afp             AFP           @relation(fields: [afpId], references: [id])
   healthPlan      WorkerHealthPlan?
   payrollItems    PayrollItem[]
+  contracts       Contract[]
 
   @@unique([companyId, rut])
 }
@@ -306,4 +310,41 @@ enum DeductionType {
   ANTICIPO
   PRESTAMO
   OTRO
+}
+
+// ============================================
+// Employment Contracts
+// ============================================
+
+model Contract {
+  id            String       @id @default(cuid())
+  companyId     String
+  workerId      String
+  type          ContractType
+  startDate     DateTime
+  endDate       DateTime?    // Only for PLAZO_FIJO
+  cargo         String
+  jornada       String       // Full-time, part-time, etc
+  schedule      String       // Horario de trabajo
+  workplace     String       // Lugar de trabajo
+  baseSalary    Decimal      @db.Decimal(10, 2)
+  benefits      String?      @db.Text // Description of benefits
+  obraDetails   String?      @db.Text // For OBRA_FAENA type
+  legalRep      String       // Representante legal
+  legalRepRut   String       // RUT del representante
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  company       Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  worker        Worker       @relation(fields: [workerId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([workerId])
+  @@index([type])
+}
+
+enum ContractType {
+  INDEFINIDO
+  PLAZO_FIJO
+  OBRA_FAENA
 }
