@@ -75,6 +75,7 @@ export async function POST(request: Request) {
         isapreUF: worker.healthPlan?.planUF ? Number(worker.healthPlan.planUF) : undefined,
         valorUF: Number(systemValue.valorUF),
         sueldoMinimo: Number(systemValue.sueldoMinimo),
+        diasTrabajados: Number(workerInput.diasTrabajados) || 30,
         horasExtras50: Number(workerInput.horasExtras50) || 0,
         horasExtras100: Number(workerInput.horasExtras100) || 0,
         // Bonos fijos del trabajador (no imponibles)

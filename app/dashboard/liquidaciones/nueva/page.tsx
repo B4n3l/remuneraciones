@@ -32,6 +32,7 @@ export default function NuevaLiquidacionPage() {
     });
 
     const [workerInputs, setWorkerInputs] = useState<Record<string, {
+        diasTrabajados: number;
         horasExtras50: number;
         horasExtras100: number;
         bonos: number;
@@ -73,6 +74,7 @@ export default function NuevaLiquidacionPage() {
                     const inputs: typeof workerInputs = {};
                     data.forEach((worker: Worker) => {
                         inputs[worker.id] = {
+                            diasTrabajados: 30, // Default to 30 days
                             horasExtras50: 0,
                             horasExtras100: 0,
                             bonos: 0,
@@ -284,6 +286,9 @@ export default function NuevaLiquidacionPage() {
                                         Sueldo Base
                                     </th>
                                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                                        Días Trab.
+                                    </th>
+                                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
                                         HE 50%
                                     </th>
                                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
@@ -302,6 +307,16 @@ export default function NuevaLiquidacionPage() {
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-500">
                                             {formatCurrency(worker.sueldoBase)}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                max="31"
+                                                value={workerInputs[worker.id]?.diasTrabajados || 30}
+                                                onChange={(e) => handleWorkerInputChange(worker.id, "diasTrabajados", e.target.value)}
+                                                className="w-16 px-2 py-1 border border-gray-300 rounded text-center"
+                                            />
                                         </td>
                                         <td className="px-4 py-3">
                                             <input

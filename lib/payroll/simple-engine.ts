@@ -20,6 +20,7 @@ interface PayrollInput {
     sueldoMinimo: number;
 
     // Additional inputs (monthly variables)
+    diasTrabajados?: number; // Días trabajados en el mes (default 30)
     horasExtras50?: number;  // Cantidad de horas extras al 50%
     horasExtras100?: number; // Cantidad de horas extras al 100%
 
@@ -159,6 +160,7 @@ export function calculatePayroll(input: PayrollInput): PayrollResult {
         isapreUF,
         valorUF,
         sueldoMinimo,
+        diasTrabajados = 30, // Default to full month
         horasExtras50 = 0,
         horasExtras100 = 0,
         bonoColacion = 0,
@@ -167,21 +169,24 @@ export function calculatePayroll(input: PayrollInput): PayrollResult {
         bonosVariables = 0,
     } = input;
 
-    // Primero calcular horas extras
-    const valorHE50 = calcularValorHoraExtra(sueldoBase, 1.5);
-    const valorHE100 = calcularValorHoraExtra(sueldoBase, 2.0);
+    // Apply proportional salary based on worked days
+    const sueldoBaseProporcional = Math.round((sueldoBase / 30) * diasTrabajados);
+
+    // Primero calcular horas extras (usando sueldo proporcional)
+    const valorHE50 = calcularValorHoraExtra(sueldoBaseProporcional, 1.5);
+    const valorHE100 = calcularValorHoraExtra(sueldoBaseProporcional, 2.0);
     const horasExtras = (horasExtras50 * valorHE50) + (horasExtras100 * valorHE100);
 
-    // Luego calcular gratificación (necesita horas extras)
-    const gratificacion = calcularGratificacion(tipoGratificacion, sueldoBase, horasExtras, sueldoMinimo, gratificacionPactada);
+    // Luego calcular gratificación (necesita horas extras, usando sueldo proporcional)
+    const gratificacion = calcularGratificacion(tipoGratificacion, sueldoBaseProporcional, horasExtras, sueldoMinimo, gratificacionPactada);
 
     // Total bonos (fijos + variables, NO imponibles)
     const totalBonos = bonoColacion + bonoMovilizacion + bonoViatico + bonosVariables;
 
-    const totalHaberes = sueldoBase + horasExtras + gratificacion + totalBonos;
+    const totalHaberes = sueldoBaseProporcional + horasExtras + gratificacion + totalBonos;
 
-    // Base imponible (sueldo + horas extras + gratificación, NO bonos)
-    const imponible = sueldoBase + horasExtras + gratificacion;
+    // Base imponible (sueldo proporcional + horas extras + gratificación, NO bonos)
+    const imponible = sueldoBaseProporcional + horasExtras + gratificacion;
 
     // Calculate descuentos
     const afp = calcularAFP(imponible, afpPorcentaje);
@@ -195,9 +200,16 @@ export function calculatePayroll(input: PayrollInput): PayrollResult {
     const liquido = totalHaberes - totalDescuentos;
 
     // Detalles para mostrar
-    const detalleHaberes = [
-        { concepto: "Sueldo Base", monto: sueldoBase },
-    ];
+    const detalleHaberes = [];
+
+    if (diasTrabajados < 30) {
+        detalleHaberes.push({
+            concepto: `Sueldo Base (${diasTrabajados}/30 días)`,
+            monto: sueldoBaseProporcional
+        });
+    } else {
+        detalleHaberes.push({ concepto: "Sueldo Base", monto: sueldoBaseProporcional });
+    }
 
     if (horasExtras > 0) {
         const detalle = [];
@@ -245,7 +257,7 @@ export function calculatePayroll(input: PayrollInput): PayrollResult {
     }
 
     return {
-        sueldoBase,
+        sueldoBase: sueldoBaseProporcional,
         horasExtras,
         gratificacion,
         bonos: totalBonos,
