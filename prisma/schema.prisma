@@ -216,6 +216,89 @@ model SystemValue {
   @@unique([year, month])
 }
 
+// ============================================
+// Indicadores Previsionales Históricos
+// ============================================
+
+model IndicadorMensual {
+  id                    String   @id @default(cuid())
+  year                  Int
+  month                 Int      // 1-12
+  
+  // Valores UF/UTM/UTA
+  valorUF               Decimal  @db.Decimal(12, 4)
+  valorUTM              Decimal  @db.Decimal(12, 2)
+  valorUTA              Decimal  @db.Decimal(12, 2)
+  
+  // Sueldos Mínimos
+  sueldoMinimo          Decimal  @db.Decimal(12, 2)  // Dependientes e Independientes
+  sueldoMinimoCasaPart  Decimal  @db.Decimal(12, 2)  // Casa Particular
+  sueldoMinimoMenores   Decimal  @db.Decimal(12, 2)  // Menores 18 / Mayores 65
+  sueldoMinimoNoRem     Decimal  @db.Decimal(12, 2)  // Fines no remuneracionales
+  
+  // Topes Imponibles (en UF)
+  topeImponibleAFP      Decimal  @db.Decimal(10, 2)  // 89.9 UF AFP
+  topeImponibleINP      Decimal  @db.Decimal(10, 2)  // 60 UF INP
+  topeSeguroCesantia    Decimal  @db.Decimal(10, 2)  // 135.1 UF Cesantía
+  
+  // Tasas generales
+  sisRate               Decimal  @db.Decimal(5, 3)   // 1.54% SIS
+  seguroSocialRate      Decimal  @db.Decimal(5, 3)   // 0.9% Expectativa vida
+  
+  // APV Topes (en UF)
+  apvTopeMensualUF      Decimal  @db.Decimal(10, 2)  // 50 UF
+  apvTopeAnualUF        Decimal  @db.Decimal(10, 2)  // 600 UF
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  // Relaciones
+  afpRates              AFPHistorico[]
+  cesantiaRates         CesantiaHistorico[]
+  asignacionFamiliar    AsignacionFamiliarHistorico[]
+  
+  @@unique([year, month])
+}
+
+model AFPHistorico {
+  id                    String   @id @default(cuid())
+  indicadorId           String
+  afpNombre             String   // Capital, Cuprum, Habitat, etc.
+  cargoTrabajador       Decimal  @db.Decimal(5, 3)  // 11.44%
+  cargoEmpleador        Decimal  @db.Decimal(5, 3)  // 0.1%
+  totalAPagar           Decimal  @db.Decimal(5, 3)  // 11.54%
+  independiente         Decimal  @db.Decimal(5, 3)  // 12.98%
+  
+  indicador             IndicadorMensual @relation(fields: [indicadorId], references: [id], onDelete: Cascade)
+  
+  @@unique([indicadorId, afpNombre])
+}
+
+model CesantiaHistorico {
+  id                    String   @id @default(cuid())
+  indicadorId           String
+  tipoContrato          String   // INDEFINIDO, PLAZO_FIJO, INDEFINIDO_11, CASA_PARTICULAR
+  empleador             Decimal  @db.Decimal(5, 3)
+  trabajador            Decimal  @db.Decimal(5, 3)
+  
+  indicador             IndicadorMensual @relation(fields: [indicadorId], references: [id], onDelete: Cascade)
+  
+  @@unique([indicadorId, tipoContrato])
+}
+
+model AsignacionFamiliarHistorico {
+  id                    String   @id @default(cuid())
+  indicadorId           String
+  tramo                 String   // A, B, C, D
+  monto                 Decimal  @db.Decimal(12, 2)
+  rentaDesde            Decimal  @db.Decimal(12, 2)
+  rentaHasta            Decimal? @db.Decimal(12, 2)  // null para tramo D
+  
+  indicador             IndicadorMensual @relation(fields: [indicadorId], references: [id], onDelete: Cascade)
+  
+  @@unique([indicadorId, tramo])
+}
+
 
 // ============================================
 // Payroll Management

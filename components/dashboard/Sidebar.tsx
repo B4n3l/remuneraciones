@@ -8,6 +8,7 @@ import {
     DocumentTextIcon,
     Cog6ToothIcon,
     ShieldCheckIcon,
+    ChartBarIcon,
 } from "@heroicons/react/24/outline";
 
 export default function Sidebar() {
@@ -38,6 +39,11 @@ export default function Sidebar() {
             name: "Configuración",
             href: "/dashboard/configuracion",
             icon: Cog6ToothIcon,
+        },
+        {
+            name: "Indicadores",
+            href: "/dashboard/admin/indicadores",
+            icon: ChartBarIcon,
         },
         {
             name: "Admin",
