@@ -336,8 +336,8 @@ export default function IndicadoresPage() {
                         key={year}
                         onClick={() => setSelectedYear(year)}
                         className={`px-4 py-2 rounded-lg ${selectedYear === year
-                                ? "bg-blue-600 text-white"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                             }`}
                     >
                         {year}
@@ -666,7 +666,7 @@ export default function IndicadoresPage() {
                                                     <th className="pb-2">AFP</th>
                                                     <th className="pb-2">Trabajador %</th>
                                                     <th className="pb-2">Empleador %</th>
-                                                    <th className="pb-2">Total %</th>
+                                                    <th className="pb-2">Total % <span className="text-xs text-gray-400">(auto)</span></th>
                                                     <th className="pb-2">Independiente %</th>
                                                 </tr>
                                             </thead>
@@ -681,7 +681,9 @@ export default function IndicadoresPage() {
                                                                 value={afp.cargoTrabajador}
                                                                 onChange={(e) => {
                                                                     const newRates = [...afpRates];
-                                                                    newRates[index].cargoTrabajador = parseFloat(e.target.value);
+                                                                    const trabajador = parseFloat(e.target.value) || 0;
+                                                                    newRates[index].cargoTrabajador = trabajador;
+                                                                    newRates[index].totalAPagar = parseFloat((trabajador + newRates[index].cargoEmpleador).toFixed(2));
                                                                     setAfpRates(newRates);
                                                                 }}
                                                                 className="w-20 border rounded px-2 py-1"
@@ -693,25 +695,19 @@ export default function IndicadoresPage() {
                                                                 step="0.01"
                                                                 value={afp.cargoEmpleador}
                                                                 onChange={(e) => {
-                                                                    const newRates = [...afpRates];
-                                                                    newRates[index].cargoEmpleador = parseFloat(e.target.value);
+                                                                    const newRates = [...afpRates];;
+                                                                    const empleador = parseFloat(e.target.value) || 0;
+                                                                    newRates[index].cargoEmpleador = empleador;
+                                                                    newRates[index].totalAPagar = parseFloat((newRates[index].cargoTrabajador + empleador).toFixed(2));
                                                                     setAfpRates(newRates);
                                                                 }}
                                                                 className="w-20 border rounded px-2 py-1"
                                                             />
                                                         </td>
                                                         <td className="py-1">
-                                                            <input
-                                                                type="number"
-                                                                step="0.01"
-                                                                value={afp.totalAPagar}
-                                                                onChange={(e) => {
-                                                                    const newRates = [...afpRates];
-                                                                    newRates[index].totalAPagar = parseFloat(e.target.value);
-                                                                    setAfpRates(newRates);
-                                                                }}
-                                                                className="w-20 border rounded px-2 py-1"
-                                                            />
+                                                            <span className="inline-block w-20 px-2 py-1 bg-gray-100 rounded text-center font-medium">
+                                                                {afp.totalAPagar.toFixed(2)}
+                                                            </span>
                                                         </td>
                                                         <td className="py-1">
                                                             <input
@@ -720,7 +716,7 @@ export default function IndicadoresPage() {
                                                                 value={afp.independiente}
                                                                 onChange={(e) => {
                                                                     const newRates = [...afpRates];
-                                                                    newRates[index].independiente = parseFloat(e.target.value);
+                                                                    newRates[index].independiente = parseFloat(e.target.value) || 0;
                                                                     setAfpRates(newRates);
                                                                 }}
                                                                 className="w-20 border rounded px-2 py-1"
