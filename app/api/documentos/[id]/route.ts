@@ -42,7 +42,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         // Obtener URL firmada de Supabase Storage
         const { createClient } = await import("@supabase/supabase-js");
         const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!
         );
 
@@ -97,7 +97,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         // Eliminar de Supabase Storage
         const { createClient } = await import("@supabase/supabase-js");
         const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!
         );
 
