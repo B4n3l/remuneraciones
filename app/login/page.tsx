@@ -27,10 +27,19 @@ export default function LoginPage() {
             if (result?.error) {
                 setError("Credenciales inválidas");
             } else {
-                router.push("/dashboard");
+                // Obtener la sesión para verificar el rol
+                const sessionRes = await fetch("/api/auth/session");
+                const session = await sessionRes.json();
+
+                // Redirigir según el rol
+                if (session?.user?.role === "CLIENTE") {
+                    router.push("/portal");
+                } else {
+                    router.push("/dashboard");
+                }
                 router.refresh();
             }
-        } catch (error) {
+        } catch {
             setError("Error al intentar iniciar sesión");
         } finally {
             setIsLoading(false);

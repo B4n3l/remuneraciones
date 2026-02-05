@@ -19,21 +19,23 @@ model User {
   email         String    @unique
   name          String?
   password      String // hashed
-  role          UserRole  @default(USER)
+  role          UserRole  @default(CONTADOR)
   emailVerified DateTime?
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   // Relations
-  accounts     Account[]
-  sessions     Session[]
-  companies    UserCompany[]
+  accounts          Account[]
+  sessions          Session[]
+  companies         UserCompany[]
+  documentosSubidos DocumentoCliente[]
 }
 
 enum UserRole {
   SUPER_ADMIN
-  USER
+  CONTADOR
+  CLIENTE
 }
 
 model Account {
@@ -79,10 +81,11 @@ model Company {
   updatedAt DateTime @updatedAt
 
   // Relations
-  users         UserCompany[]
-  workers       Worker[]
+  users          UserCompany[]
+  workers        Worker[]
   payrollPeriods PayrollPeriod[]
-  contracts     Contract[]
+  contracts      Contract[]
+  documentos     DocumentoCliente[]
 }
 
 model UserCompany {
@@ -431,3 +434,43 @@ enum ContractType {
   PLAZO_FIJO
   OBRA_FAENA
 }
+
+// ============================================
+// Portal de Clientes - Documentos
+// ============================================
+
+model CategoriaDocumento {
+  id          String   @id @default(cuid())
+  nombre      String   @unique  // Ej: "Liquidaciones", "F29", "Balances"
+  descripcion String?
+  orden       Int      @default(0)
+  createdAt   DateTime @default(now())
+  
+  documentos  DocumentoCliente[]
+}
+
+model DocumentoCliente {
+  id           String   @id @default(cuid())
+  nombre       String   // Nombre del archivo
+  descripcion  String?
+  storagePath  String   // Path en Supabase Storage
+  mimeType     String   // application/pdf, etc.
+  tamanioBytes Int
+  periodo      String?  // Ej: "2026-01" para documentos mensuales
+  
+  // Relaciones
+  empresa      Company  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  empresaId    String
+  categoria    CategoriaDocumento @relation(fields: [categoriaId], references: [id])
+  categoriaId  String
+  subidoPor    User     @relation(fields: [subidoPorId], references: [id])
+  subidoPorId  String
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@index([empresaId, categoriaId])
+  @@index([empresaId])
+  @@index([categoriaId])
+}
+
