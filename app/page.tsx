@@ -99,7 +99,7 @@ export default function LandingPage() {
         "Hasta 5 liquidaciones/mes",
         "Soporte por email"
       ],
-      cta: "Comenzar Gratis",
+      cta: "Iniciar Sesión",
       highlighted: false
     },
     {
@@ -170,15 +170,9 @@ export default function LandingPage() {
             <div className="flex items-center gap-4">
               <Link
                 href="/login"
-                className="text-gray-600 hover:text-gray-900 font-medium"
-              >
-                Iniciar Sesión
-              </Link>
-              <Link
-                href="/register"
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
               >
-                Comenzar Gratis
+                Iniciar Sesión
               </Link>
             </div>
           </div>
@@ -201,17 +195,11 @@ export default function LandingPage() {
             </p>
             <div className="flex gap-4 justify-center flex-wrap">
               <Link
-                href="/register"
+                href="/login"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold rounded-lg transition-colors shadow-lg"
               >
-                Comenzar Gratis
+                Iniciar Sesión
                 <ArrowRightIcon className="h-5 w-5" />
-              </Link>
-              <Link
-                href="/login"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-white hover:bg-gray-50 text-gray-900 text-lg font-semibold rounded-lg border-2 border-gray-200 transition-colors"
-              >
-                Ver Demo
               </Link>
             </div>
           </div>
@@ -319,7 +307,7 @@ export default function LandingPage() {
                   ))}
                 </ul>
                 <Link
-                  href="/register"
+                  href="/login"
                   className={`block w-full py-3 px-6 rounded-lg font-semibold text-center transition-colors ${plan.highlighted
                     ? 'bg-white text-blue-600 hover:bg-gray-100'
                     : 'bg-blue-600 text-white hover:bg-blue-700'
