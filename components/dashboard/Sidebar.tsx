@@ -9,6 +9,7 @@ import {
     Cog6ToothIcon,
     ShieldCheckIcon,
     ChartBarIcon,
+    UserGroupIcon,
 } from "@heroicons/react/24/outline";
 
 export default function Sidebar() {
@@ -44,6 +45,11 @@ export default function Sidebar() {
             name: "Indicadores",
             href: "/dashboard/admin/indicadores",
             icon: ChartBarIcon,
+        },
+        {
+            name: "Usuarios",
+            href: "/dashboard/admin/users",
+            icon: UserGroupIcon,
         },
         {
             name: "Admin",
