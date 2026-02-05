@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, PencilIcon, TrashIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
 export default function CompaniesClientList({ companies }: { companies: any[] }) {
@@ -93,6 +93,13 @@ export default function CompaniesClientList({ companies }: { companies: any[] })
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div className="flex items-center justify-end gap-3">
                                     <Link
+                                        href={`/dashboard/empresas/${company.id}/documentos`}
+                                        className="text-green-600 hover:text-green-900 inline-flex items-center gap-1"
+                                    >
+                                        <DocumentTextIcon className="h-4 w-4" />
+                                        Docs
+                                    </Link>
+                                    <Link
                                         href={`/dashboard/empresas/${company.id}/editar`}
                                         className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1"
                                     >
@@ -105,7 +112,7 @@ export default function CompaniesClientList({ companies }: { companies: any[] })
                                         className="text-red-600 hover:text-red-900 inline-flex items-center gap-1 disabled:opacity-50"
                                     >
                                         <TrashIcon className="h-4 w-4" />
-                                        {deleting === company.id ? "Eliminando..." : "Eliminar"}
+                                        {deleting === company.id ? "..." : "Eliminar"}
                                     </button>
                                 </div>
                             </td>
