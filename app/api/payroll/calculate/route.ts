@@ -61,15 +61,67 @@ export async function POST(request: Request) {
       );
     }
 
+    // Get monthly indicators (IndicadorMensual) with AFP and Cesantía rates
+    const indicadorMensual = await prisma.indicadorMensual.findUnique({
+      where: {
+        year_month: {
+          year,
+          month,
+        },
+      },
+      include: {
+        afpRates: true,
+        cesantiaRates: true,
+      },
+    });
+
+    if (!indicadorMensual) {
+      return NextResponse.json(
+        { error: `No hay indicadores previsionales para ${month}/${year}. Configúralos en Administración > Indicadores.` },
+        { status: 400 }
+      );
+    }
+
+    // Create lookup maps for AFP and Cesantía rates
+    const afpRatesMap = new Map(
+      indicadorMensual.afpRates.map((rate) => [
+        rate.afpNombre.toLowerCase(),
+        Number(rate.cargoTrabajador),
+      ])
+    );
+
+    const cesantiaRatesMap = new Map(
+      indicadorMensual.cesantiaRates.map((rate) => [
+        rate.tipoContrato,
+        {
+          trabajador: Number(rate.trabajador),
+          empleador: Number(rate.empleador),
+        },
+      ])
+    );
+
+    // Default cesantía rate for indefinido contract (most common)
+    const defaultCesantia = cesantiaRatesMap.get("INDEFINIDO") || { trabajador: 0.6, empleador: 2.4 };
+
     // Calculate payroll for each worker
     const payrollResults = workers.map((worker) => {
       const workerInput = workerInputs?.[worker.id] || {};
+
+      // Get AFP rate from monthly indicators
+      const afpNombre = worker.afp.nombre.toLowerCase();
+      const afpPorcentaje = afpRatesMap.get(afpNombre) || Number(worker.afp.porcentaje) + Number(worker.afp.comision);
+
+      // Get cesantía rate based on contract type (use indefinido as default)
+      const tipoContrato = (worker as any).tipoContrato || "INDEFINIDO";
+      const cesantiaRate = cesantiaRatesMap.get(tipoContrato) || defaultCesantia;
 
       const baseData = {
         sueldoBase: Number(worker.sueldoBase),
         tipoGratificacion: worker.tipoGratificacion as "PACTADA" | "LEGAL_25",
         gratificacionPactada: worker.gratificacionPactada ? Number(worker.gratificacionPactada) : undefined,
-        afpPorcentaje: Number(worker.afp.porcentaje),
+        afpPorcentaje,
+        afpNombre: worker.afp.nombre,
+        cesantiaPorcentaje: cesantiaRate.trabajador,
         tipoSalud: worker.tipoSalud as "FONASA" | "ISAPRE",
         isapre: worker.healthPlan?.isapre,
         isapreUF: worker.healthPlan?.planUF ? Number(worker.healthPlan.planUF) : undefined,
@@ -105,6 +157,10 @@ export async function POST(request: Request) {
         valorUF: Number(systemValue.valorUF),
         valorUTM: Number(systemValue.valorUTM),
         sueldoMinimo: Number(systemValue.sueldoMinimo),
+      },
+      indicadores: {
+        afpRates: Object.fromEntries(afpRatesMap),
+        cesantiaRates: Object.fromEntries(cesantiaRatesMap),
       },
       payrolls: payrollResults,
     });

@@ -9,8 +9,10 @@ interface PayrollInput {
     tipoGratificacion: "PACTADA" | "LEGAL_25";
     gratificacionPactada?: number;
 
-    // Previsión
+    // Previsión (from monthly indicators)
     afpPorcentaje: number;
+    afpNombre?: string;
+    cesantiaPorcentaje?: number; // From monthly indicators, default 0.6%
     tipoSalud: "FONASA" | "ISAPRE";
     isapre?: string;
     isapreUF?: number;
@@ -116,10 +118,10 @@ function calcularSalud(
 }
 
 /**
- * Calculate unemployment insurance (0.6% worker contribution)
+ * Calculate unemployment insurance (worker contribution from monthly indicators)
  */
-function calcularCesantia(imponible: number): number {
-    return Math.round(imponible * 0.006);
+function calcularCesantia(imponible: number, porcentaje: number = 0.6): number {
+    return Math.round(imponible * (porcentaje / 100));
 }
 
 /**
@@ -156,6 +158,8 @@ export function calculatePayroll(input: PayrollInput): PayrollResult {
         tipoGratificacion,
         gratificacionPactada,
         afpPorcentaje,
+        afpNombre = "AFP",
+        cesantiaPorcentaje = 0.6, // Default 0.6% if not provided
         tipoSalud,
         isapreUF,
         valorUF,
@@ -188,10 +192,10 @@ export function calculatePayroll(input: PayrollInput): PayrollResult {
     // Base imponible (sueldo proporcional + horas extras + gratificación, NO bonos)
     const imponible = sueldoBaseProporcional + horasExtras + gratificacion;
 
-    // Calculate descuentos
+    // Calculate descuentos using rates from monthly indicators
     const afp = calcularAFP(imponible, afpPorcentaje);
     const salud = calcularSalud(imponible, tipoSalud, valorUF, isapreUF);
-    const cesantia = calcularCesantia(imponible);
+    const cesantia = calcularCesantia(imponible, cesantiaPorcentaje);
     const impuesto = calcularImpuesto(imponible, afp, salud, cesantia);
 
     const totalDescuentos = afp + salud + cesantia + impuesto;
@@ -247,9 +251,9 @@ export function calculatePayroll(input: PayrollInput): PayrollResult {
     }
 
     const detalleDescuentos = [
-        { concepto: `AFP ${afpPorcentaje}%`, monto: afp },
+        { concepto: `AFP ${afpNombre} (${afpPorcentaje}%)`, monto: afp },
         { concepto: tipoSalud === "FONASA" ? "Fonasa 7%" : "Isapre", monto: salud },
-        { concepto: "Seguro Cesantía 0.6%", monto: cesantia },
+        { concepto: `Seguro Cesantía ${cesantiaPorcentaje}%`, monto: cesantia },
     ];
 
     if (impuesto > 0) {
