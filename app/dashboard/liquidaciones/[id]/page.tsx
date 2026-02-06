@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeftIcon, DocumentArrowDownIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, DocumentArrowDownIcon, PencilSquareIcon, TrashIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 
 interface PayrollItem {
     id: string;
@@ -34,10 +35,58 @@ interface PeriodData {
 
 export default function PeriodDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = use(params);
+    const router = useRouter();
     const [period, setPeriod] = useState<PeriodData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [selectedItem, setSelectedItem] = useState<PayrollItem | null>(null);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+
+    const handleDelete = async () => {
+        setDeleting(true);
+        try {
+            const response = await fetch(`/api/payroll/periods/${resolvedParams.id}`, {
+                method: "DELETE",
+            });
+            if (response.ok) {
+                router.push("/dashboard/liquidaciones");
+            } else {
+                const data = await response.json();
+                setError(data.error || "Error al eliminar");
+                setShowDeleteConfirm(false);
+            }
+        } catch (err) {
+            setError("Error al eliminar el período");
+            setShowDeleteConfirm(false);
+        } finally {
+            setDeleting(false);
+        }
+    };
+
+    const handleReliquidar = async () => {
+        // Delete current period and redirect to new liquidation page
+        setDeleting(true);
+        try {
+            const companyId = period?.company ? (period as any).companyId : "";
+            const [year, month] = period?.yearMonth.split("-") || [];
+
+            const response = await fetch(`/api/payroll/periods/${resolvedParams.id}`, {
+                method: "DELETE",
+            });
+            if (response.ok) {
+                // Redirect to nueva with pre-filled data
+                router.push(`/dashboard/liquidaciones/nueva`);
+            } else {
+                const data = await response.json();
+                setError(data.error || "Error al reliquidar");
+            }
+        } catch (err) {
+            setError("Error al reliquidar");
+        } finally {
+            setDeleting(false);
+        }
+    };
 
     useEffect(() => {
         async function fetchPeriod() {
@@ -113,8 +162,8 @@ export default function PeriodDetailPage({ params }: { params: Promise<{ id: str
                         </h1>
                         <p className="text-gray-600">{period.company.razonSocial}</p>
                     </div>
-                    <div className="flex items-center gap-6">
-                        <div className="text-right">
+                    <div className="flex items-center gap-3">
+                        <div className="text-right mr-4">
                             <p className="text-sm text-gray-500">Total Líquido</p>
                             <p className="text-2xl font-bold text-green-600">
                                 {formatCurrency(totalLiquido)}
@@ -127,9 +176,54 @@ export default function PeriodDetailPage({ params }: { params: Promise<{ id: str
                             <PencilSquareIcon className="h-5 w-5" />
                             Editar
                         </Link>
+                        <button
+                            onClick={handleReliquidar}
+                            disabled={deleting}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-md disabled:opacity-50"
+                        >
+                            <ArrowPathIcon className="h-5 w-5" />
+                            Reliquidar
+                        </button>
+                        <button
+                            onClick={() => setShowDeleteConfirm(true)}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md"
+                        >
+                            <TrashIcon className="h-5 w-5" />
+                            Eliminar
+                        </button>
                     </div>
                 </div>
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                            ¿Eliminar período de liquidación?
+                        </h3>
+                        <p className="text-gray-600 mb-6">
+                            Esta acción eliminará permanentemente todas las liquidaciones de {formatPeriod(period.yearMonth)}
+                            para {period.company.razonSocial}. Esta acción no se puede deshacer.
+                        </p>
+                        <div className="flex justify-end gap-4">
+                            <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                disabled={deleting}
+                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md disabled:opacity-50"
+                            >
+                                {deleting ? "Eliminando..." : "Sí, eliminar"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
                 <table className="min-w-full divide-y divide-gray-200">
