@@ -662,7 +662,7 @@ export default function IndicadoresPage() {
                                     <div className="p-4">
                                         <table className="w-full text-sm">
                                             <thead>
-                                                <tr className="text-left text-gray-500">
+                                                <tr className="text-left text-gray-700 font-semibold">
                                                     <th className="pb-2">AFP</th>
                                                     <th className="pb-2">Trabajador %</th>
                                                     <th className="pb-2">Empleador %</th>
@@ -686,7 +686,7 @@ export default function IndicadoresPage() {
                                                                     newRates[index].totalAPagar = parseFloat((trabajador + newRates[index].cargoEmpleador).toFixed(2));
                                                                     setAfpRates(newRates);
                                                                 }}
-                                                                className="w-20 border rounded px-2 py-1"
+                                                                className="w-20 border rounded px-2 py-1 text-gray-900"
                                                             />
                                                         </td>
                                                         <td className="py-1">
@@ -701,7 +701,7 @@ export default function IndicadoresPage() {
                                                                     newRates[index].totalAPagar = parseFloat((newRates[index].cargoTrabajador + empleador).toFixed(2));
                                                                     setAfpRates(newRates);
                                                                 }}
-                                                                className="w-20 border rounded px-2 py-1"
+                                                                className="w-20 border rounded px-2 py-1 text-gray-900"
                                                             />
                                                         </td>
                                                         <td className="py-1">
@@ -722,7 +722,7 @@ export default function IndicadoresPage() {
                                                                     newRates[index].independiente = parseFloat(e.target.value) || 0;
                                                                     setAfpRates(newRates);
                                                                 }}
-                                                                className="w-20 border rounded px-2 py-1"
+                                                                className="w-20 border rounded px-2 py-1 text-gray-900"
                                                             />
                                                         </td>
                                                     </tr>
@@ -747,7 +747,7 @@ export default function IndicadoresPage() {
                                     <div className="p-4">
                                         <table className="w-full text-sm">
                                             <thead>
-                                                <tr className="text-left text-gray-500">
+                                                <tr className="text-left text-gray-700 font-semibold">
                                                     <th className="pb-2">Tipo Contrato</th>
                                                     <th className="pb-2">Empleador %</th>
                                                     <th className="pb-2">Trabajador %</th>
@@ -769,7 +769,7 @@ export default function IndicadoresPage() {
                                                                     newRates[index].empleador = parseFloat(e.target.value);
                                                                     setCesantiaRates(newRates);
                                                                 }}
-                                                                className="w-20 border rounded px-2 py-1"
+                                                                className="w-20 border rounded px-2 py-1 text-gray-900"
                                                             />
                                                         </td>
                                                         <td className="py-1">
@@ -782,7 +782,7 @@ export default function IndicadoresPage() {
                                                                     newRates[index].trabajador = parseFloat(e.target.value);
                                                                     setCesantiaRates(newRates);
                                                                 }}
-                                                                className="w-20 border rounded px-2 py-1"
+                                                                className="w-20 border rounded px-2 py-1 text-gray-900"
                                                             />
                                                         </td>
                                                     </tr>
@@ -807,7 +807,7 @@ export default function IndicadoresPage() {
                                     <div className="p-4">
                                         <table className="w-full text-sm">
                                             <thead>
-                                                <tr className="text-left text-gray-500">
+                                                <tr className="text-left text-gray-700">
                                                     <th className="pb-2">Tramo</th>
                                                     <th className="pb-2">Monto</th>
                                                     <th className="pb-2">Renta Desde</th>
@@ -827,7 +827,7 @@ export default function IndicadoresPage() {
                                                                     newData[index].monto = parseFloat(e.target.value);
                                                                     setAsignacionFamiliar(newData);
                                                                 }}
-                                                                className="w-24 border rounded px-2 py-1"
+                                                                className="w-24 border rounded px-2 py-1 text-gray-900"
                                                             />
                                                         </td>
                                                         <td className="py-1">
@@ -839,7 +839,7 @@ export default function IndicadoresPage() {
                                                                     newData[index].rentaDesde = parseFloat(e.target.value);
                                                                     setAsignacionFamiliar(newData);
                                                                 }}
-                                                                className="w-28 border rounded px-2 py-1"
+                                                                className="w-28 border rounded px-2 py-1 text-gray-900"
                                                             />
                                                         </td>
                                                         <td className="py-1">
@@ -852,7 +852,7 @@ export default function IndicadoresPage() {
                                                                         newData[index].rentaHasta = parseFloat(e.target.value);
                                                                         setAsignacionFamiliar(newData);
                                                                     }}
-                                                                    className="w-28 border rounded px-2 py-1"
+                                                                    className="w-28 border rounded px-2 py-1 text-gray-900"
                                                                 />
                                                             ) : (
                                                                 <span className="text-gray-400">Sin límite</span>
