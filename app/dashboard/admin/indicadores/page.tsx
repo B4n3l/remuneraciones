@@ -705,7 +705,10 @@ export default function IndicadoresPage() {
                                                             />
                                                         </td>
                                                         <td className="py-1">
-                                                            <span className="inline-block w-20 px-2 py-1 bg-green-100 text-green-800 border border-green-300 rounded text-center font-semibold">
+                                                            <span
+                                                                className="inline-block w-20 px-2 py-1 rounded text-center font-bold"
+                                                                style={{ backgroundColor: '#d1fae5', color: '#065f46', border: '1px solid #6ee7b7' }}
+                                                            >
                                                                 {afp.totalAPagar.toFixed(2)}
                                                             </span>
                                                         </td>
