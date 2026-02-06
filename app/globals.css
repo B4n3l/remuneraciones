@@ -24,3 +24,18 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Ensure inputs and selects have dark text */
+input, select, textarea {
+  color: #171717;
+}
+
+/* Tables should have dark text */
+table {
+  color: #171717;
+}
+
+/* Form labels should be dark */
+label {
+  color: #374151;
+}
