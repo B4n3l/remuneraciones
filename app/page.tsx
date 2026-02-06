@@ -360,7 +360,7 @@ export default function LandingPage() {
             <div>
               <h2 className="text-4xl font-bold mb-6">Contáctanos</h2>
               <p className="text-gray-300 mb-8 text-lg">
-                Agenda una reunión gratuita y conversemos sobre cómo podemos ayudarte con la gestión contable de tu empresa.
+                Agenda una reunión de 30 a 45 minutos y conversemos sobre cómo podemos ayudarte con la gestión contable de tu empresa.
               </p>
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
