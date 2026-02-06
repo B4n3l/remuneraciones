@@ -369,22 +369,22 @@ export default function IndicadoresPage() {
                         ) : (
                             indicadores.map((ind) => (
                                 <tr key={ind.id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap font-medium">
+                                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
                                         {MESES[ind.month - 1]} {ind.year}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">
                                         {formatCurrency(Number(ind.valorUF))}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">
                                         {formatCurrency(Number(ind.valorUTM))}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">
                                         {formatCurrency(Number(ind.sueldoMinimo))}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">
                                         {Number(ind.topeImponibleAFP)} UF
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">
                                         {Number(ind.sisRate)}%
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right">
