@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { ArrowLeftIcon, DocumentArrowDownIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, DocumentArrowDownIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 
 interface PayrollItem {
     id: string;
@@ -113,11 +113,20 @@ export default function PeriodDetailPage({ params }: { params: Promise<{ id: str
                         </h1>
                         <p className="text-gray-600">{period.company.razonSocial}</p>
                     </div>
-                    <div className="text-right">
-                        <p className="text-sm text-gray-500">Total Líquido</p>
-                        <p className="text-2xl font-bold text-green-600">
-                            {formatCurrency(totalLiquido)}
-                        </p>
+                    <div className="flex items-center gap-6">
+                        <div className="text-right">
+                            <p className="text-sm text-gray-500">Total Líquido</p>
+                            <p className="text-2xl font-bold text-green-600">
+                                {formatCurrency(totalLiquido)}
+                            </p>
+                        </div>
+                        <Link
+                            href={`/dashboard/liquidaciones/${resolvedParams.id}/editar`}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md"
+                        >
+                            <PencilSquareIcon className="h-5 w-5" />
+                            Editar
+                        </Link>
                     </div>
                 </div>
             </div>
