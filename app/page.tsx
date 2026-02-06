@@ -2,158 +2,155 @@
 
 import Link from "next/link";
 import {
-  ChartBarIcon,
-  DocumentTextIcon,
   CalculatorIcon,
+  DocumentTextIcon,
+  BuildingOfficeIcon,
+  CurrencyDollarIcon,
   ClipboardDocumentCheckIcon,
-  ClockIcon,
-  CalendarIcon,
+  UserGroupIcon,
   CheckCircleIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  MapPinIcon
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const features = [
+  const services = [
     {
-      icon: ChartBarIcon,
-      title: "Liquidaciones de Sueldo",
-      description: "Genera liquidaciones automáticas con cálculo de AFP, salud, impuestos y bonos. Descarga PDFs profesionales.",
+      icon: CurrencyDollarIcon,
+      title: "Contabilidad General",
+      description: "Llevamos tu contabilidad al día: libros contables, balances, estados de resultados y reportes financieros mensuales.",
       color: "blue"
     },
     {
       icon: DocumentTextIcon,
-      title: "Generación de Contratos",
-      description: "Crea contratos de trabajo personalizados: indefinidos, plazo fijo u obra. Cumple con la legislación chilena.",
+      title: "Remuneraciones",
+      description: "Cálculo y pago de sueldos, liquidaciones, imposiciones, contratos de trabajo y finiquitos. Todo en regla con la legislación.",
       color: "green"
     },
     {
       icon: CalculatorIcon,
-      title: "Calculadora de Honorarios",
-      description: "Calcula boletas de honorarios con retención automática del 12.25%. Obtén el líquido a recibir al instante.",
+      title: "Declaraciones de Impuestos",
+      description: "IVA mensual, renta anual, PPM, retenciones de honorarios. Cumplimos con todas tus obligaciones tributarias.",
       color: "purple"
     },
     {
-      icon: ClipboardDocumentCheckIcon,
-      title: "Calculadora de Finiquitos",
-      description: "Determina el monto exacto a pagar por años de servicio, vacaciones proporcionales e indemnizaciones.",
+      icon: BuildingOfficeIcon,
+      title: "Constitución de Empresas",
+      description: "Te ayudamos a crear tu empresa: EIRL, SpA, Ltda. Trámites en SII, inicio de actividades y patentes comerciales.",
       color: "orange"
     },
     {
-      icon: ClockIcon,
-      title: "Control de Asistencia",
-      description: "Registra entrada y salida de trabajadores. Genera reportes de asistencia mensual automáticamente.",
+      icon: ClipboardDocumentCheckIcon,
+      title: "Asesoría Tributaria",
+      description: "Optimiza tu carga tributaria legalmente. Te asesoramos en planificación fiscal y régimen de tributación.",
       color: "indigo"
     },
     {
-      icon: CalendarIcon,
-      title: "Gestión de Vacaciones",
-      description: "Administra solicitudes, saldos y períodos de vacaciones. Mantén el control total del año laboral.",
+      icon: UserGroupIcon,
+      title: "Outsourcing Contable",
+      description: "Externalizamos todo tu departamento contable. Nos integramos a tu equipo como si fuéramos parte de tu empresa.",
       color: "teal"
     }
   ];
 
-  const audiences = [
+  const benefits = [
+    {
+      emoji: "✅",
+      title: "Experiencia",
+      description: "Más de 15 años asesorando empresas de todos los tamaños en Chile."
+    },
     {
       emoji: "📊",
-      title: "Contadores",
-      benefits: [
-        "Automatiza procesos repetitivos",
-        "Reduce errores de cálculo",
-        "Genera documentación legal",
-        "Ahorra horas de trabajo mensual"
-      ]
+      title: "Tecnología",
+      description: "Utilizamos software de última generación para una gestión eficiente y precisa."
     },
     {
-      emoji: "🏢",
-      title: "Pymes",
-      benefits: [
-        "Administra nóminas sin contador",
-        "Cumple con obligaciones legales",
-        "Controla costos laborales",
-        "Gestiona múltiples trabajadores"
-      ]
+      emoji: "🤝",
+      title: "Cercanía",
+      description: "Atención personalizada. Un ejecutivo dedicado conoce tu negocio."
     },
     {
-      emoji: "💼",
-      title: "Emprendedores",
-      benefits: [
-        "Herramientas profesionales accesibles",
-        "Sin conocimientos contables previos",
-        "Calculadoras gratuitas",
-        "Escala cuando crezcas"
-      ]
+      emoji: "⚡",
+      title: "Rapidez",
+      description: "Respuestas en menos de 24 horas. Nunca te dejamos esperando."
     }
   ];
 
   const pricing = [
     {
-      name: "Gratis",
-      price: "$0",
-      period: "siempre",
+      name: "Emprendedor",
+      price: "$89.990",
+      period: "mensual",
+      description: "Ideal para negocios pequeños",
       features: [
-        "Calculadora de honorarios",
-        "Calculadora de finiquitos",
-        "Hasta 5 liquidaciones/mes",
+        "Contabilidad simplificada",
+        "Hasta 3 trabajadores",
+        "Declaración IVA mensual",
+        "F29 y F22",
         "Soporte por email"
       ],
-      cta: "Iniciar Sesión",
+      cta: "Solicitar Cotización",
       highlighted: false
     },
     {
-      name: "Profesional",
-      price: "$19.990",
+      name: "Pyme",
+      price: "$149.990",
       period: "mensual",
+      description: "El más popular",
       features: [
-        "Liquidaciones ilimitadas",
-        "Generación de contratos",
-        "Control de asistencia",
-        "Gestión de vacaciones",
-        "Descarga de PDFs",
-        "Soporte prioritario"
+        "Contabilidad completa",
+        "Hasta 10 trabajadores",
+        "Todas las declaraciones",
+        "Liquidaciones de sueldo",
+        "Asesoría tributaria",
+        "Reuniones mensuales"
       ],
-      cta: "Probar 14 días gratis",
+      cta: "Solicitar Cotización",
       highlighted: true
     },
     {
       name: "Empresa",
-      price: "$49.990",
-      period: "mensual",
+      price: "A convenir",
+      period: "",
+      description: "Soluciones a medida",
       features: [
-        "Todo de Profesional",
-        "Multi-empresa",
-        "Usuarios ilimitados",
-        "API de integración",
-        "Capacitación personalizada",
-        "Soporte 24/7"
+        "Contabilidad full service",
+        "Trabajadores ilimitados",
+        "Outsourcing completo",
+        "Asesoría permanente",
+        "Reportes personalizados",
+        "Ejecutivo dedicado"
       ],
-      cta: "Contactar Ventas",
+      cta: "Contactar",
       highlighted: false
     }
   ];
 
   const faqs = [
     {
-      q: "¿Cómo funciona la prueba gratuita?",
-      a: "La prueba de 14 días te da acceso completo al plan Profesional sin necesidad de tarjeta de crédito. Puedes cancelar en cualquier momento."
+      q: "¿Qué incluye el servicio de contabilidad?",
+      a: "Incluye registro de facturas, libros contables (compras, ventas, honorarios), balance mensual, estado de resultados y análisis financiero. Todo lo necesario para mantener tu contabilidad al día."
     },
     {
-      q: "¿Los cálculos cumplen con la legislación chilena?",
-      a: "Sí, todos nuestros cálculos están actualizados según el Código del Trabajo y la normativa vigente de la Dirección del Trabajo."
+      q: "¿Cómo funciona el servicio de remuneraciones?",
+      a: "Calculamos sueldos, generamos liquidaciones, pagamos imposiciones (AFP, Fonasa/Isapre, Cesantía), y gestionamos contratos y finiquitos. Nos encargamos de toda tu área laboral."
     },
     {
-      q: "¿Puedo importar mis trabajadores actuales?",
-      a: "Por supuesto. Puedes agregar trabajadores manualmente o contactarnos para importación masiva desde Excel."
+      q: "¿Pueden constituir mi empresa?",
+      a: "Sí, te ayudamos con todo el proceso: redacción de escritura, inscripción en Registro de Comercio, inicio de actividades en SII, obtención de patente municipal y más."
     },
     {
-      q: "¿Qué pasa si cambio de plan?",
-      a: "Puedes cambiar entre planes en cualquier momento. Los cambios se aplican de inmediato y ajustamos el cobro proporcionalmente."
+      q: "¿Trabajan con empresas de cualquier tamaño?",
+      a: "Trabajamos con emprendedores, pymes y empresas medianas. Tenemos planes adaptados a cada etapa de crecimiento de tu negocio."
     },
     {
-      q: "¿Ofrecen capacitación?",
-      a: "El plan Empresa incluye capacitación personalizada. También ofrecemos webinars gratuitos mensuales para todos los usuarios."
+      q: "¿Cómo es el proceso para comenzar?",
+      a: "Agenda una reunión gratuita donde evaluamos tu situación. Luego te enviamos una propuesta personalizada. Una vez aceptada, comenzamos a trabajar inmediatamente."
     }
   ];
 
@@ -164,15 +161,20 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
-              <ChartBarIcon className="h-8 w-8 text-blue-600" />
+              <CalculatorIcon className="h-8 w-8 text-blue-600" />
               <span className="text-xl font-bold text-gray-900">Centro Contable</span>
+            </div>
+            <div className="hidden md:flex items-center gap-8">
+              <a href="#servicios" className="text-gray-600 hover:text-gray-900">Servicios</a>
+              <a href="#planes" className="text-gray-600 hover:text-gray-900">Planes</a>
+              <a href="#contacto" className="text-gray-600 hover:text-gray-900">Contacto</a>
             </div>
             <div className="flex items-center gap-4">
               <Link
                 href="/login"
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
               >
-                Iniciar Sesión
+                Portal Clientes
               </Link>
             </div>
           </div>
@@ -184,51 +186,73 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6">
-              Centro Contable
+              Servicios Contables Integrales
             </h1>
             <p className="text-2xl md:text-3xl text-gray-600 mb-4">
-              Tu Aliado en Gestión Laboral y Contable
+              Tu oficina contable de confianza en Chile
             </p>
             <p className="text-xl text-gray-500 mb-12 max-w-3xl mx-auto">
-              Simplifica nóminas, contratos y cálculos tributarios.
-              Todo en una plataforma profesional diseñada para Chile.
+              Contabilidad, remuneraciones, impuestos y asesoría tributaria.
+              Nos encargamos de todo para que tú te enfoques en hacer crecer tu negocio.
             </p>
             <div className="flex gap-4 justify-center flex-wrap">
-              <Link
-                href="/login"
+              <a
+                href="#contacto"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold rounded-lg transition-colors shadow-lg"
               >
-                Iniciar Sesión
+                Solicitar Cotización
                 <ArrowRightIcon className="h-5 w-5" />
-              </Link>
+              </a>
+              <a
+                href="tel:+56912345678"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-white hover:bg-gray-50 text-gray-900 text-lg font-semibold rounded-lg transition-colors shadow-lg border-2 border-gray-200"
+              >
+                <PhoneIcon className="h-5 w-5" />
+                Llamar Ahora
+              </a>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-white">
+      {/* Benefits Bar */}
+      <section className="py-8 bg-blue-600">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {benefits.map((benefit, idx) => (
+              <div key={idx} className="text-center text-white">
+                <div className="text-3xl mb-2">{benefit.emoji}</div>
+                <h3 className="font-semibold text-lg">{benefit.title}</h3>
+                <p className="text-blue-100 text-sm">{benefit.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section id="servicios" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Módulos y Herramientas
+              Nuestros Servicios
             </h2>
             <p className="text-xl text-gray-600">
-              Todo lo que necesitas para gestionar tu área laboral y contable
+              Soluciones contables y tributarias para tu empresa
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, idx) => (
+            {services.map((service, idx) => (
               <div
                 key={idx}
                 className="p-6 rounded-xl border-2 border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all"
               >
-                <feature.icon className={`h-12 w-12 text-${feature.color}-600 mb-4`} />
+                <service.icon className="h-12 w-12 text-blue-600 mb-4" />
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  {feature.title}
+                  {service.title}
                 </h3>
                 <p className="text-gray-600">
-                  {feature.description}
+                  {service.description}
                 </p>
               </div>
             ))}
@@ -236,47 +260,15 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Target Audience Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              ¿Para quién es Centro Contable?
-            </h2>
-            <p className="text-xl text-gray-600">
-              Diseñado para profesionales y empresas de todos los tamaños
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {audiences.map((audience, idx) => (
-              <div key={idx} className="bg-white p-8 rounded-xl shadow-md">
-                <div className="text-5xl mb-4 text-center">{audience.emoji}</div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-                  {audience.title}
-                </h3>
-                <ul className="space-y-3">
-                  {audience.benefits.map((benefit, bidx) => (
-                    <li key={bidx} className="flex items-start gap-3">
-                      <CheckCircleIcon className="h-6 w-6 text-green-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700">{benefit}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Pricing Section */}
-      <section className="py-20 bg-white">
+      <section id="planes" className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Planes y Precios
+              Planes de Servicio
             </h2>
             <p className="text-xl text-gray-600">
-              Comienza gratis, escala cuando lo necesites
+              Elige el plan que mejor se adapte a tu empresa
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -288,13 +280,18 @@ export default function LandingPage() {
                 <h3 className={`text-2xl font-bold mb-2 ${plan.highlighted ? 'text-white' : 'text-gray-900'}`}>
                   {plan.name}
                 </h3>
+                <p className={`mb-4 ${plan.highlighted ? 'text-blue-100' : 'text-gray-500'}`}>
+                  {plan.description}
+                </p>
                 <div className="mb-6">
                   <span className={`text-4xl font-extrabold ${plan.highlighted ? 'text-white' : 'text-gray-900'}`}>
                     {plan.price}
                   </span>
-                  <span className={`text-lg ${plan.highlighted ? 'text-blue-100' : 'text-gray-500'}`}>
-                    /{plan.period}
-                  </span>
+                  {plan.period && (
+                    <span className={`text-lg ${plan.highlighted ? 'text-blue-100' : 'text-gray-500'}`}>
+                      /{plan.period}
+                    </span>
+                  )}
                 </div>
                 <ul className="space-y-4 mb-8">
                   {plan.features.map((feature, fidx) => (
@@ -306,44 +303,47 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Link
-                  href="/login"
+                <a
+                  href="#contacto"
                   className={`block w-full py-3 px-6 rounded-lg font-semibold text-center transition-colors ${plan.highlighted
                     ? 'bg-white text-blue-600 hover:bg-gray-100'
                     : 'bg-blue-600 text-white hover:bg-blue-700'
                     }`}
                 >
                   {plan.cta}
-                </Link>
+                </a>
               </div>
             ))}
           </div>
+          <p className="text-center text-gray-500 mt-8">
+            * Los precios no incluyen IVA. Todos los planes incluyen acceso al Portal de Clientes.
+          </p>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
               Preguntas Frecuentes
             </h2>
             <p className="text-xl text-gray-600">
-              Todo lo que necesitas saber
+              Resolvemos tus dudas
             </p>
           </div>
           <div className="space-y-4">
             {faqs.map((faq, idx) => (
-              <div key={idx} className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div key={idx} className="bg-gray-50 rounded-lg overflow-hidden">
                 <button
                   onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                  className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors"
+                  className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-100 transition-colors"
                 >
                   <span className="font-semibold text-gray-900">{faq.q}</span>
                   <span className="text-2xl text-gray-400">{openFaq === idx ? '−' : '+'}</span>
                 </button>
                 {openFaq === idx && (
-                  <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                  <div className="px-6 py-4 bg-white border-t border-gray-200">
                     <p className="text-gray-700">{faq.a}</p>
                   </div>
                 )}
@@ -353,46 +353,106 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      {/* Contact Section */}
+      <section id="contacto" className="py-20 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <ChartBarIcon className="h-8 w-8 text-blue-400" />
-                <span className="text-xl font-bold">Centro Contable</span>
-              </div>
-              <p className="text-gray-400">
-                Simplificando la gestión laboral y contable para Chile.
+              <h2 className="text-4xl font-bold mb-6">Contáctanos</h2>
+              <p className="text-gray-300 mb-8 text-lg">
+                Agenda una reunión gratuita y conversemos sobre cómo podemos ayudarte con la gestión contable de tu empresa.
               </p>
+              <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <PhoneIcon className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">Teléfono</p>
+                    <p className="text-xl font-semibold">+56 9 1234 5678</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <EnvelopeIcon className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">Email</p>
+                    <p className="text-xl font-semibold">contacto@centrocontable.cl</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <MapPinIcon className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">Dirección</p>
+                    <p className="text-xl font-semibold">Santiago, Chile</p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <h4 className="font-semibold mb-4">Producto</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="#" className="hover:text-white">Características</Link></li>
-                <li><Link href="#" className="hover:text-white">Precios</Link></li>
-                <li><Link href="#" className="hover:text-white">Recursos</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Empresa</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="#" className="hover:text-white">Sobre Nosotros</Link></li>
-                <li><Link href="#" className="hover:text-white">Blog</Link></li>
-                <li><Link href="#" className="hover:text-white">Contacto</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="#" className="hover:text-white">Términos de Uso</Link></li>
-                <li><Link href="#" className="hover:text-white">Privacidad</Link></li>
-                <li><Link href="#" className="hover:text-white">Cookies</Link></li>
-              </ul>
+            <div className="bg-white text-gray-900 rounded-xl p-8">
+              <h3 className="text-2xl font-bold mb-6">Solicita tu Cotización</h3>
+              <form className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Tu nombre completo"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="tu@email.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                  <input
+                    type="tel"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="+56 9 XXXX XXXX"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Mensaje</label>
+                  <textarea
+                    rows={4}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Cuéntanos sobre tu empresa y qué servicios necesitas..."
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+                >
+                  Enviar Solicitud
+                </button>
+              </form>
             </div>
           </div>
-          <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-            <p>&copy; {new Date().getFullYear()} Centro Contable. Todos los derechos reservados.</p>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-950 text-white py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2">
+              <CalculatorIcon className="h-6 w-6 text-blue-400" />
+              <span className="font-bold">Centro Contable</span>
+            </div>
+            <p className="text-gray-400 text-sm">
+              © {new Date().getFullYear()} Centro Contable. Todos los derechos reservados.
+            </p>
+            <div className="flex gap-6 text-gray-400">
+              <Link href="/login" className="hover:text-white">Portal Clientes</Link>
+            </div>
           </div>
         </div>
       </footer>

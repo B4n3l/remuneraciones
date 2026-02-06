@@ -15,11 +15,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Remuneraciones | Sistema de Gestión de Sueldos",
-    template: "%s | Remuneraciones",
+    default: "Centro Contable | Servicios Contables Integrales",
+    template: "%s | Centro Contable",
   },
-  description: "Sistema de gestión de remuneraciones y liquidaciones de sueldo para empresas chilenas",
-  keywords: ["remuneraciones", "liquidaciones", "sueldos", "nómina", "chile", "afp", "isapre"],
+  description: "Servicios contables y tributarios para empresas chilenas. Contabilidad, remuneraciones, impuestos y asesoría tributaria.",
+  keywords: ["contabilidad", "contador", "servicios contables", "tributario", "remuneraciones", "impuestos", "chile"],
 };
 
 export default function RootLayout({
