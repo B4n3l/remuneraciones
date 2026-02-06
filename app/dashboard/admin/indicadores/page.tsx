@@ -430,7 +430,7 @@ export default function IndicadoresPage() {
                                         value={formData.month}
                                         onChange={(e) => setFormData({ ...formData, month: parseInt(e.target.value) })}
                                         disabled={!!editingIndicador}
-                                        className="w-full border rounded-lg px-3 py-2"
+                                        className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                     >
                                         {MESES.map((mes, i) => (
                                             <option key={i} value={i + 1}>{mes}</option>
@@ -443,7 +443,7 @@ export default function IndicadoresPage() {
                                         value={formData.year}
                                         onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
                                         disabled={!!editingIndicador}
-                                        className="w-full border rounded-lg px-3 py-2"
+                                        className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                     >
                                         {[2024, 2025, 2026, 2027].map(year => (
                                             <option key={year} value={year}>{year}</option>
@@ -499,7 +499,7 @@ export default function IndicadoresPage() {
                                             step="0.01"
                                             value={formData.valorUF}
                                             onChange={(e) => setFormData({ ...formData, valorUF: parseFloat(e.target.value) })}
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
                                     <div>
@@ -508,7 +508,7 @@ export default function IndicadoresPage() {
                                             type="number"
                                             value={formData.valorUTM}
                                             onChange={(e) => setFormData({ ...formData, valorUTM: parseFloat(e.target.value) })}
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
                                     <div>
@@ -517,7 +517,7 @@ export default function IndicadoresPage() {
                                             type="number"
                                             value={formData.valorUTA}
                                             onChange={(e) => setFormData({ ...formData, valorUTA: parseFloat(e.target.value) })}
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
                                 </div>
@@ -533,7 +533,7 @@ export default function IndicadoresPage() {
                                             type="number"
                                             value={formData.sueldoMinimo}
                                             onChange={(e) => setFormData({ ...formData, sueldoMinimo: parseFloat(e.target.value) })}
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
                                     <div>
@@ -542,7 +542,7 @@ export default function IndicadoresPage() {
                                             type="number"
                                             value={formData.sueldoMinimoCasaPart}
                                             onChange={(e) => setFormData({ ...formData, sueldoMinimoCasaPart: parseFloat(e.target.value) })}
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
                                     <div>
@@ -551,7 +551,7 @@ export default function IndicadoresPage() {
                                             type="number"
                                             value={formData.sueldoMinimoMenores}
                                             onChange={(e) => setFormData({ ...formData, sueldoMinimoMenores: parseFloat(e.target.value) })}
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
                                     <div>
@@ -560,7 +560,7 @@ export default function IndicadoresPage() {
                                             type="number"
                                             value={formData.sueldoMinimoNoRem}
                                             onChange={(e) => setFormData({ ...formData, sueldoMinimoNoRem: parseFloat(e.target.value) })}
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
                                 </div>
@@ -577,7 +577,7 @@ export default function IndicadoresPage() {
                                             step="0.1"
                                             value={formData.topeImponibleAFP}
                                             onChange={(e) => setFormData({ ...formData, topeImponibleAFP: parseFloat(e.target.value) })}
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
                                     <div>
@@ -587,7 +587,7 @@ export default function IndicadoresPage() {
                                             step="0.1"
                                             value={formData.topeImponibleINP}
                                             onChange={(e) => setFormData({ ...formData, topeImponibleINP: parseFloat(e.target.value) })}
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
                                     <div>
@@ -597,7 +597,7 @@ export default function IndicadoresPage() {
                                             step="0.1"
                                             value={formData.topeSeguroCesantia}
                                             onChange={(e) => setFormData({ ...formData, topeSeguroCesantia: parseFloat(e.target.value) })}
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
                                 </div>
@@ -614,7 +614,7 @@ export default function IndicadoresPage() {
                                             step="0.01"
                                             value={formData.sisRate}
                                             onChange={(e) => setFormData({ ...formData, sisRate: parseFloat(e.target.value) })}
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
                                     <div>
@@ -624,7 +624,7 @@ export default function IndicadoresPage() {
                                             step="0.01"
                                             value={formData.seguroSocialRate}
                                             onChange={(e) => setFormData({ ...formData, seguroSocialRate: parseFloat(e.target.value) })}
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
                                     <div>
@@ -633,7 +633,7 @@ export default function IndicadoresPage() {
                                             type="number"
                                             value={formData.apvTopeMensualUF}
                                             onChange={(e) => setFormData({ ...formData, apvTopeMensualUF: parseFloat(e.target.value) })}
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
                                     <div>
@@ -642,7 +642,7 @@ export default function IndicadoresPage() {
                                             type="number"
                                             value={formData.apvTopeAnualUF}
                                             onChange={(e) => setFormData({ ...formData, apvTopeAnualUF: parseFloat(e.target.value) })}
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
                                 </div>
