@@ -109,6 +109,33 @@ export default function EditPayrollPage({ params }: { params: Promise<{ id: stri
         setEditedItems(newItems);
     };
 
+    const updateDiasTrabajados = (itemIndex: number, dias: number) => {
+        const newItems = [...editedItems];
+        const item = newItems[itemIndex];
+        const sueldoBase = item.worker.sueldoBase;
+
+        // Update dias trabajados
+        item.diasTrabajados = dias;
+
+        // Find and update sueldo base earning proportionally
+        const sueldoBaseEarningIndex = item.earnings.findIndex(e =>
+            e.concepto.toLowerCase().includes('sueldo base') || e.tipo === 'SUELDO_BASE'
+        );
+
+        if (sueldoBaseEarningIndex >= 0) {
+            // Calculate proportional sueldo base (30 days = full salary)
+            const sueldoProporcional = Math.round((sueldoBase / 30) * dias);
+            item.earnings[sueldoBaseEarningIndex].monto = sueldoProporcional;
+
+            // Recalculate totals
+            const totalHaberes = item.earnings.reduce((sum, e) => sum + Number(e.monto), 0);
+            item.totalHaberes = totalHaberes;
+            item.liquidoPagar = totalHaberes - item.totalDescuentosLegales;
+        }
+
+        setEditedItems(newItems);
+    };
+
     const handleSave = async () => {
         setSaving(true);
         setError("");
@@ -200,6 +227,30 @@ export default function EditPayrollPage({ params }: { params: Promise<{ id: stri
                         </div>
 
                         <div className="p-6">
+                            {/* Días Trabajados */}
+                            <div className="mb-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                                <div className="flex items-center justify-between gap-6">
+                                    <div>
+                                        <h4 className="font-medium text-yellow-800">Días Trabajados</h4>
+                                        <p className="text-sm text-yellow-600">
+                                            Sueldo base: {formatCurrency(item.worker.sueldoBase)} |
+                                            Inasistencias: {30 - item.diasTrabajados} días
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max="31"
+                                            value={item.diasTrabajados}
+                                            onChange={(e) => updateDiasTrabajados(itemIndex, parseInt(e.target.value) || 0)}
+                                            className="w-20 px-3 py-2 border border-yellow-300 rounded-md text-center font-medium"
+                                        />
+                                        <span className="text-yellow-800">/ 30</span>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Haberes */}
                                 <div>
