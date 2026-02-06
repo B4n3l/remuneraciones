@@ -232,7 +232,7 @@ export default function NuevaLiquidacionPage() {
                         <select
                             value={formData.companyId}
                             onChange={(e) => setFormData({ ...formData, companyId: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900"
                         >
                             <option value="">Seleccionar empresa</option>
                             {companies.map((company) => (
@@ -248,7 +248,7 @@ export default function NuevaLiquidacionPage() {
                             type="number"
                             value={formData.year}
                             onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900"
                             min="2020"
                             max="2030"
                         />
@@ -258,7 +258,7 @@ export default function NuevaLiquidacionPage() {
                         <select
                             value={formData.month}
                             onChange={(e) => setFormData({ ...formData, month: parseInt(e.target.value) })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900"
                         >
                             {[
                                 "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -305,7 +305,7 @@ export default function NuevaLiquidacionPage() {
                                         <td className="px-4 py-3 text-sm text-gray-900">
                                             {worker.nombres} {worker.apellidoPaterno}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-500">
+                                        <td className="px-4 py-3 text-sm text-gray-900">
                                             {formatCurrency(worker.sueldoBase)}
                                         </td>
                                         <td className="px-4 py-3">
@@ -315,7 +315,7 @@ export default function NuevaLiquidacionPage() {
                                                 max="31"
                                                 value={workerInputs[worker.id]?.diasTrabajados || 30}
                                                 onChange={(e) => handleWorkerInputChange(worker.id, "diasTrabajados", e.target.value)}
-                                                className="w-16 px-2 py-1 border border-gray-300 rounded text-center"
+                                                className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-gray-900"
                                             />
                                         </td>
                                         <td className="px-4 py-3">
@@ -324,7 +324,7 @@ export default function NuevaLiquidacionPage() {
                                                 min="0"
                                                 value={workerInputs[worker.id]?.horasExtras50 || 0}
                                                 onChange={(e) => handleWorkerInputChange(worker.id, "horasExtras50", e.target.value)}
-                                                className="w-20 px-2 py-1 border border-gray-300 rounded text-center"
+                                                className="w-20 px-2 py-1 border border-gray-300 rounded text-center text-gray-900"
                                             />
                                         </td>
                                         <td className="px-4 py-3">
@@ -333,7 +333,7 @@ export default function NuevaLiquidacionPage() {
                                                 min="0"
                                                 value={workerInputs[worker.id]?.horasExtras100 || 0}
                                                 onChange={(e) => handleWorkerInputChange(worker.id, "horasExtras100", e.target.value)}
-                                                className="w-20 px-2 py-1 border border-gray-300 rounded text-center"
+                                                className="w-20 px-2 py-1 border border-gray-300 rounded text-center text-gray-900"
                                             />
                                         </td>
                                         <td className="px-4 py-3">
@@ -342,7 +342,7 @@ export default function NuevaLiquidacionPage() {
                                                 min="0"
                                                 value={workerInputs[worker.id]?.bonos || 0}
                                                 onChange={(e) => handleWorkerInputChange(worker.id, "bonos", e.target.value)}
-                                                className="w-24 px-2 py-1 border border-gray-300 rounded text-center"
+                                                className="w-24 px-2 py-1 border border-gray-300 rounded text-center text-gray-900"
                                             />
                                         </td>
                                     </tr>
