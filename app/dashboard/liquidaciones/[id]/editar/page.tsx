@@ -127,6 +127,15 @@ export default function EditPayrollPage({ params }: { params: Promise<{ id: stri
             const sueldoProporcional = Math.round((sueldoBase / 30) * dias);
             item.earnings[sueldoBaseEarningIndex].monto = sueldoProporcional;
 
+            // Also update gratification (25% of proportional salary)
+            const gratificacionIndex = item.earnings.findIndex(e =>
+                e.concepto.toLowerCase().includes('gratificación') || e.tipo === 'GRATIFICACION'
+            );
+            if (gratificacionIndex >= 0) {
+                const gratificacionProporcional = Math.round(sueldoProporcional * 0.25);
+                item.earnings[gratificacionIndex].monto = gratificacionProporcional;
+            }
+
             // Recalculate totals
             const totalHaberes = item.earnings.reduce((sum, e) => sum + Number(e.monto), 0);
             item.totalHaberes = totalHaberes;

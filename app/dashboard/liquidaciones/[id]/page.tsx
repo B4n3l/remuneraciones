@@ -224,7 +224,7 @@ export default function PeriodDetailPage({ params }: { params: Promise<{ id: str
                                         {selectedItem.earnings.map((item, idx) => (
                                             <div key={idx} className="flex justify-between text-sm">
                                                 <span className="text-gray-600">{item.concepto}</span>
-                                                <span className="font-medium">{formatCurrency(Number(item.monto))}</span>
+                                                <span className="font-medium text-gray-900">{formatCurrency(Number(item.monto))}</span>
                                             </div>
                                         ))}
                                         <div className="border-t border-green-200 pt-2 mt-2">
@@ -243,7 +243,7 @@ export default function PeriodDetailPage({ params }: { params: Promise<{ id: str
                                         {selectedItem.deductions.map((item, idx) => (
                                             <div key={idx} className="flex justify-between text-sm">
                                                 <span className="text-gray-600">{item.concepto}</span>
-                                                <span className="font-medium">-{formatCurrency(Number(item.monto))}</span>
+                                                <span className="font-medium text-gray-900">-{formatCurrency(Number(item.monto))}</span>
                                             </div>
                                         ))}
                                         <div className="border-t border-red-200 pt-2 mt-2">
