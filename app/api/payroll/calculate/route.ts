@@ -46,21 +46,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get system values for the month
-    const systemValue = await prisma.systemValue.findFirst({
-      where: {
-        year,
-        month,
-      },
-    });
-
-    if (!systemValue) {
-      return NextResponse.json(
-        { error: `No hay valores del sistema para ${month}/${year}. Verifica que existan UF/UTM para ese período.` },
-        { status: 400 }
-      );
-    }
-
     // Get monthly indicators (IndicadorMensual) with AFP and Cesantía rates
     const indicadorMensual = await prisma.indicadorMensual.findUnique({
       where: {
@@ -125,8 +110,8 @@ export async function POST(request: Request) {
         tipoSalud: worker.tipoSalud as "FONASA" | "ISAPRE",
         isapre: worker.healthPlan?.isapre,
         isapreUF: worker.healthPlan?.planUF ? Number(worker.healthPlan.planUF) : undefined,
-        valorUF: Number(systemValue.valorUF),
-        sueldoMinimo: Number(systemValue.sueldoMinimo),
+        valorUF: Number(indicadorMensual.valorUF),
+        sueldoMinimo: Number(indicadorMensual.sueldoMinimo),
         diasTrabajados: Number(workerInput.diasTrabajados) || 30,
         horasExtras50: Number(workerInput.horasExtras50) || 0,
         horasExtras100: Number(workerInput.horasExtras100) || 0,
@@ -154,9 +139,9 @@ export async function POST(request: Request) {
       year,
       month,
       systemValue: {
-        valorUF: Number(systemValue.valorUF),
-        valorUTM: Number(systemValue.valorUTM),
-        sueldoMinimo: Number(systemValue.sueldoMinimo),
+        valorUF: Number(indicadorMensual.valorUF),
+        valorUTM: Number(indicadorMensual.valorUTM),
+        sueldoMinimo: Number(indicadorMensual.sueldoMinimo),
       },
       indicadores: {
         afpRates: Object.fromEntries(afpRatesMap),
