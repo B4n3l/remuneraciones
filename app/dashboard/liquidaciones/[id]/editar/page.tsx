@@ -92,13 +92,13 @@ export default function EditPayrollPage({ params }: { params: Promise<{ id: stri
                                 concepto.includes('colación') ||
                                 concepto.includes('movilización') ||
                                 concepto.includes('viático')) {
-                                bonos[e.concepto] = e.monto;
+                                bonos[e.concepto] = Number(e.monto);
                             }
                         });
 
                         initialData[item.worker.id] = {
-                            sueldoBase: item.worker.sueldoBase,
-                            diasTrabajados: item.diasTrabajados,
+                            sueldoBase: Number(item.worker.sueldoBase),
+                            diasTrabajados: Number(item.diasTrabajados),
                             horasExtras50: hrs50,
                             horasExtras100: hrs100,
                             bonos
@@ -207,8 +207,9 @@ export default function EditPayrollPage({ params }: { params: Promise<{ id: stri
             return d;
         });
 
-        const totalHaberes = newEarnings.reduce((sum, e) => sum + e.monto, 0);
-        const totalDescuentos = newDeductions.reduce((sum, d) => sum + d.monto, 0);
+
+        const totalHaberes = newEarnings.reduce((sum, e) => sum + Number(e.monto), 0);
+        const totalDescuentos = newDeductions.reduce((sum, d) => sum + Number(d.monto), 0);
 
         return {
             ...originalItem,
