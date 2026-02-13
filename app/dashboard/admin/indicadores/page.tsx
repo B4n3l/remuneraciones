@@ -272,8 +272,16 @@ export default function IndicadoresPage() {
                 setShowModal(false);
                 await fetchIndicadores();
             } else {
-                const error = await res.json();
-                alert(error.error || "Error al guardar");
+                const errorData = await res.json();
+                // Handle Zod validation errors
+                if (Array.isArray(errorData.error)) {
+                    const messages = errorData.error.map((err: any) =>
+                        `${err.path.join('.')}: ${err.message}`
+                    ).join('\n');
+                    alert(`Errores de validación:\n${messages}`);
+                } else {
+                    alert(errorData.error || "Error al guardar");
+                }
             }
         } catch (error) {
             console.error("Error saving:", error);
@@ -498,7 +506,7 @@ export default function IndicadoresPage() {
                                             type="number"
                                             step="0.01"
                                             value={formData.valorUF}
-                                            onChange={(e) => setFormData({ ...formData, valorUF: parseFloat(e.target.value) })}
+                                            onChange={(e) => setFormData({ ...formData, valorUF: parseFloat(e.target.value) || 0 })}
                                             className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
@@ -507,7 +515,7 @@ export default function IndicadoresPage() {
                                         <input
                                             type="number"
                                             value={formData.valorUTM}
-                                            onChange={(e) => setFormData({ ...formData, valorUTM: parseFloat(e.target.value) })}
+                                            onChange={(e) => setFormData({ ...formData, valorUTM: parseFloat(e.target.value) || 0 })}
                                             className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
@@ -516,7 +524,7 @@ export default function IndicadoresPage() {
                                         <input
                                             type="number"
                                             value={formData.valorUTA}
-                                            onChange={(e) => setFormData({ ...formData, valorUTA: parseFloat(e.target.value) })}
+                                            onChange={(e) => setFormData({ ...formData, valorUTA: parseFloat(e.target.value) || 0 })}
                                             className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
@@ -532,7 +540,7 @@ export default function IndicadoresPage() {
                                         <input
                                             type="number"
                                             value={formData.sueldoMinimo}
-                                            onChange={(e) => setFormData({ ...formData, sueldoMinimo: parseFloat(e.target.value) })}
+                                            onChange={(e) => setFormData({ ...formData, sueldoMinimo: parseFloat(e.target.value) || 0 })}
                                             className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
@@ -541,7 +549,7 @@ export default function IndicadoresPage() {
                                         <input
                                             type="number"
                                             value={formData.sueldoMinimoCasaPart}
-                                            onChange={(e) => setFormData({ ...formData, sueldoMinimoCasaPart: parseFloat(e.target.value) })}
+                                            onChange={(e) => setFormData({ ...formData, sueldoMinimoCasaPart: parseFloat(e.target.value) || 0 })}
                                             className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
@@ -550,7 +558,7 @@ export default function IndicadoresPage() {
                                         <input
                                             type="number"
                                             value={formData.sueldoMinimoMenores}
-                                            onChange={(e) => setFormData({ ...formData, sueldoMinimoMenores: parseFloat(e.target.value) })}
+                                            onChange={(e) => setFormData({ ...formData, sueldoMinimoMenores: parseFloat(e.target.value) || 0 })}
                                             className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
@@ -559,7 +567,7 @@ export default function IndicadoresPage() {
                                         <input
                                             type="number"
                                             value={formData.sueldoMinimoNoRem}
-                                            onChange={(e) => setFormData({ ...formData, sueldoMinimoNoRem: parseFloat(e.target.value) })}
+                                            onChange={(e) => setFormData({ ...formData, sueldoMinimoNoRem: parseFloat(e.target.value) || 0 })}
                                             className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
@@ -576,7 +584,7 @@ export default function IndicadoresPage() {
                                             type="number"
                                             step="0.1"
                                             value={formData.topeImponibleAFP}
-                                            onChange={(e) => setFormData({ ...formData, topeImponibleAFP: parseFloat(e.target.value) })}
+                                            onChange={(e) => setFormData({ ...formData, topeImponibleAFP: parseFloat(e.target.value) || 0 })}
                                             className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
@@ -586,7 +594,7 @@ export default function IndicadoresPage() {
                                             type="number"
                                             step="0.1"
                                             value={formData.topeImponibleINP}
-                                            onChange={(e) => setFormData({ ...formData, topeImponibleINP: parseFloat(e.target.value) })}
+                                            onChange={(e) => setFormData({ ...formData, topeImponibleINP: parseFloat(e.target.value) || 0 })}
                                             className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
@@ -596,7 +604,7 @@ export default function IndicadoresPage() {
                                             type="number"
                                             step="0.1"
                                             value={formData.topeSeguroCesantia}
-                                            onChange={(e) => setFormData({ ...formData, topeSeguroCesantia: parseFloat(e.target.value) })}
+                                            onChange={(e) => setFormData({ ...formData, topeSeguroCesantia: parseFloat(e.target.value) || 0 })}
                                             className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
@@ -613,7 +621,7 @@ export default function IndicadoresPage() {
                                             type="number"
                                             step="0.01"
                                             value={formData.sisRate}
-                                            onChange={(e) => setFormData({ ...formData, sisRate: parseFloat(e.target.value) })}
+                                            onChange={(e) => setFormData({ ...formData, sisRate: parseFloat(e.target.value) || 0 })}
                                             className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
@@ -623,7 +631,7 @@ export default function IndicadoresPage() {
                                             type="number"
                                             step="0.01"
                                             value={formData.seguroSocialRate}
-                                            onChange={(e) => setFormData({ ...formData, seguroSocialRate: parseFloat(e.target.value) })}
+                                            onChange={(e) => setFormData({ ...formData, seguroSocialRate: parseFloat(e.target.value) || 0 })}
                                             className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
@@ -632,7 +640,7 @@ export default function IndicadoresPage() {
                                         <input
                                             type="number"
                                             value={formData.apvTopeMensualUF}
-                                            onChange={(e) => setFormData({ ...formData, apvTopeMensualUF: parseFloat(e.target.value) })}
+                                            onChange={(e) => setFormData({ ...formData, apvTopeMensualUF: parseFloat(e.target.value) || 0 })}
                                             className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
@@ -641,7 +649,7 @@ export default function IndicadoresPage() {
                                         <input
                                             type="number"
                                             value={formData.apvTopeAnualUF}
-                                            onChange={(e) => setFormData({ ...formData, apvTopeAnualUF: parseFloat(e.target.value) })}
+                                            onChange={(e) => setFormData({ ...formData, apvTopeAnualUF: parseFloat(e.target.value) || 0 })}
                                             className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
                                     </div>
@@ -766,7 +774,7 @@ export default function IndicadoresPage() {
                                                                 value={c.empleador}
                                                                 onChange={(e) => {
                                                                     const newRates = [...cesantiaRates];
-                                                                    newRates[index].empleador = parseFloat(e.target.value);
+                                                                    newRates[index].empleador = parseFloat(e.target.value) || 0;
                                                                     setCesantiaRates(newRates);
                                                                 }}
                                                                 className="w-20 border rounded px-2 py-1 text-gray-900"
@@ -779,7 +787,7 @@ export default function IndicadoresPage() {
                                                                 value={c.trabajador}
                                                                 onChange={(e) => {
                                                                     const newRates = [...cesantiaRates];
-                                                                    newRates[index].trabajador = parseFloat(e.target.value);
+                                                                    newRates[index].trabajador = parseFloat(e.target.value) || 0;
                                                                     setCesantiaRates(newRates);
                                                                 }}
                                                                 className="w-20 border rounded px-2 py-1 text-gray-900"
@@ -824,7 +832,7 @@ export default function IndicadoresPage() {
                                                                 value={a.monto}
                                                                 onChange={(e) => {
                                                                     const newData = [...asignacionFamiliar];
-                                                                    newData[index].monto = parseFloat(e.target.value);
+                                                                    newData[index].monto = parseFloat(e.target.value) || 0;
                                                                     setAsignacionFamiliar(newData);
                                                                 }}
                                                                 className="w-24 border rounded px-2 py-1 text-gray-900"
@@ -836,7 +844,7 @@ export default function IndicadoresPage() {
                                                                 value={a.rentaDesde}
                                                                 onChange={(e) => {
                                                                     const newData = [...asignacionFamiliar];
-                                                                    newData[index].rentaDesde = parseFloat(e.target.value);
+                                                                    newData[index].rentaDesde = parseFloat(e.target.value) || 0;
                                                                     setAsignacionFamiliar(newData);
                                                                 }}
                                                                 className="w-28 border rounded px-2 py-1 text-gray-900"
@@ -849,7 +857,7 @@ export default function IndicadoresPage() {
                                                                     value={a.rentaHasta || 0}
                                                                     onChange={(e) => {
                                                                         const newData = [...asignacionFamiliar];
-                                                                        newData[index].rentaHasta = parseFloat(e.target.value);
+                                                                        newData[index].rentaHasta = parseFloat(e.target.value) || 0;
                                                                         setAsignacionFamiliar(newData);
                                                                     }}
                                                                     className="w-28 border rounded px-2 py-1 text-gray-900"
