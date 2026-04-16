@@ -204,7 +204,7 @@ export default function LandingPage() {
                 <ArrowRightIcon className="h-5 w-5" />
               </a>
               <a
-                href="tel:+56995933340"
+                href="tel:+56975149711"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-white hover:bg-gray-50 text-gray-900 text-lg font-semibold rounded-lg transition-colors shadow-lg border-2 border-gray-200"
               >
                 <PhoneIcon className="h-5 w-5" />
