@@ -369,7 +369,7 @@ export default function LandingPage() {
                   </div>
                   <div>
                     <p className="text-gray-400 text-sm">Teléfono</p>
-                    <p className="text-xl font-semibold">+56 9 9593 3340</p>
+                    <p className="text-xl font-semibold">+56 9 7514 9711</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
