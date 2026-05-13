@@ -4,12 +4,16 @@ import { auth } from "@/auth";
 
 export async function middleware(request: NextRequest) {
     const session = await auth();
+    const { pathname } = request.nextUrl;
 
-    const isAuthPage = request.nextUrl.pathname.startsWith("/login") ||
-        request.nextUrl.pathname.startsWith("/register");
+    const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register");
+    const isDashboard = pathname.startsWith("/dashboard");
+    const isAdminRoute = pathname.startsWith("/dashboard/admin");
+    const isRoot = pathname === "/";
 
-    const isDashboard = request.nextUrl.pathname.startsWith("/dashboard");
-    const isAdminRoute = request.nextUrl.pathname.startsWith("/dashboard/admin");
+    if (isRoot) {
+        return NextResponse.redirect(new URL(session ? "/dashboard" : "/login", request.url));
+    }
 
     if (isAuthPage) {
         if (session) {
@@ -32,5 +36,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/dashboard/:path*", "/login", "/register"],
+    matcher: ["/", "/dashboard/:path*", "/login", "/register"],
 };
