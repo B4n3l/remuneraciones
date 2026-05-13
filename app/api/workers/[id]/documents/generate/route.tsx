@@ -4,6 +4,7 @@ import { pdf } from "@react-pdf/renderer";
 import { IndefinidoContract, PlazoFijoContract, ObraFaenaContract } from "@/lib/pdf/contract-templates";
 import { VacationVoucher } from "@/lib/pdf/vacation-templates";
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import React from 'react';
 import { format, addDays } from "date-fns";
 import { es } from "date-fns/locale";
@@ -12,6 +13,11 @@ export async function POST(
     req: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    const session = await auth();
+    if (!session) {
+        return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     try {
         const { id } = await params;
         const body = await req.json();
