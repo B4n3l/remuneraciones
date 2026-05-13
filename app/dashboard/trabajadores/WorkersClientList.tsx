@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { PlusIcon, PencilIcon, TrashIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, PencilIcon, TrashIcon, ExclamationTriangleIcon, UserIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
 export default function WorkersClientList({ workers, companyCount }: { workers: any[]; companyCount: number }) {
@@ -107,7 +107,12 @@ export default function WorkersClientList({ workers, companyCount }: { workers: 
                     {workers.map((worker: any) => (
                         <tr key={worker.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {worker.nombres} {worker.apellidoPaterno}
+                                <Link 
+                                    href={`/dashboard/trabajadores/${worker.id}`}
+                                    className="text-blue-600 hover:text-blue-800"
+                                >
+                                    {worker.nombres} {worker.apellidoPaterno}
+                                </Link>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {worker.rut}
@@ -120,6 +125,14 @@ export default function WorkersClientList({ workers, companyCount }: { workers: 
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div className="flex items-center justify-end gap-3">
+                                    <Link
+                                        href={`/dashboard/trabajadores/${worker.id}`}
+                                        className="text-gray-600 hover:text-gray-900 inline-flex items-center gap-1"
+                                        title="Ver Ficha"
+                                    >
+                                        <UserIcon className="h-4 w-4" />
+                                        Ficha
+                                    </Link>
                                     <Link
                                         href={`/dashboard/trabajadores/${worker.id}/editar`}
                                         className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1"

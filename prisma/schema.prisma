@@ -146,8 +146,49 @@ model Worker {
   healthPlan      WorkerHealthPlan?
   payrollItems    PayrollItem[]
   contracts       Contract[]
+  vacaciones      Vacacion[]
+  documentos      DocumentoTrabajador[]
 
   @@unique([companyId, rut])
+}
+
+model Vacacion {
+  id              String    @id @default(cuid())
+  workerId        String
+  fechaInicio     DateTime
+  fechaFin        DateTime
+  diasHabiles     Int
+  comprobantePath String?   // Path al PDF en storage
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  worker Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
+}
+
+model DocumentoTrabajador {
+  id           String    @id @default(cuid())
+  workerId     String
+  nombre       String    // Ej: "Contrato Indefinido 2024"
+  tipo         TipoDoc   // Enum
+  storagePath  String    // Path en Supabase Storage
+  mimeType     String    @default("application/pdf")
+  tamanioBytes Int
+  periodo      String?   // Opcional: "2024-01"
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  worker Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
+
+  @@index([workerId])
+  @@index([tipo])
+}
+
+enum TipoDoc {
+  CONTRATO
+  ANEXO
+  VACACIONES
+  FINIQUITO
+  OTRO
 }
 
 enum TipoContrato {
