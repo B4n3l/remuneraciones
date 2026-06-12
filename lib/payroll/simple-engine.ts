@@ -39,6 +39,7 @@ interface PayrollResult {
     // Haberes (Earnings)
     sueldoBase: number;
     horasExtras: number;
+    valorHoraExtra50: number; // Tarifa unitaria de la hora extra al 50%
     gratificacion: number;
     bonos: number;
     totalHaberes: number;
@@ -62,11 +63,25 @@ interface PayrollResult {
 }
 
 /**
- * Calculate overtime value per hour for 44-hour weekly workers
- * Formula: (SueldoBase / 30 * 28 / 176) * factor
+ * Sueldo diario redondeado a peso entero (sueldo mensual / 30)
  */
-function calcularValorHoraExtra(sueldoBase: number, factor: 1.5 | 2.0): number {
-    return Math.round((sueldoBase / 30 * 28 / 176) * factor);
+export function calcularSueldoDiario(sueldoBase: number): number {
+    return Math.round(sueldoBase / 30);
+}
+
+/**
+ * Valor de la hora extra según jornada semanal.
+ * Jornada legal máxima: 42 hrs desde el 26-04-2026 (Ley 21.561).
+ * Fórmula DT: (sueldo diario × 28) / (jornada × 4) × factor, redondeo único al final.
+ * Se calcula sobre el sueldo mensual contractual, no el proporcional por inasistencias.
+ */
+export function calcularValorHoraExtra(
+    sueldoBase: number,
+    factor: 1.5 | 2.0,
+    jornadaSemanal: number = 42
+): number {
+    const diario = calcularSueldoDiario(sueldoBase);
+    return Math.round((diario * 28 / (jornadaSemanal * 4)) * factor);
 }
 
 /**
@@ -173,12 +188,14 @@ export function calculatePayroll(input: PayrollInput): PayrollResult {
         bonosVariables = 0,
     } = input;
 
-    // Apply proportional salary based on worked days
-    const sueldoBaseProporcional = Math.round((sueldoBase / 30) * diasTrabajados);
+    // Mes completo paga el sueldo contractual exacto; días parciales usan el diario redondeado
+    const sueldoBaseProporcional = diasTrabajados >= 30
+        ? sueldoBase
+        : calcularSueldoDiario(sueldoBase) * diasTrabajados;
 
-    // Primero calcular horas extras (usando sueldo proporcional)
-    const valorHE50 = calcularValorHoraExtra(sueldoBaseProporcional, 1.5);
-    const valorHE100 = calcularValorHoraExtra(sueldoBaseProporcional, 2.0);
+    // Horas extras sobre el sueldo contractual completo (las inasistencias no reducen el valor hora)
+    const valorHE50 = calcularValorHoraExtra(sueldoBase, 1.5);
+    const valorHE100 = calcularValorHoraExtra(sueldoBase, 2.0);
     const horasExtras = (horasExtras50 * valorHE50) + (horasExtras100 * valorHE100);
 
     // Luego calcular gratificación (necesita horas extras, usando sueldo proporcional)
@@ -263,6 +280,7 @@ export function calculatePayroll(input: PayrollInput): PayrollResult {
     return {
         sueldoBase: sueldoBaseProporcional,
         horasExtras,
+        valorHoraExtra50: valorHE50,
         gratificacion,
         bonos: totalBonos,
         totalHaberes,

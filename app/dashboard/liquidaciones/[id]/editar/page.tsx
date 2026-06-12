@@ -4,6 +4,7 @@ import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeftIcon, CheckCircleIcon, LockClosedIcon } from "@heroicons/react/24/outline";
+import { calcularSueldoDiario, calcularValorHoraExtra } from "@/lib/payroll/simple-engine";
 
 interface PayrollItem {
     id: string;
@@ -122,17 +123,18 @@ export default function EditPayrollPage({ params }: { params: Promise<{ id: stri
 
     // Recalculate payroll when editable data changes
     const recalculatePayroll = (workerId: string, data: EditableData, originalItem: PayrollItem) => {
-        // Calculate proportional salary
-        const sueldoProporcional = Math.round((data.sueldoBase / 30) * data.diasTrabajados);
+        // Sueldo proporcional: mes completo exacto, días parciales con diario redondeado
+        const sueldoProporcional = data.diasTrabajados >= 30
+            ? data.sueldoBase
+            : calcularSueldoDiario(data.sueldoBase) * data.diasTrabajados;
 
-        // Calculate overtime value
-        const valorHora = Math.round(sueldoProporcional / 180); // 180 hours per month
-        const montoHE50 = Math.round(data.horasExtras50 * valorHora * 1.5);
-        const montoHE100 = Math.round(data.horasExtras100 * valorHora * 2.0);
+        // Horas extras con la fórmula centralizada del motor (jornada 42, sueldo contractual)
+        const montoHE50 = data.horasExtras50 * calcularValorHoraExtra(data.sueldoBase, 1.5);
+        const montoHE100 = data.horasExtras100 * calcularValorHoraExtra(data.sueldoBase, 2.0);
         const totalHorasExtras = montoHE50 + montoHE100;
 
-        // Calculate legal gratification (25% of proportional salary)
-        const gratificacion = Math.round(sueldoProporcional * 0.25);
+        // Gratificación legal: 25% sobre sueldo proporcional + horas extras (igual que el motor)
+        const gratificacion = Math.round((sueldoProporcional + totalHorasExtras) * 0.25);
 
         // Calculate taxable base (imponible)
         const totalBonos = Object.values(data.bonos).reduce((sum, val) => sum + val, 0);
