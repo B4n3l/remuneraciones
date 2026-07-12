@@ -322,6 +322,8 @@ export default function NuevaLiquidacionPage() {
                                             <input
                                                 type="number"
                                                 min="0"
+                                                step="0.5"
+                                                inputMode="decimal"
                                                 value={workerInputs[worker.id]?.horasExtras50 || 0}
                                                 onChange={(e) => handleWorkerInputChange(worker.id, "horasExtras50", e.target.value)}
                                                 className="w-20 px-2 py-1 border border-gray-300 rounded text-center text-gray-900"
@@ -331,6 +333,8 @@ export default function NuevaLiquidacionPage() {
                                             <input
                                                 type="number"
                                                 min="0"
+                                                step="0.5"
+                                                inputMode="decimal"
                                                 value={workerInputs[worker.id]?.horasExtras100 || 0}
                                                 onChange={(e) => handleWorkerInputChange(worker.id, "horasExtras100", e.target.value)}
                                                 className="w-20 px-2 py-1 border border-gray-300 rounded text-center text-gray-900"

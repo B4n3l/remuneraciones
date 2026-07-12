@@ -59,8 +59,8 @@ export async function POST(request: Request) {
                     create: payrolls.map((payroll: any) => ({
                         workerId: payroll.workerId,
                         diasTrabajados: Number(payroll.inputs?.diasTrabajados) || 30,
-                        horasExtra: (payroll.inputs?.horasExtras50 || 0) + (payroll.inputs?.horasExtras100 || 0),
-                        valorHoraExtra: payroll.valorHoraExtra50 || 0,
+                        horasExtra: (Number(payroll.inputs?.horasExtras50) || 0) + (Number(payroll.inputs?.horasExtras100) || 0),
+                        valorHoraExtra: Number(payroll.valorHoraExtra50) || 0,
                         totalHaberes: payroll.totalHaberes,
                         totalDescuentosLegales: payroll.totalDescuentos,
                         totalDescuentosVoluntarios: 0,

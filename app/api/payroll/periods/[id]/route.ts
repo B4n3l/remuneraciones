@@ -112,8 +112,9 @@ export async function PUT(
                 where: { id: item.id },
                 data: {
                     diasTrabajados: item.diasTrabajados || 30,
-                    horasExtra: item.horasExtra || 0,
-                    valorHoraExtra: item.valorHoraExtra || 0,
+                    // Number() tolera Decimals serializados como string por el GET
+                    horasExtra: Number(item.horasExtra) || 0,
+                    valorHoraExtra: Number(item.valorHoraExtra) || 0,
                     totalHaberes: item.totalHaberes,
                     totalDescuentosLegales: item.totalDescuentosLegales,
                     liquidoPagar: item.liquidoPagar,

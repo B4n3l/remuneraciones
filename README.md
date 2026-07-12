@@ -186,16 +186,9 @@ remuneraciones/
 4. **Generar PDF:**
    - En la liquidación finalizada, click en "Descargar PDF"
 
-## 🔮 Pendientes (Fase 2)
+## 🔮 Estado del proyecto y pendientes
 
-- [ ] **Automatic UF/UTM Updates:** Integrar API mindicador.cl
-- [ ] **Libro de Remuneraciones:** Reporte mensual consolidado
-- [ ] **Email Notifications:** Envío automático de liquidaciones
-- [ ] **Módulo de Trabajadores completo:** CRUD con todos los campos
-- [ ] **Módulo de Liquidaciones completo:** Interfaz de cálculo y gestión
-- [ ] **Configuración de AFP:** CRUD de administración
-- [ ] **Configuración de Valores del Sistema:** Gestión de UF/UTM/Sueldo Mínimo
-- [ ] **PDF Generation:** Implementación completa del template
+Ver [docs/ROADMAP.md](docs/ROADMAP.md) — registro de lo completado y lo que falta (Fase 2 y deuda técnica).
 
 ## 📄 Licencia
 

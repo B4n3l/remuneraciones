@@ -4,7 +4,7 @@ import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeftIcon, CheckCircleIcon, LockClosedIcon } from "@heroicons/react/24/outline";
-import { calcularSueldoDiario, calcularValorHoraExtra } from "@/lib/payroll/simple-engine";
+import { calcularSueldoDiario, calcularValorHoraExtra, formatHorasCL } from "@/lib/payroll/simple-engine";
 
 interface PayrollItem {
     id: string;
@@ -74,15 +74,17 @@ export default function EditPayrollPage({ params }: { params: Promise<{ id: stri
                     data.payrollItems.forEach((item: PayrollItem) => {
                         // Try to extract hours from concept (e.g., "Horas Extras (5 hrs al 50%)")
                         const horasExtrasEarning = item.earnings.find(e =>
-                            e.concepto.toLowerCase().includes('horas extras') || e.tipo === 'HORAS_EXTRAS'
+                            e.concepto.toLowerCase().includes('horas extras') || e.tipo === 'HORAS_EXTRA'
                         );
 
                         let hrs50 = 0, hrs100 = 0;
                         if (horasExtrasEarning) {
-                            const match50 = horasExtrasEarning.concepto.match(/(\d+)\s*hrs?\s*al\s*50%/i);
-                            const match100 = horasExtrasEarning.concepto.match(/(\d+)\s*hrs?\s*al\s*100%/i);
-                            if (match50) hrs50 = parseInt(match50[1]);
-                            if (match100) hrs100 = parseInt(match100[1]);
+                            // Acepta decimales con coma (formato es-CL del concepto) o punto
+                            const parseHoras = (s: string) => parseFloat(s.replace(',', '.')) || 0;
+                            const match50 = horasExtrasEarning.concepto.match(/(\d+(?:[.,]\d+)?)\s*hrs?\s*al\s*50%/i);
+                            const match100 = horasExtrasEarning.concepto.match(/(\d+(?:[.,]\d+)?)\s*hrs?\s*al\s*100%/i);
+                            if (match50) hrs50 = parseHoras(match50[1]);
+                            if (match100) hrs100 = parseHoras(match100[1]);
                         }
 
                         // Extract bonuses (colacion, movilizacion, viatico, and other non-standard bonuses)
@@ -131,7 +133,13 @@ export default function EditPayrollPage({ params }: { params: Promise<{ id: stri
         // Horas extras con la fórmula centralizada del motor (jornada 42, sueldo contractual)
         const montoHE50 = data.horasExtras50 * calcularValorHoraExtra(data.sueldoBase, 1.5);
         const montoHE100 = data.horasExtras100 * calcularValorHoraExtra(data.sueldoBase, 2.0);
-        const totalHorasExtras = montoHE50 + montoHE100;
+        const totalHorasExtras = Math.round(montoHE50 + montoHE100);
+
+        // Concepto con el mismo formato del motor (es-CL), para que el parseo al recargar funcione
+        const detalleHE: string[] = [];
+        if (data.horasExtras50 > 0) detalleHE.push(`${formatHorasCL(data.horasExtras50)} hrs al 50%`);
+        if (data.horasExtras100 > 0) detalleHE.push(`${formatHorasCL(data.horasExtras100)} hrs al 100%`);
+        const heConcepto = detalleHE.length > 0 ? `Horas Extras (${detalleHE.join(', ')})` : 'Horas Extras';
 
         // Gratificación legal: 25% sobre sueldo proporcional + horas extras (igual que el motor)
         const gratificacion = Math.round((sueldoProporcional + totalHorasExtras) * 0.25);
@@ -140,8 +148,11 @@ export default function EditPayrollPage({ params }: { params: Promise<{ id: stri
         const totalBonos = Object.values(data.bonos).reduce((sum, val) => sum + val, 0);
         const imponible = sueldoProporcional + totalHorasExtras + gratificacion;
 
+        const isHorasExtras = (e: { tipo: string; concepto: string }) =>
+            e.tipo === 'HORAS_EXTRA' || e.concepto.toLowerCase().includes('horas extras');
+
         // Recalculate earnings
-        const newEarnings = originalItem.earnings.map(e => {
+        let newEarnings = originalItem.earnings.map(e => {
             const concepto = e.concepto.toLowerCase();
 
             // Sueldo Base
@@ -150,16 +161,8 @@ export default function EditPayrollPage({ params }: { params: Promise<{ id: stri
             }
 
             // Horas Extras
-            if (concepto.includes('horas extras') || e.tipo === 'HORAS_EXTRAS') {
-                let newConcepto = 'Horas Extras';
-                if (data.horasExtras50 > 0 && data.horasExtras100 > 0) {
-                    newConcepto = `Horas Extras (${data.horasExtras50} hrs al 50%, ${data.horasExtras100} hrs al 100%)`;
-                } else if (data.horasExtras50 > 0) {
-                    newConcepto = `Horas Extras (${data.horasExtras50} hrs al 50%)`;
-                } else if (data.horasExtras100 > 0) {
-                    newConcepto = `Horas Extras (${data.horasExtras100} hrs al 100%)`;
-                }
-                return { ...e, concepto: newConcepto, monto: totalHorasExtras };
+            if (isHorasExtras(e)) {
+                return { ...e, concepto: heConcepto, monto: totalHorasExtras };
             }
 
             // Gratification
@@ -174,6 +177,23 @@ export default function EditPayrollPage({ params }: { params: Promise<{ id: stri
 
             return e;
         });
+
+        // La liquidación original puede no tener línea de HE (creada con 0 horas):
+        // agregarla si ahora hay horas, o eliminarla si volvieron a 0
+        if (totalHorasExtras > 0 && !newEarnings.some(isHorasExtras)) {
+            const idxSueldo = newEarnings.findIndex(e =>
+                e.tipo === 'SUELDO_BASE' || e.concepto.toLowerCase().includes('sueldo base')
+            );
+            // id sintético: el PUT borra y recrea las earnings, solo se usa como key de React
+            newEarnings.splice(idxSueldo + 1, 0, {
+                id: `he-${workerId}`,
+                tipo: 'HORAS_EXTRA',
+                concepto: heConcepto,
+                monto: totalHorasExtras
+            });
+        } else if (totalHorasExtras === 0) {
+            newEarnings = newEarnings.filter(e => !isHorasExtras(e));
+        }
 
         // Recalculate deductions based on new imponible
         const newDeductions = originalItem.deductions.map(d => {
@@ -216,6 +236,8 @@ export default function EditPayrollPage({ params }: { params: Promise<{ id: stri
         return {
             ...originalItem,
             diasTrabajados: data.diasTrabajados,
+            horasExtra: data.horasExtras50 + data.horasExtras100,
+            valorHoraExtra: calcularValorHoraExtra(data.sueldoBase, 1.5),
             earnings: newEarnings,
             deductions: newDeductions,
             totalHaberes,
@@ -468,8 +490,11 @@ export default function EditPayrollPage({ params }: { params: Promise<{ id: stri
                                                     <input
                                                         type="number"
                                                         min="0"
+                                                        step="0.5"
+                                                        inputMode="decimal"
+                                                        placeholder="8.5"
                                                         value={workerData.horasExtras50}
-                                                        onChange={(e) => updateField(item.worker.id, 'horasExtras50', parseInt(e.target.value) || 0)}
+                                                        onChange={(e) => updateField(item.worker.id, 'horasExtras50', parseFloat(e.target.value) || 0)}
                                                         className="w-16 px-2 py-1 border border-gray-300 rounded text-center"
                                                     />
                                                     <span className="text-gray-500">hrs</span>
@@ -479,8 +504,11 @@ export default function EditPayrollPage({ params }: { params: Promise<{ id: stri
                                                     <input
                                                         type="number"
                                                         min="0"
+                                                        step="0.5"
+                                                        inputMode="decimal"
+                                                        placeholder="8.5"
                                                         value={workerData.horasExtras100}
-                                                        onChange={(e) => updateField(item.worker.id, 'horasExtras100', parseInt(e.target.value) || 0)}
+                                                        onChange={(e) => updateField(item.worker.id, 'horasExtras100', parseFloat(e.target.value) || 0)}
                                                         className="w-16 px-2 py-1 border border-gray-300 rounded text-center"
                                                     />
                                                     <span className="text-gray-500">hrs</span>

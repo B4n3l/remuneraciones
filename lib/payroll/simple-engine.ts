@@ -85,6 +85,14 @@ export function calcularValorHoraExtra(
 }
 
 /**
+ * Formatea horas con separador decimal es-CL (8.5 → "8,5") para conceptos y PDF.
+ * El regex de la página de edición debe aceptar coma y punto al reconstruir las horas.
+ */
+export function formatHorasCL(horas: number): string {
+    return new Intl.NumberFormat("es-CL", { maximumFractionDigits: 2 }).format(horas);
+}
+
+/**
  * Calculate gratificación based on type
  * For LEGAL_25: (sueldoBase + horasExtras) * 25% with cap of 4.75 minimum wages
  */
@@ -196,7 +204,8 @@ export function calculatePayroll(input: PayrollInput): PayrollResult {
     // Horas extras sobre el sueldo contractual completo (las inasistencias no reducen el valor hora)
     const valorHE50 = calcularValorHoraExtra(sueldoBase, 1.5);
     const valorHE100 = calcularValorHoraExtra(sueldoBase, 2.0);
-    const horasExtras = (horasExtras50 * valorHE50) + (horasExtras100 * valorHE100);
+    // Las horas pueden traer decimales (ej. 8.5), el monto se redondea a peso entero
+    const horasExtras = Math.round((horasExtras50 * valorHE50) + (horasExtras100 * valorHE100));
 
     // Luego calcular gratificación (necesita horas extras, usando sueldo proporcional)
     const gratificacion = calcularGratificacion(tipoGratificacion, sueldoBaseProporcional, horasExtras, sueldoMinimo, gratificacionPactada);
@@ -235,10 +244,10 @@ export function calculatePayroll(input: PayrollInput): PayrollResult {
     if (horasExtras > 0) {
         const detalle = [];
         if (horasExtras50 > 0) {
-            detalle.push(`${horasExtras50} hrs al 50%`);
+            detalle.push(`${formatHorasCL(horasExtras50)} hrs al 50%`);
         }
         if (horasExtras100 > 0) {
-            detalle.push(`${horasExtras100} hrs al 100%`);
+            detalle.push(`${formatHorasCL(horasExtras100)} hrs al 100%`);
         }
         detalleHaberes.push({
             concepto: `Horas Extras (${detalle.join(", ")})`,

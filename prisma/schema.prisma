@@ -377,7 +377,7 @@ model PayrollItem {
   
   // Variable data for this period
   diasTrabajados  Int
-  horasExtra      Int             @default(0)
+  horasExtra      Decimal         @db.Decimal(5, 2) @default(0)
   valorHoraExtra  Decimal         @db.Decimal(10, 2) @default(0)
   
   // Calculated values
