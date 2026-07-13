@@ -29,8 +29,21 @@ _Última actualización: 2026-07-12_
 
 ## 🔜 Pendiente
 
+### Inmediato (retomar próxima sesión)
+- [ ] **Aplicar `prisma/migrations/horas_extra_decimal.sql` en el Supabase SQL Editor** — bloquea el push del fix de HE.
+- [ ] **Push del fix de horas extra** (commit local `e6f76d0`, sin push) — recién después de aplicar el SQL anterior.
+- [ ] **Bug Decimal en `/dashboard/trabajadores`**: "Only plain objects can be passed to Client Components... Decimal objects are not supported" (`app/dashboard/trabajadores/page.tsx:66`). Serializar `sueldoBase` (y cualquier Decimal) a number antes de pasar `workers` a `WorkersClientList`. Bug preexistente, no relacionado al fix de HE.
+
+### Migración a VPS (Dokploy)
+- [ ] Migrar app + PostgreSQL + archivos desde Vercel/Supabase a un VPS con Dokploy. **Plan y runbook completo en [MIGRACION-VPS.md](MIGRACION-VPS.md)**. La auth (NextAuth JWT) es portable sin cambios; la migración de BD puede hacerse como paso intermedio independiente.
+
 ### Fase 2 (funcionalidades)
-- [ ] **Actualización automática UF/UTM**: integrar API mindicador.cl.
+- [ ] **Indicadores previsionales desde API propia** (reemplaza la idea original de mindicador.cl, que no trae tasas AFP ni asignación familiar). El usuario desarrollará la API; contrato JSON = misma estructura del schema Zod del POST `/api/admin/indicadores` (valores generales + `afpRates` + `cesantiaRates` + `asignacionFamiliar`), auth por API key. En esta app:
+  - `lib/indicadores/sync.ts`: fetch a la API + validación con el schema Zod existente (reutilizado) + upsert transaccional de `IndicadorMensual` y tablas hijas. Env: `INDICADORES_API_URL`, `INDICADORES_API_KEY`.
+  - Botón "Sincronizar desde API" en `/dashboard/admin/indicadores`.
+  - Fallback on-the-fly en `payroll/calculate`: si no hay indicadores del mes, intentar sincronizar antes de devolver error (elimina el 90% del problema sin cron).
+  - Cron mensual — hacer **después** de la migración al VPS (nativo en Dokploy; en Vercel requeriría vercel.json).
+  - Política: no pisar meses con liquidaciones finalizadas; la UI manual queda como override/fallback.
 - [ ] **Libro de Remuneraciones**: reporte mensual consolidado.
 - [ ] **Notificaciones por email**: envío automático de liquidaciones.
 - [ ] **CRUD de AFP**: administración de AFPs y sus tasas.
