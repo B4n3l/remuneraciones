@@ -30,9 +30,9 @@ _Última actualización: 2026-07-12_
 ## 🔜 Pendiente
 
 ### Inmediato (retomar próxima sesión)
-- [ ] **Aplicar `prisma/migrations/horas_extra_decimal.sql` en el Supabase SQL Editor** — bloquea el push del fix de HE.
-- [ ] **Push del fix de horas extra** (commit local `e6f76d0`, sin push) — recién después de aplicar el SQL anterior.
+- [ ] **Aplicar `prisma/migrations/vacacion_comprobante_path.sql` en el Supabase SQL Editor de producción** — la tabla `Vacacion` quedó creada sin la columna `comprobantePath` (drift detectado 2026-07-14: `P2022` al abrir la ficha de cualquier trabajador). Bloquea toda la ficha de trabajador (`/dashboard/trabajadores/[id]`), no solo vacaciones, porque el `include` en `page.tsx` es incondicional.
 - [ ] **Bug Decimal en `/dashboard/trabajadores`**: "Only plain objects can be passed to Client Components... Decimal objects are not supported" (`app/dashboard/trabajadores/page.tsx:66`). Serializar `sueldoBase` (y cualquier Decimal) a number antes de pasar `workers` a `WorkersClientList`. Bug preexistente, no relacionado al fix de HE.
+- [x] Mismo bug de Decimal en la ficha de trabajador (`app/dashboard/trabajadores/[id]/page.tsx`): `Contratos`/`Vacaciones`/`DocumentosExtras` son Client Components que recibían el `worker` de Prisma completo (con `sueldoBase`, `contracts[].baseSalary`, `afp.porcentaje`, etc.). Corregido 2026-07-14 pasándoles `JSON.parse(JSON.stringify(worker))` en vez del objeto crudo.
 
 ### Migración a VPS (Dokploy)
 - [ ] Migrar app + PostgreSQL + archivos desde Vercel/Supabase a un VPS con Dokploy. **Plan y runbook completo en [MIGRACION-VPS.md](MIGRACION-VPS.md)**. La auth (NextAuth JWT) es portable sin cambios; la migración de BD puede hacerse como paso intermedio independiente.

@@ -40,16 +40,20 @@ export default async function WorkerProfilePage({
         notFound();
     }
 
+    // Los tabs de abajo son Client Components: no pueden recibir campos Decimal de Prisma
+    // (sueldoBase, baseSalary, afp.porcentaje, etc.) directamente como prop.
+    const serializedWorker = JSON.parse(JSON.stringify(worker));
+
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <WorkerHeader worker={worker} />
             <WorkerTabs />
-            
+
             <div className="mt-6">
                 {activeTab === "info" && <InfoGeneral worker={worker} />}
-                {activeTab === "contratos" && <Contratos worker={worker} />}
-                {activeTab === "vacaciones" && <Vacaciones worker={worker} />}
-                {activeTab === "documentos" && <DocumentosExtras worker={worker} />}
+                {activeTab === "contratos" && <Contratos worker={serializedWorker} />}
+                {activeTab === "vacaciones" && <Vacaciones worker={serializedWorker} />}
+                {activeTab === "documentos" && <DocumentosExtras worker={serializedWorker} />}
             </div>
         </div>
     );
