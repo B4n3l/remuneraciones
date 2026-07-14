@@ -98,10 +98,10 @@ export async function POST(
         }
 
         if (type === "VACACIONES") {
-            const { startDate, endDate, totalDays } = body;
+            const { startDate, endDate, totalDays, anioServicio } = body;
 
-            if (!startDate || !endDate || !totalDays) {
-                return NextResponse.json({ error: "Faltan datos de vacaciones (startDate, endDate, totalDays)" }, { status: 400 });
+            if (!startDate || !endDate || !totalDays || !anioServicio) {
+                return NextResponse.json({ error: "Faltan datos de vacaciones (startDate, endDate, totalDays, anioServicio)" }, { status: 400 });
             }
 
             // Prepare data for PDF
@@ -110,6 +110,8 @@ export async function POST(
                 companyRut: worker.company.rut,
                 workerName: `${worker.nombres} ${worker.apellidoPaterno} ${worker.apellidoMaterno}`,
                 workerRut: worker.rut,
+                cargo: worker.cargo,
+                anioServicio: anioServicio,
                 startDate: format(new Date(startDate), "PPP", { locale: es }),
                 endDate: format(new Date(endDate), "PPP", { locale: es }),
                 totalDays: totalDays,
@@ -143,6 +145,7 @@ export async function POST(
                     fechaInicio: new Date(startDate),
                     fechaFin: new Date(endDate),
                     diasHabiles: totalDays,
+                    anioServicio: anioServicio,
                     comprobantePath: uploadResult.path
                 }
             });

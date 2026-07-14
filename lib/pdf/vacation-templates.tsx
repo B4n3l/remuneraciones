@@ -26,28 +26,41 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         textAlign: "center",
         marginTop: 20,
-        marginBottom: 30,
         textDecoration: "underline",
     },
-    section: {
-        marginBottom: 20,
+    subtitle: {
+        fontSize: 9,
+        textAlign: "center",
+        color: "#666",
+        marginTop: 4,
+        marginBottom: 30,
     },
-    row: {
-        flexDirection: "row",
-        marginBottom: 8,
-    },
-    label: {
-        width: "30%",
+    sectionTitle: {
+        fontSize: 12,
         fontWeight: "bold",
-    },
-    value: {
-        width: "70%",
+        marginBottom: 12,
     },
     content: {
-        marginTop: 20,
         textAlign: "justify",
     },
     bold: {
+        fontWeight: "bold",
+    },
+    detailTitle: {
+        fontSize: 11,
+        fontWeight: "bold",
+        marginTop: 25,
+        marginBottom: 10,
+    },
+    row: {
+        flexDirection: "row",
+        marginBottom: 6,
+    },
+    label: {
+        width: "45%",
+    },
+    value: {
+        width: "55%",
         fontWeight: "bold",
     },
     footer: {
@@ -62,11 +75,6 @@ const styles = StyleSheet.create({
         textAlign: "center",
         fontSize: 10,
     },
-    dateContainer: {
-        marginTop: 40,
-        textAlign: "right",
-        fontSize: 10,
-    }
 });
 
 export interface VacationData {
@@ -74,6 +82,8 @@ export interface VacationData {
     companyRut: string;
     workerName: string;
     workerRut: string;
+    cargo: string;
+    anioServicio: number;
     startDate: string;
     endDate: string;
     totalDays: number;
@@ -92,50 +102,60 @@ export function VacationVoucher({ data }: { data: VacationData }) {
                 </View>
 
                 <Text style={styles.title}>COMPROBANTE DE FERIADO LEGAL</Text>
+                <Text style={styles.subtitle}>Código del Trabajo de Chile — Art. 67 y 68</Text>
 
-                <View style={styles.section}>
-                    <View style={styles.row}>
-                        <Text style={styles.label}>Nombre Trabajador:</Text>
-                        <Text style={styles.value}>{data.workerName}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.label}>RUT Trabajador:</Text>
-                        <Text style={styles.value}>{data.workerRut}</Text>
-                    </View>
-                </View>
+                <Text style={styles.sectionTitle}>Autorización de Feriado</Text>
 
                 <View style={styles.content}>
                     <Text>
-                        Por intermedio del presente documento, se deja constancia que el trabajador(a) individualizado(a) anteriormente,
-                        hace uso de su feriado anual legal de acuerdo a lo siguiente:
+                        La empresa <Text style={styles.bold}>{data.companyName}</Text>, RUT <Text style={styles.bold}>{data.companyRut}</Text>, autoriza al trabajador(a) <Text style={styles.bold}>{data.workerName}</Text>, RUT <Text style={styles.bold}>{data.workerRut}</Text>, cargo <Text style={styles.bold}>{data.cargo}</Text>, hacer uso de su feriado legal
+                        correspondiente al año de servicio N° <Text style={styles.bold}>{data.anioServicio}</Text>, según lo dispuesto en el artículo 67 del Código del Trabajo.
                     </Text>
-                    
-                    <View style={{ marginTop: 15, marginLeft: 20 }}>
-                        <Text>• Fecha de Inicio: <Text style={styles.bold}>{data.startDate}</Text></Text>
-                        <Text>• Fecha de Término: <Text style={styles.bold}>{data.endDate}</Text></Text>
-                        <Text>• Total Días Hábiles: <Text style={styles.bold}>{data.totalDays}</Text></Text>
-                        <Text>• Fecha de Reintegro: <Text style={styles.bold}>{data.returnDate}</Text></Text>
+                    <Text style={{ marginTop: 10 }}>
+                        El feriado comprende <Text style={styles.bold}>{data.totalDays}</Text> día(s) hábil(es), a partir del día <Text style={styles.bold}>{data.startDate}</Text> hasta el día <Text style={styles.bold}>{data.endDate}</Text>
+                        {" "}inclusive, debiendo reintegrarse a sus labores el día <Text style={styles.bold}>{data.returnDate}</Text>.
+                    </Text>
+                </View>
+
+                <Text style={styles.detailTitle}>Detalle</Text>
+                <View>
+                    <View style={styles.row}>
+                        <Text style={styles.label}>Fecha inicio vacaciones:</Text>
+                        <Text style={styles.value}>{data.startDate}</Text>
                     </View>
-
-                    <Text style={{ marginTop: 20 }}>
-                        El trabajador declara haber recibido a su entera satisfacción la remuneración correspondiente al período 
-                        de vacaciones antes señalado, no teniendo cargo ni reclamo alguno que formular al respecto.
-                    </Text>
+                    <View style={styles.row}>
+                        <Text style={styles.label}>Fecha término vacaciones:</Text>
+                        <Text style={styles.value}>{data.endDate}</Text>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.label}>Fecha de reintegro:</Text>
+                        <Text style={styles.value}>{data.returnDate}</Text>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.label}>Días hábiles utilizados:</Text>
+                        <Text style={styles.value}>{data.totalDays}</Text>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.label}>Emisión del comprobante:</Text>
+                        <Text style={styles.value}>{data.currentDate}</Text>
+                    </View>
                 </View>
 
-                <View style={styles.dateContainer}>
-                    <Text>Santiago, {data.currentDate}</Text>
-                </View>
+                <Text style={{ marginTop: 15 }}>
+                    Las partes declaran estar de acuerdo con el período de feriado indicado. El trabajador(a) firma en señal de haber recibido este
+                    comprobante.
+                </Text>
 
                 {/* Signatures */}
                 <View style={styles.footer}>
                     <View style={styles.signatureBox}>
-                        <Text>Firma Trabajador</Text>
-                        <Text style={{ fontSize: 8, marginTop: 4 }}>RUT: {data.workerRut}</Text>
+                        <Text>RUT: {data.companyRut}</Text>
+                        <Text>Empleador</Text>
                     </View>
                     <View style={styles.signatureBox}>
-                        <Text>Firma Empleador / RRHH</Text>
-                        <Text style={{ fontSize: 8, marginTop: 4 }}>{data.companyName}</Text>
+                        <Text>{data.workerName}</Text>
+                        <Text>RUT: {data.workerRut}</Text>
+                        <Text>Trabajador(a)</Text>
                     </View>
                 </View>
             </Page>

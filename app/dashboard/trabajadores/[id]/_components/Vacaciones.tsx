@@ -13,7 +13,8 @@ export default function Vacaciones({ worker }: { worker: any }) {
     const [formData, setFormData] = useState({
         startDate: "",
         endDate: "",
-        totalDays: 0
+        totalDays: 0,
+        anioServicio: 1
     });
     const router = useRouter();
 
@@ -90,7 +91,7 @@ export default function Vacaciones({ worker }: { worker: any }) {
                             <XMarkIcon className="h-5 w-5" />
                         </button>
                     </div>
-                    <form onSubmit={handleGenerate} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <form onSubmit={handleGenerate} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                         <div>
                             <label className="block text-xs font-medium text-blue-700 mb-1">Fecha Inicio</label>
                             <input 
@@ -113,15 +114,26 @@ export default function Vacaciones({ worker }: { worker: any }) {
                         </div>
                         <div>
                             <label className="block text-xs font-medium text-blue-700 mb-1">Días Hábiles</label>
-                            <input 
-                                type="number" 
+                            <input
+                                type="number"
                                 required
                                 value={formData.totalDays}
                                 onChange={(e) => setFormData({...formData, totalDays: parseInt(e.target.value)})}
-                                className="w-full rounded-lg border-blue-200 text-sm focus:ring-blue-500 focus:border-blue-500" 
+                                className="w-full rounded-lg border-blue-200 text-sm focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
-                        <button 
+                        <div>
+                            <label className="block text-xs font-medium text-blue-700 mb-1">Año de Servicio</label>
+                            <input
+                                type="number"
+                                min={1}
+                                required
+                                value={formData.anioServicio}
+                                onChange={(e) => setFormData({...formData, anioServicio: parseInt(e.target.value)})}
+                                className="w-full rounded-lg border-blue-200 text-sm focus:ring-blue-500 focus:border-blue-500"
+                            />
+                        </div>
+                        <button
                             type="submit"
                             disabled={generating}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm h-[38px] flex items-center justify-center gap-2 disabled:opacity-50"
