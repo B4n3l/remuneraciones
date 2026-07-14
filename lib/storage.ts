@@ -32,3 +32,14 @@ export async function getDownloadUrl(path: string) {
     const { data } = await supabase.storage.from(bucket).getPublicUrl(path);
     return data.publicUrl;
 }
+
+export async function getWorkerDocumentSignedUrl(path: string, expiresIn: number = 60) {
+    const bucket = 'worker-documents';
+    const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, expiresIn);
+
+    if (error) {
+        throw new Error(`Error al firmar URL de descarga: ${error.message}`);
+    }
+
+    return data.signedUrl;
+}

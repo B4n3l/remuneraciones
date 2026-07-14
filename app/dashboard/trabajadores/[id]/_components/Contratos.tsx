@@ -8,7 +8,31 @@ import { useRouter } from "next/navigation";
 
 export default function Contratos({ worker }: { worker: any }) {
     const [generating, setGenerating] = useState(false);
+    const [downloading, setDownloading] = useState(false);
     const router = useRouter();
+
+    // PDF de contrato más reciente (los documentos vienen ordenados por createdAt desc)
+    const contratoDoc = (worker.documentos || []).find((doc: any) => doc.tipo === "CONTRATO");
+
+    const handleDownload = async () => {
+        if (!contratoDoc) return;
+        setDownloading(true);
+        try {
+            const response = await fetch(`/api/workers/${worker.id}/documents/${contratoDoc.id}/download`);
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || "Error al descargar contrato");
+            }
+
+            const data = await response.json();
+            window.open(data.url, "_blank");
+        } catch (error: any) {
+            alert(error.message);
+        } finally {
+            setDownloading(false);
+        }
+    };
 
     const handleGenerate = async () => {
         setGenerating(true);
@@ -85,8 +109,17 @@ export default function Contratos({ worker }: { worker: any }) {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1.5">
-                                            <ArrowDownTrayIcon className="h-4 w-4" />
+                                        <button
+                                            onClick={handleDownload}
+                                            disabled={!contratoDoc || downloading}
+                                            title={!contratoDoc ? "Genera el contrato primero para poder descargarlo" : undefined}
+                                            className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                                        >
+                                            {downloading ? (
+                                                <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                                            ) : (
+                                                <ArrowDownTrayIcon className="h-4 w-4" />
+                                            )}
                                             Descargar
                                         </button>
                                     </td>

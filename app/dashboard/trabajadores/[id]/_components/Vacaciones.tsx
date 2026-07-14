@@ -9,6 +9,7 @@ import { es } from "date-fns/locale";
 export default function Vacaciones({ worker }: { worker: any }) {
     const [isRegistering, setIsRegistering] = useState(false);
     const [generating, setGenerating] = useState(false);
+    const [downloadingId, setDownloadingId] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         startDate: "",
         endDate: "",
@@ -41,6 +42,25 @@ export default function Vacaciones({ worker }: { worker: any }) {
             alert(error.message);
         } finally {
             setGenerating(false);
+        }
+    };
+
+    const handleDownload = async (vacacionId: string) => {
+        setDownloadingId(vacacionId);
+        try {
+            const response = await fetch(`/api/workers/${worker.id}/vacations/${vacacionId}/download`);
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || "Error al descargar comprobante");
+            }
+
+            const data = await response.json();
+            window.open(data.url, "_blank");
+        } catch (error: any) {
+            alert(error.message);
+        } finally {
+            setDownloadingId(null);
         }
     };
 
@@ -143,8 +163,16 @@ export default function Vacaciones({ worker }: { worker: any }) {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         {vacacion.comprobantePath && (
-                                            <button className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1.5">
-                                                <ArrowDownTrayIcon className="h-4 w-4" />
+                                            <button
+                                                onClick={() => handleDownload(vacacion.id)}
+                                                disabled={downloadingId === vacacion.id}
+                                                className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1.5 disabled:opacity-50"
+                                            >
+                                                {downloadingId === vacacion.id ? (
+                                                    <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                                                ) : (
+                                                    <ArrowDownTrayIcon className="h-4 w-4" />
+                                                )}
                                                 Comprobante
                                             </button>
                                         )}

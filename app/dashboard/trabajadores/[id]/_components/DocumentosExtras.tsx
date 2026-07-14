@@ -1,12 +1,33 @@
 "use client";
 
-import { DocumentDuplicateIcon, ArrowUpTrayIcon, ArrowDownTrayIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
+import { DocumentDuplicateIcon, ArrowUpTrayIcon, ArrowDownTrayIcon, ArrowPathIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { useState } from "react";
 
 export default function DocumentosExtras({ worker }: { worker: any }) {
     // Filtrar documentos que no sean CONTRATO ni VACACIONES para esta pestaña, o mostrar todos
     const documentos = worker.documentos || [];
+    const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+    const handleDownload = async (docId: string) => {
+        setDownloadingId(docId);
+        try {
+            const response = await fetch(`/api/workers/${worker.id}/documents/${docId}/download`);
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || "Error al descargar documento");
+            }
+
+            const data = await response.json();
+            window.open(data.url, "_blank");
+        } catch (error: any) {
+            alert(error.message);
+        } finally {
+            setDownloadingId(null);
+        }
+    };
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -55,8 +76,16 @@ export default function DocumentosExtras({ worker }: { worker: any }) {
                                         {format(new Date(doc.createdAt), "dd/MM/yyyy HH:mm")}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1">
-                                            <ArrowDownTrayIcon className="h-4 w-4" />
+                                        <button
+                                            onClick={() => handleDownload(doc.id)}
+                                            disabled={downloadingId === doc.id}
+                                            className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1 disabled:opacity-50"
+                                        >
+                                            {downloadingId === doc.id ? (
+                                                <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                                            ) : (
+                                                <ArrowDownTrayIcon className="h-4 w-4" />
+                                            )}
                                             Ver/Descargar
                                         </button>
                                     </td>
