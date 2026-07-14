@@ -30,7 +30,10 @@ _Última actualización: 2026-07-12_
 ## 🔜 Pendiente
 
 ### Inmediato (retomar próxima sesión)
-- [ ] **Aplicar `prisma/migrations/vacacion_comprobante_path.sql` en el Supabase SQL Editor de producción** — la tabla `Vacacion` quedó creada sin la columna `comprobantePath` (drift detectado 2026-07-14: `P2022` al abrir la ficha de cualquier trabajador). Bloquea toda la ficha de trabajador (`/dashboard/trabajadores/[id]`), no solo vacaciones, porque el `include` en `page.tsx` es incondicional.
+- [ ] **Aplicar en el Supabase SQL Editor de producción, en este orden** (drift detectado 2026-07-14 al abrir la ficha de cualquier trabajador, `P2022`/tabla faltante; bloquea toda `/dashboard/trabajadores/[id]` porque el `include` en `page.tsx` es incondicional):
+  1. `prisma/migrations/vacacion_comprobante_path.sql` — a `Vacacion` le faltaban `comprobantePath` y `updatedAt`.
+  2. `prisma/migrations/documento_trabajador_table.sql` — la tabla `DocumentoTrabajador` (con su enum `TipoDoc`) nunca se creó en producción.
+  - Diagnóstico completo comparado columna por columna en `prisma/migrations/check_schema_drift.sql` (solo lectura). `Worker`, `Contract`, `AFP`, `Company`, `WorkerHealthPlan` están completos (tienen columnas extra sin usar: `email`, `estadoCivil`, `fechaNacimiento`, `nacionalidad`, `profesion` en Worker; `ciudad`, `metodoPago` en Contract — no bloquean, no se tocaron).
 - [ ] **Bug Decimal en `/dashboard/trabajadores`**: "Only plain objects can be passed to Client Components... Decimal objects are not supported" (`app/dashboard/trabajadores/page.tsx:66`). Serializar `sueldoBase` (y cualquier Decimal) a number antes de pasar `workers` a `WorkersClientList`. Bug preexistente, no relacionado al fix de HE.
 - [x] Mismo bug de Decimal en la ficha de trabajador (`app/dashboard/trabajadores/[id]/page.tsx`): `Contratos`/`Vacaciones`/`DocumentosExtras` son Client Components que recibían el `worker` de Prisma completo (con `sueldoBase`, `contracts[].baseSalary`, `afp.porcentaje`, etc.). Corregido 2026-07-14 pasándoles `JSON.parse(JSON.stringify(worker))` en vez del objeto crudo.
 
