@@ -104,6 +104,8 @@ export async function POST(
                 return NextResponse.json({ error: "Faltan datos de vacaciones (startDate, endDate, totalDays, anioServicio)" }, { status: 400 });
             }
 
+            const fechaRegreso = addDays(new Date(endDate), 1);
+
             // Prepare data for PDF
             const pdfData = {
                 companyName: worker.company.razonSocial,
@@ -115,7 +117,7 @@ export async function POST(
                 startDate: format(new Date(startDate), "PPP", { locale: es }),
                 endDate: format(new Date(endDate), "PPP", { locale: es }),
                 totalDays: totalDays,
-                returnDate: format(addDays(new Date(endDate), 1), "PPP", { locale: es }),
+                returnDate: format(fechaRegreso, "PPP", { locale: es }),
                 currentDate: format(new Date(), "PPP", { locale: es })
             };
 
@@ -146,6 +148,7 @@ export async function POST(
                     fechaFin: new Date(endDate),
                     diasHabiles: totalDays,
                     anioServicio: anioServicio,
+                    fechaRegreso: fechaRegreso,
                     comprobantePath: uploadResult.path
                 }
             });

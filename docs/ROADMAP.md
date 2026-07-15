@@ -21,6 +21,9 @@ _Última actualización: 2026-07-12_
 - Generación de PDF de liquidación protegida por sesión (`52b6c88`, `13c1033`).
 
 ### Plataforma
+- **Vacaciones: días disponibles + drift `fechaRegreso` alineado** — 2026-07-15
+  - Pestaña Vacaciones muestra Días Devengados (1,25 días hábiles por mes completo desde `fechaIngreso`), Tomados y Disponibles. Solo cuenta vacaciones registradas en el sistema; las históricas se registran retroactivamente con el mismo formulario.
+  - `Vacacion.fechaRegreso` (NOT NULL en producción) y `observacion` agregados a `schema.prisma` y `fechaRegreso` se persiste al generar el comprobante — corrige el null constraint violation al registrar vacaciones. Sin SQL: las columnas ya existían en producción.
 - Next.js 16.2.6 (actualización de seguridad) (`52b6c88`).
 - Ficha de trabajador con gestión de documentos y vacaciones (`2e99307`).
 - Raíz del sitio migrada a intranet: `/` redirige a login o dashboard (`1f799e8`).

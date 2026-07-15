@@ -159,6 +159,8 @@ model Vacacion {
   fechaFin        DateTime
   diasHabiles     Int
   anioServicio    Int       // Año de servicio N° para la cita legal del comprobante
+  fechaRegreso    DateTime  // Día de reintegro a labores (NOT NULL en producción)
+  observacion     String?
   comprobantePath String?   // Path al PDF en storage
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

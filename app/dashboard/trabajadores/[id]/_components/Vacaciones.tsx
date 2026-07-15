@@ -3,8 +3,12 @@
 import { CalendarIcon, PlusIcon, ArrowDownTrayIcon, ArrowPathIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
+import { format, differenceInMonths } from "date-fns";
 import { es } from "date-fns/locale";
+
+function formatDias(dias: number) {
+    return dias.toLocaleString("es-CL", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
 
 export default function Vacaciones({ worker }: { worker: any }) {
     const [isRegistering, setIsRegistering] = useState(false);
@@ -17,6 +21,12 @@ export default function Vacaciones({ worker }: { worker: any }) {
         anioServicio: 1
     });
     const router = useRouter();
+
+    // Feriado legal chileno: 15 días hábiles al año = 1,25 por mes completo trabajado
+    const mesesTrabajados = differenceInMonths(new Date(), new Date(worker.fechaIngreso));
+    const diasDevengados = mesesTrabajados * 1.25;
+    const diasTomados = worker.vacaciones.reduce((acc: number, v: any) => acc + v.diasHabiles, 0);
+    const diasDisponibles = diasDevengados - diasTomados;
 
     const handleGenerate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -146,11 +156,26 @@ export default function Vacaciones({ worker }: { worker: any }) {
             )}
 
             <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                <div className="p-6 border-b border-slate-100 flex gap-12">
+                <div className="p-6 border-b border-slate-100 flex flex-wrap gap-12">
+                    <div>
+                        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Días Devengados</div>
+                        <div className="text-3xl font-bold text-slate-900">
+                            {formatDias(diasDevengados)}
+                        </div>
+                        <div className="text-xs text-slate-400 mt-1">
+                            1,25 días hábiles/mes desde {format(new Date(worker.fechaIngreso), "dd/MM/yyyy")}
+                        </div>
+                    </div>
                     <div>
                         <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Días Tomados</div>
                         <div className="text-3xl font-bold text-slate-900">
-                            {worker.vacaciones.reduce((acc: number, v: any) => acc + v.diasHabiles, 0).toFixed(1)}
+                            {formatDias(diasTomados)}
+                        </div>
+                    </div>
+                    <div>
+                        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Días Disponibles</div>
+                        <div className={`text-3xl font-bold ${diasDisponibles < 0 ? "text-red-600" : "text-green-600"}`}>
+                            {formatDias(diasDisponibles)}
                         </div>
                     </div>
                 </div>
