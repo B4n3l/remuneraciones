@@ -104,6 +104,15 @@ export async function POST(
                 return NextResponse.json({ error: "Faltan datos de vacaciones (startDate, endDate, totalDays, anioServicio)" }, { status: 400 });
             }
 
+            // Server-side validation. The client-sent totalDays is respected as
+            // the accountant's override; it is NOT recomputed here.
+            if (!totalDays || totalDays <= 0) {
+                return NextResponse.json({ error: "Los días hábiles deben ser mayor a 0" }, { status: 400 });
+            }
+            if (new Date(endDate) < new Date(startDate)) {
+                return NextResponse.json({ error: "La fecha de término no puede ser anterior a la fecha de inicio" }, { status: 400 });
+            }
+
             const fechaRegreso = addDays(new Date(endDate), 1);
 
             // Prepare data for PDF

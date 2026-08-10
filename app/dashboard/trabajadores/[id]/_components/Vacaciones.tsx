@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { format, differenceInMonths } from "date-fns";
 import { es } from "date-fns/locale";
+import { calcularDiasHabiles } from "@/lib/vacaciones";
 
 function formatDias(dias: number) {
     return dias.toLocaleString("es-CL", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
@@ -21,6 +22,17 @@ export default function Vacaciones({ worker }: { worker: any }) {
         anioServicio: 1
     });
     const router = useRouter();
+
+    // When both dates are set (and valid), auto-fill "Días Hábiles" with the
+    // calculated business days. The field stays editable so an accountant can
+    // override the value (e.g. workers who work on Saturdays).
+    const handleDateChange = (field: "startDate" | "endDate", value: string) => {
+        const next = { ...formData, [field]: value };
+        if (next.startDate && next.endDate && next.endDate >= next.startDate) {
+            next.totalDays = calcularDiasHabiles(next.startDate, next.endDate);
+        }
+        setFormData(next);
+    };
 
     // Feriado legal chileno: 15 días hábiles al año = 1,25 por mes completo trabajado
     const mesesTrabajados = differenceInMonths(new Date(), new Date(worker.fechaIngreso));
@@ -108,7 +120,7 @@ export default function Vacaciones({ worker }: { worker: any }) {
                                 type="date" 
                                 required
                                 value={formData.startDate}
-                                onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+                                onChange={(e) => handleDateChange("startDate", e.target.value)}
                                 className="w-full rounded-lg border-blue-200 text-sm focus:ring-blue-500 focus:border-blue-500" 
                             />
                         </div>
@@ -118,7 +130,7 @@ export default function Vacaciones({ worker }: { worker: any }) {
                                 type="date" 
                                 required
                                 value={formData.endDate}
-                                onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+                                onChange={(e) => handleDateChange("endDate", e.target.value)}
                                 className="w-full rounded-lg border-blue-200 text-sm focus:ring-blue-500 focus:border-blue-500" 
                             />
                         </div>
