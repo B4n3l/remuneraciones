@@ -96,7 +96,7 @@ export function formatHorasCL(horas: number): string {
  * Calculate gratificación based on type
  * For LEGAL_25: (sueldoBase + horasExtras) * 25% with cap of 4.75 minimum wages
  */
-function calcularGratificacion(
+export function calcularGratificacion(
     tipo: "PACTADA" | "LEGAL_25",
     sueldoBase: number,
     horasExtras: number,

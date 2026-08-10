@@ -37,6 +37,13 @@ export async function GET(
             return NextResponse.json({ error: "Período no encontrado" }, { status: 404 });
         }
 
+        // Fetch monthly indicators for the period's year/month
+        const [year, month] = period.yearMonth.split("-").map(Number);
+        const indicadorMensual = await prisma.indicadorMensual.findUnique({
+            where: { year_month: { year, month } },
+            include: { afpRates: true, cesantiaRates: true },
+        });
+
         // Check access
         if (session.user.role !== "SUPER_ADMIN") {
             const hasAccess = await prisma.userCompany.findFirst({
@@ -51,7 +58,7 @@ export async function GET(
             }
         }
 
-        return NextResponse.json(period);
+        return NextResponse.json({ ...period, indicadores: indicadorMensual });
     } catch (error) {
         console.error("Error fetching period:", error);
         return NextResponse.json({ error: "Error al obtener período" }, { status: 500 });
@@ -167,7 +174,14 @@ export async function DELETE(
             return NextResponse.json({ error: "Período no encontrado" }, { status: 404 });
         }
 
-        // Check access - only SUPER_ADMIN can delete
+        // Fetch monthly indicators for the period's year/month
+        const [year, month] = period.yearMonth.split("-").map(Number);
+        const indicadorMensual = await prisma.indicadorMensual.findUnique({
+            where: { year_month: { year, month } },
+            include: { afpRates: true, cesantiaRates: true },
+        });
+
+        // Check access
         if (session.user.role !== "SUPER_ADMIN") {
             return NextResponse.json({ error: "Solo administradores pueden eliminar períodos" }, { status: 403 });
         }

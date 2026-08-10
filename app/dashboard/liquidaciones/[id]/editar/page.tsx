@@ -4,7 +4,7 @@ import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeftIcon, CheckCircleIcon, LockClosedIcon } from "@heroicons/react/24/outline";
-import { calcularSueldoDiario, calcularValorHoraExtra, formatHorasCL } from "@/lib/payroll/simple-engine";
+import { calcularSueldoDiario, calcularValorHoraExtra, formatHorasCL, calcularGratificacion } from "@/lib/payroll/simple-engine";
 
 interface PayrollItem {
     id: string;
@@ -16,6 +16,8 @@ interface PayrollItem {
         rut: string;
         cargo: string;
         sueldoBase: number;
+        tipoGratificacion: "PACTADA" | "LEGAL_25";
+        gratificacionPactada: number | null;
     };
     diasTrabajados: number;
     horasExtra: number;
@@ -45,6 +47,10 @@ interface PeriodData {
         rut: string;
     };
     payrollItems: PayrollItem[];
+    indicadores: {
+        sueldoMinimo: number;
+        valorUF: number;
+    } | null;
 }
 
 export default function EditPayrollPage({ params }: { params: Promise<{ id: string }> }) {
@@ -141,8 +147,18 @@ export default function EditPayrollPage({ params }: { params: Promise<{ id: stri
         if (data.horasExtras100 > 0) detalleHE.push(`${formatHorasCL(data.horasExtras100)} hrs al 100%`);
         const heConcepto = detalleHE.length > 0 ? `Horas Extras (${detalleHE.join(', ')})` : 'Horas Extras';
 
-        // Gratificación legal: 25% sobre sueldo proporcional + horas extras (igual que el motor)
-        const gratificacion = Math.round((sueldoProporcional + totalHorasExtras) * 0.25);
+        // Gratificación: usa la función centralizada del motor con tope legal (4.75 SM/12).
+        // Fallback al 25% sin tope si no hay indicadores cargados (legacy behavior).
+        const sueldoMinimo = period?.indicadores?.sueldoMinimo ?? 0;
+        const gratificacion = sueldoMinimo > 0
+            ? calcularGratificacion(
+                originalItem.worker.tipoGratificacion,
+                sueldoProporcional,
+                totalHorasExtras,
+                sueldoMinimo,
+                originalItem.worker.gratificacionPactada ?? undefined
+            )
+            : Math.round((sueldoProporcional + totalHorasExtras) * 0.25);
 
         // Calculate taxable base (imponible)
         const totalBonos = Object.values(data.bonos).reduce((sum, val) => sum + val, 0);
