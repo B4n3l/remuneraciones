@@ -19,10 +19,24 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
         const documento = await prisma.documentoTrabajador.findUnique({
             where: { id: docId },
+            include: { worker: { select: { companyId: true } } },
         });
 
         if (!documento || documento.workerId !== id) {
             return NextResponse.json({ error: "Documento no encontrado" }, { status: 404 });
+        }
+
+        // IDOR fix: validate company access (same pattern as other worker routes)
+        if (session.user.role !== "SUPER_ADMIN") {
+            const hasAccess = await prisma.userCompany.findFirst({
+                where: {
+                    userId: session.user.id,
+                    companyId: documento.worker.companyId,
+                },
+            });
+            if (!hasAccess) {
+                return NextResponse.json({ error: "Sin acceso a esta empresa" }, { status: 403 });
+            }
         }
 
         const url = await getWorkerDocumentSignedUrl(documento.storagePath);
