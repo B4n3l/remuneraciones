@@ -48,6 +48,10 @@ export default async function TrabajadoresPage() {
         },
     });
 
+    // WorkersClientList es un Client Component: no puede recibir campos Decimal de Prisma
+    // (sueldoBase) directamente como prop — hay que serializar antes de pasar.
+    const serializedWorkers = JSON.parse(JSON.stringify(workers));
+
     return (
         <div>
             <div className="mb-6 flex items-center justify-between">
@@ -63,7 +67,7 @@ export default async function TrabajadoresPage() {
                 )}
             </div>
 
-            <WorkersClientList workers={workers} companyCount={companyCount} />
+            <WorkersClientList workers={serializedWorkers} companyCount={companyCount} />
         </div>
     );
 }
