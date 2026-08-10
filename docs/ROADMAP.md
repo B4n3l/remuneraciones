@@ -2,7 +2,7 @@
 
 Estado del proyecto: qué está hecho y qué falta. Actualizar este archivo al completar o planificar trabajo.
 
-_Última actualización: 2026-07-12_
+_Última actualización: 2026-08-10_
 
 ## ✅ Completado
 
@@ -21,7 +21,8 @@ _Última actualización: 2026-07-12_
 - Generación de PDF de liquidación protegida por sesión (`52b6c88`, `13c1033`).
 
 ### Plataforma
-- **Autocálculo de días hábiles en vacaciones** — 2026-08-03: el formulario calcula automáticamente los Días Hábiles entre inicio y fin (L-V excluyendo feriados legales chilenos); el campo queda editable como override del contador. Módulo nuevo `lib/feriados.ts` (reglas Ley 19.668 solo para San Pedro/Encuentro; Ley 20.983 fija para Virgen del Carmen/Asunción/Todos los Santos/Inmaculada + puentes 2/1 y 17/9; Ley 20.299 evangélico; excluye 31/12 bancario y regionales) + `lib/vacaciones.ts` (`calcularDiasHabiles`). Validado contra calendarios oficiales 2026 y 2027 (51 checks). Limitación conocida: no incluye feriados regionales (Arica/Chillán) ni días de elecciones.
+- **Autocálculo de días hábiles en vacaciones** — 2026-08-03 (commiteado y pusheado 2026-08-10): el formulario calcula automáticamente los Días Hábiles entre inicio y fin (L-V excluyendo feriados legales chilenos); el campo queda editable como override del contador. Módulo nuevo `lib/feriados.ts` (reglas Ley 19.668 solo para San Pedro/Encuentro; Ley 20.983 fija para Virgen del Carmen/Asunción/Todos los Santos/Inmaculada + puentes 2/1 y 17/9; Ley 20.299 evangélico; excluye 31/12 bancario y regionales) + `lib/vacaciones.ts` (`calcularDiasHabiles`). Validado contra calendarios oficiales 2026 y 2027 (51 checks). Limitación conocida: no incluye feriados regionales (Arica/Chillán) ni días de elecciones.
+- **IDOR en rutas de descarga corregido** — 2026-08-10: las rutas `/api/workers/[id]/vacations/[vacationId]/download` y `/api/workers/[id]/documents/[docId]/download` ahora validan acceso a empresa (`userCompany.findFirst`) además de auth + workerId match, alineándose con el patrón del resto de las API (`contracts/route.ts`).
 - **Bug Decimal en la lista de trabajadores corregido** — 2026-08-03: `WorkersClientList` recibía objetos Prisma crudos con `sueldoBase` (Decimal); serializado con `JSON.parse(JSON.stringify(workers))` antes de pasar la prop (mismo patrón que el fix de la ficha del 2026-07-14).
 - **Vacaciones: días disponibles + drift `fechaRegreso` alineado** — 2026-07-15
   - Pestaña Vacaciones muestra Días Devengados (1,25 días hábiles por mes completo desde `fechaIngreso`), Tomados y Disponibles. Solo cuenta vacaciones registradas en el sistema; las históricas se registran retroactivamente con el mismo formulario.
@@ -35,12 +36,14 @@ _Última actualización: 2026-07-12_
 ## 🔜 Pendiente
 
 ### Inmediato (retomar próxima sesión)
-- [ ] **Confirmar en producción que "Registrar Vacaciones" genera el comprobante end-to-end** tras el fix de `fechaRegreso` (commit `1deabd0`, pusheado 2026-07-15, sin confirmar todavía por el usuario). Si falla, revisar log de Vercel para el mensaje exacto de Prisma.
-- [x] **Bug Decimal en `/dashboard/trabajadores`** (la lista, no la ficha): "Only plain objects can be passed to Client Components... Decimal objects are not supported" (`app/dashboard/trabajadores/page.tsx:66`). Serializar `sueldoBase` (y cualquier Decimal) a number antes de pasar `workers` a `WorkersClientList`. Bug preexistente, no relacionado a nada de esta sesión — **resuelto 2026-08-03** (`JSON.parse(JSON.stringify(workers))` en `page.tsx`, ver "✅ Completado").
-- [x] Drift de schema `Vacacion`/`DocumentoTrabajador` en producción (`P2022`/tabla faltante) — resuelto 2026-07-14/15: SQL aplicado (`comprobantePath`, `updatedAt`, tabla `DocumentoTrabajador` completa) y `schema.prisma` alineado con `anioServicio`/`fechaRegreso`/`observacion`. Diagnóstico columna por columna en `prisma/migrations/check_schema_drift.sql`; `Worker`, `Contract`, `AFP`, `Company`, `WorkerHealthPlan` están completos (tienen columnas extra sin usar: `email`, `estadoCivil`, `fechaNacimiento`, `nacionalidad`, `profesion` en Worker; `ciudad`, `metodoPago` en Contract — no bloquean, no se tocaron).
-- [x] Bug Decimal en la ficha de trabajador (`app/dashboard/trabajadores/[id]/page.tsx`): `Contratos`/`Vacaciones`/`DocumentosExtras` son Client Components que recibían el `worker` de Prisma completo (con `sueldoBase`, `contracts[].baseSalary`, `afp.porcentaje`, etc.). Corregido 2026-07-14 pasándoles `JSON.parse(JSON.stringify(worker))` en vez del objeto crudo.
-- [x] Bucket de Storage `worker-documents` creado en Supabase (privado — las descargas usan URLs firmadas de 60s, nunca URLs públicas).
-- [x] Formato legal del comprobante de vacaciones restaurado (Art. 67/68, cargo, año de servicio, sección Detalle) y cálculo de días Devengados/Tomados/Disponibles agregado a la pestaña Vacaciones — 2026-07-15 (`8ab42a6`, `1deabd0`).
+- [ ] **Confirmar en producción que "Registrar Vacaciones" genera el comprobante end-to-end** tras el fix de `fechaRegreso` (commit `1deabd0`, pusheado 2026-07-15, sin confirmar todavía por el usuario). Si falla, revisar log de Vercel para el mensaje exacto de Prisma. (Nota: los commits de la sesión 2026-08-03 fueron pusheados hoy 2026-08-10; ya se puede probar en producción.)
+- [ ] **fechaRegreso debería ser siguiente día hábil, no endDate + 1 calendario** — si la vacación termina viernes, el comprobante dice que regresa sábado; legalmente debería ser lunes. Requiere usar `calcularDiasHabiles`/`esFeriadoChile` para encontrar el siguiente día hábil.
+- [x] **Bug Decimal en `/dashboard/trabajadores`** (la lista, no la ficha) — **resuelto y pusheado 2026-08-10**.
+- [x] Drift de schema `Vacacion`/`DocumentoTrabajador` en producción — **resuelto 2026-07-14/15**.
+- [x] Bug Decimal en la ficha de trabajador — **resuelto 2026-07-14**.
+- [x] Bucket de Storage `worker-documents` creado en Supabase.
+- [x] Formato legal del comprobante de vacaciones restaurado — **resuelto 2026-07-15**.
+- [x] **IDOR en rutas de descarga** — **resuelto 2026-08-10** (`eea7363`).
 
 ### Migración a VPS (Dokploy)
 - [ ] Migrar app + PostgreSQL + archivos desde Vercel/Supabase a un VPS con Dokploy. **Plan y runbook completo en [MIGRACION-VPS.md](MIGRACION-VPS.md)**. La auth (NextAuth JWT) es portable sin cambios; la migración de BD puede hacerse como paso intermedio independiente.
