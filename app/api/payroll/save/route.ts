@@ -1,6 +1,34 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+
+const saveSchema = z.object({
+    companyId: z.string().min(1, "companyId es requerido"),
+    year: z.coerce.number().int().min(2020).max(2100),
+    month: z.coerce.number().int().min(1).max(12),
+    payrolls: z.array(z.object({
+        workerId: z.string().min(1),
+        inputs: z.object({
+            diasTrabajados: z.coerce.number().int().min(0).max(31).optional(),
+            horasExtras50: z.coerce.number().nonnegative().optional(),
+            horasExtras100: z.coerce.number().nonnegative().optional(),
+        }).optional(),
+        valorHoraExtra50: z.coerce.number().nonnegative().optional(),
+        totalHaberes: z.coerce.number(),
+        totalDescuentos: z.coerce.number(),
+        liquido: z.coerce.number(),
+        detalleHaberes: z.array(z.object({
+            concepto: z.string(),
+            monto: z.coerce.number(),
+        })),
+        detalleDescuentos: z.array(z.object({
+            concepto: z.string(),
+            monto: z.coerce.number(),
+        })),
+    })).min(1, "Debe haber al menos una liquidación"),
+    systemValue: z.any().optional(),
+});
 
 export async function POST(request: Request) {
     try {
@@ -10,7 +38,7 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json();
-        const { companyId, year, month, payrolls, systemValue } = body;
+        const { companyId, year, month, payrolls, systemValue } = saveSchema.parse(body);
 
         // Validate access
         if (session.user.role !== "SUPER_ADMIN") {
@@ -99,6 +127,12 @@ export async function POST(request: Request) {
             message: `Período ${month}/${year} guardado correctamente`,
         });
     } catch (error) {
+        if (error instanceof z.ZodError) {
+            return NextResponse.json(
+                { error: "Datos de entrada inválidos", issues: error.issues },
+                { status: 400 }
+            );
+        }
         console.error("Error saving payroll period:", error);
         return NextResponse.json(
             { error: "Error al guardar el período de liquidación" },

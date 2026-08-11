@@ -1,6 +1,29 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+
+const updatePeriodSchema = z.object({
+    payrollItems: z.array(z.object({
+        id: z.string().min(1),
+        diasTrabajados: z.coerce.number().int().min(0).max(31).optional(),
+        horasExtra: z.coerce.number().nonnegative().optional(),
+        valorHoraExtra: z.coerce.number().nonnegative().optional(),
+        totalHaberes: z.coerce.number(),
+        totalDescuentosLegales: z.coerce.number(),
+        liquidoPagar: z.coerce.number(),
+        earnings: z.array(z.object({
+            tipo: z.string(),
+            concepto: z.string(),
+            monto: z.coerce.number(),
+        })),
+        deductions: z.array(z.object({
+            tipo: z.string(),
+            concepto: z.string(),
+            monto: z.coerce.number(),
+        })),
+    })).min(1, "Debe haber al menos un ítem de liquidación"),
+});
 
 export async function GET(
     request: Request,
@@ -78,7 +101,7 @@ export async function PUT(
 
         const { id } = await params;
         const body = await request.json();
-        const { payrollItems } = body;
+        const { payrollItems } = updatePeriodSchema.parse(body);
 
         // Get existing period
         const period = await prisma.payrollPeriod.findUnique({
@@ -148,6 +171,12 @@ export async function PUT(
             message: "Liquidación actualizada correctamente",
         });
     } catch (error) {
+        if (error instanceof z.ZodError) {
+            return NextResponse.json(
+                { error: "Datos de entrada inválidos", issues: error.issues },
+                { status: 400 }
+            );
+        }
         console.error("Error updating period:", error);
         return NextResponse.json({ error: "Error al actualizar período" }, { status: 500 });
     }

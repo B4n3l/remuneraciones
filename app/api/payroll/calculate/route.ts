@@ -1,17 +1,34 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { calculatePayroll } from "@/lib/payroll/simple-engine";
 
-export async function POST(request: Request) {
-  try {
-    const session = await auth();
-    if (!session) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
+const calculateSchema = z.object({
+    companyId: z.string().min(1, "companyId es requerido"),
+    year: z.coerce.number().int().min(2020).max(2100),
+    month: z.coerce.number().int().min(1).max(12),
+    workerInputs: z.record(
+        z.string(),
+        z.object({
+            diasTrabajados: z.coerce.number().int().min(0).max(31).optional(),
+            horasExtras50: z.coerce.number().nonnegative().optional(),
+            horasExtras100: z.coerce.number().nonnegative().optional(),
+            bonos: z.coerce.number().nonnegative().optional(),
+            bonosVariables: z.coerce.number().nonnegative().optional(),
+        })
+    ).optional(),
+});
 
-    const body = await request.json();
-    const { companyId, year, month, workerInputs } = body;
+export async function POST(request: Request) {
+    try {
+        const session = await auth();
+        if (!session) {
+            return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+        }
+
+        const body = await request.json();
+        const { companyId, year, month, workerInputs } = calculateSchema.parse(body);
 
     // Check access to company
     if (session.user.role !== "SUPER_ADMIN") {
@@ -120,7 +137,7 @@ export async function POST(request: Request) {
         bonoMovilizacion: Number(worker.bonoMovilizacion) || 0,
         bonoViatico: Number(worker.bonoViatico) || 0,
         // Bonos variables ingresados para este período
-        bonosVariables: Number(workerInput.bonos) || 0,
+        bonosVariables: Number(workerInput?.bonosVariables ?? workerInput?.bonos ?? 0),
       };
 
       const calculation = calculatePayroll(baseData);
@@ -150,6 +167,12 @@ export async function POST(request: Request) {
       payrolls: payrollResults,
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Datos de entrada inválidos", issues: error.issues },
+        { status: 400 }
+      );
+    }
     console.error("Error calculating payroll:", error);
     return NextResponse.json(
       { error: "Error al calcular liquidaciones" },
