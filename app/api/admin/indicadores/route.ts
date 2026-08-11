@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { z } from "zod";
 
 // Validation schema for creating/updating indicadores
-const indicadorSchema = z.object({
+export const indicadorSchema = z.object({
     year: z.number().min(2020).max(2100),
     month: z.number().min(1).max(12),
 

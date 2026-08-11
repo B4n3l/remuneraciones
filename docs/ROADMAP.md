@@ -49,13 +49,13 @@ _Última actualización: 2026-08-10_
 - [ ] Migrar app + PostgreSQL + archivos desde Vercel/Supabase a un VPS con Dokploy. **Plan y runbook completo en [MIGRACION-VPS.md](MIGRACION-VPS.md)**. La auth (NextAuth JWT) es portable sin cambios; la migración de BD puede hacerse como paso intermedio independiente.
 
 ### Fase 2 (funcionalidades)
-- [ ] **Indicadores previsionales + tramos impuesto único desde API propia**. La API del usuario scrapea SII (tasas previsionales + tramos impuesto único segunda categoría) y sirve ambos. Contrato JSON = valores generales + `afpRates` + `cesantiaRates` + `asignacionFamiliar` + `impuestoTramos` (desde https://www.sii.cl/valores_y_fechas/impuesto_2da_categoria/impuesto{year}.htm), auth por API key. En esta app:
-  - `lib/indicadores/sync.ts`: fetch a la API + validación con schema Zod + upsert transaccional de `IndicadorMensual`, tablas hijas y nueva tabla `ImpuestoTramo`. Env: `INDICADORES_API_URL`, `INDICADORES_API_KEY`.
-  - Botón "Sincronizar desde API" en `/dashboard/admin/indicadores`.
-  - Fallback on-the-fly en `payroll/calculate`: si no hay indicadores del mes, intentar sincronizar antes de devolver error.
-  - Alerta por email (Resend) a superadmin si el scraping del SII falla (cambio de estructura HTML, 404, etc.).
-  - Cron mensual — hacer **después** de la migración al VPS.
-  - Política: no pisar meses con liquidaciones finalizadas; la UI manual queda como override/fallback.
+- [x] **Indicadores previsionales + tramos impuesto único desde API propia** — parcialmente implementado 2026-08-10.
+  - Schema Prisma: modelo `ImpuestoTramo` + relación + SQL de migración (`prisma/migrations/add_impuesto_tramo.sql`).
+  - `lib/indicadores/sync.ts`: fetch a la API externa (`INDICADORES_API_URL` + `INDICADORES_API_KEY`), validación Zod extendida, upsert transaccional (delete + create) con hijos incluyendo `impuestoTramos`.
+  - Botón "Sincronizar desde API" en `/dashboard/admin/indicadores` con prompt de año/mes.
+  - Fallback on-the-fly en `payroll/calculate`: si no hay indicadores, intenta `syncIndicadoresFromAPI` antes de devolver 400.
+  - Alerta por email vía Resend (`lib/email.ts`) a `ALERT_EMAIL` o al primer `SUPER_ADMIN` si falla la sincronización.
+  - [ ] **Pendiente**: Cron mensual (post-migración VPS), política de no pisar meses con liquidaciones finalizadas, y consumo real de `ImpuestoTramo` en el motor de cálculo.
 - [ ] **Libro de Remuneraciones**: reporte mensual consolidado.
 - [ ] **Notificaciones por email**: envío automático de liquidaciones.
 - [ ] **CRUD de AFP**: administración de AFPs y sus tasas.

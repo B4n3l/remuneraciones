@@ -76,6 +76,7 @@ export default function IndicadoresPage() {
     const [showModal, setShowModal] = useState(false);
     const [editingIndicador, setEditingIndicador] = useState<Indicador | null>(null);
     const [saving, setSaving] = useState(false);
+    const [syncing, setSyncing] = useState(false);
     const [duplicateFrom, setDuplicateFrom] = useState<{ year: number; month: number } | null>(null);
 
     // Form state
@@ -129,6 +130,40 @@ export default function IndicadoresPage() {
             console.error("Error fetching indicadores:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSync = async () => {
+        const defaultYear = selectedYear;
+        const defaultMonth = new Date().getMonth() + 1;
+        const yearInput = prompt("Año a sincronizar:", String(defaultYear));
+        const monthInput = prompt("Mes a sincronizar (1-12):", String(defaultMonth));
+        if (!yearInput || !monthInput) return;
+        const year = parseInt(yearInput, 10);
+        const month = parseInt(monthInput, 10);
+        if (Number.isNaN(year) || Number.isNaN(month)) {
+            alert("Año o mes inválidos");
+            return;
+        }
+        setSyncing(true);
+        try {
+            const res = await fetch("/api/admin/indicadores/sync", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ year, month }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert(data.message || "Sincronización exitosa");
+                await fetchIndicadores();
+            } else {
+                alert(data.error || "Error al sincronizar");
+            }
+        } catch (error) {
+            console.error("Error syncing:", error);
+            alert("Error al sincronizar indicadores");
+        } finally {
+            setSyncing(false);
         }
     };
 
@@ -329,12 +364,21 @@ export default function IndicadoresPage() {
                     <h1 className="text-2xl font-bold text-gray-900">Indicadores Previsionales</h1>
                     <p className="text-gray-600">Gestiona los valores de UF, UTM, AFPs y otros indicadores por período</p>
                 </div>
-                <button
-                    onClick={handleNew}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
-                >
-                    <span>+</span> Nuevo Indicador
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={handleSync}
+                        disabled={syncing}
+                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+                    >
+                        {syncing ? "Sincronizando..." : "Sincronizar desde API"}
+                    </button>
+                    <button
+                        onClick={handleNew}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                    >
+                        <span>+</span> Nuevo Indicador
+                    </button>
+                </div>
             </div>
 
             {/* Year filter */}

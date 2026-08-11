@@ -303,8 +303,22 @@ model IndicadorMensual {
   afpRates              AFPHistorico[]
   cesantiaRates         CesantiaHistorico[]
   asignacionFamiliar    AsignacionFamiliarHistorico[]
-  
+  impuestoTramos        ImpuestoTramo[]
+
   @@unique([year, month])
+}
+
+model ImpuestoTramo {
+  id              String   @id @default(cuid())
+  indicadorId     String
+  desde           Decimal  @db.Decimal(12, 0)
+  hasta           Decimal? @db.Decimal(12, 0)
+  factor          Decimal  @db.Decimal(5, 4)
+  cantidadRebajar Decimal  @db.Decimal(12, 0)
+
+  indicador IndicadorMensual @relation(fields: [indicadorId], references: [id], onDelete: Cascade)
+
+  @@index([indicadorId])
 }
 
 model AFPHistorico {

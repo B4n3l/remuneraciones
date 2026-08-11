@@ -3,6 +3,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { calculatePayroll } from "@/lib/payroll/simple-engine";
+import { syncIndicadoresFromAPI } from "@/lib/indicadores/sync";
 
 const calculateSchema = z.object({
     companyId: z.string().min(1, "companyId es requerido"),
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
     }
 
     // Get monthly indicators (IndicadorMensual) with AFP and Cesantía rates
-    const indicadorMensual = await prisma.indicadorMensual.findUnique({
+    let indicadorMensual = await prisma.indicadorMensual.findUnique({
       where: {
         year_month: {
           year,
@@ -76,6 +77,29 @@ export async function POST(request: Request) {
         cesantiaRates: true,
       },
     });
+
+    if (!indicadorMensual) {
+      // Fallback: try syncing from external API on-the-fly
+      try {
+        const syncResult = await syncIndicadoresFromAPI(year, month);
+        if (syncResult.success) {
+          indicadorMensual = await prisma.indicadorMensual.findUnique({
+            where: {
+              year_month: {
+                year,
+                month,
+              },
+            },
+            include: {
+              afpRates: true,
+              cesantiaRates: true,
+            },
+          });
+        }
+      } catch (syncError) {
+        console.error("Error syncing indicators on-the-fly:", syncError);
+      }
+    }
 
     if (!indicadorMensual) {
       return NextResponse.json(
