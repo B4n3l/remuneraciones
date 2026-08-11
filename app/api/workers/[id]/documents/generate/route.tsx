@@ -3,11 +3,22 @@ import { uploadWorkerDocument } from "@/lib/storage";
 import { pdf } from "@react-pdf/renderer";
 import { IndefinidoContract, PlazoFijoContract, ObraFaenaContract } from "@/lib/pdf/contract-templates";
 import { VacationVoucher } from "@/lib/pdf/vacation-templates";
+import { AnexoContract } from "@/lib/pdf/anexo-template";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import React from 'react';
 import { format, addDays } from "date-fns";
 import { es } from "date-fns/locale";
+import { z } from "zod";
+
+const anexoSchema = z.object({
+    type: z.literal("ANEXO"),
+    cambioCargo: z.string().optional(),
+    nuevoSueldo: z.number().optional(),
+    cambioJornada: z.string().optional(),
+    otros: z.string().optional(),
+    fechaEfectiva: z.string().min(1, "Fecha efectiva es requerida"),
+});
 
 export async function POST(
     req: Request,
@@ -159,6 +170,64 @@ export async function POST(
                     anioServicio: anioServicio,
                     fechaRegreso: fechaRegreso,
                     comprobantePath: uploadResult.path
+                }
+            });
+
+            return NextResponse.json(doc);
+        }
+
+        if (type === "ANEXO") {
+            const validation = anexoSchema.safeParse(body);
+            if (!validation.success) {
+                return NextResponse.json({ error: validation.error.issues.map(e => e.message).join(", ") }, { status: 400 });
+            }
+
+            const { cambioCargo, nuevoSueldo, cambioJornada, otros, fechaEfectiva } = validation.data;
+
+            const contractData = await prisma.contract.findFirst({
+                where: { workerId: id },
+                orderBy: { createdAt: 'desc' }
+            });
+
+            if (!contractData) {
+                return NextResponse.json({ error: "No hay datos de contrato registrados para este trabajador" }, { status: 400 });
+            }
+
+            const pdfData = {
+                companyName: worker.company.razonSocial,
+                companyRut: worker.company.rut,
+                companyAddress: worker.company.direccion,
+                legalRep: contractData.legalRep || worker.company.legalRep || "Representante Legal",
+                legalRepRut: contractData.legalRepRut || worker.company.legalRepRut || "",
+                workerName: `${worker.nombres} ${worker.apellidoPaterno} ${worker.apellidoMaterno}`,
+                workerRut: worker.rut,
+                workerAddress: "Domicilio del Trabajador",
+                workerNationality: "Chilena",
+                originalContractType: contractData.type,
+                originalStartDate: format(new Date(contractData.startDate), "PPP", { locale: es }),
+                cambioCargo,
+                nuevoSueldo: nuevoSueldo ? Number(nuevoSueldo) : undefined,
+                cambioJornada,
+                otros,
+                fechaEfectiva: format(new Date(fechaEfectiva), "PPP", { locale: es }),
+                fechaAnexo: format(new Date(), "PPP", { locale: es }),
+                lugarAnexo: worker.company.direccion,
+            };
+
+            const blob = await pdf(<AnexoContract data={pdfData} />).toBlob();
+            const buffer = Buffer.from(await blob.arrayBuffer());
+
+            const fileName = `anexo_${worker.apellidoPaterno}_${Date.now()}.pdf`;
+            const uploadResult = await uploadWorkerDocument(id, buffer, fileName);
+
+            const doc = await prisma.documentoTrabajador.create({
+                data: {
+                    workerId: id,
+                    nombre: `Anexo de Contrato - ${format(new Date(), "yyyy-MM-dd")}`,
+                    tipo: "ANEXO",
+                    storagePath: uploadResult.path,
+                    tamanioBytes: buffer.length,
+                    mimeType: "application/pdf"
                 }
             });
 

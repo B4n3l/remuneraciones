@@ -57,7 +57,7 @@ _Última actualización: 2026-08-10_
   - Alerta por email vía Resend (`lib/email.ts`) a `ALERT_EMAIL` o al primer `SUPER_ADMIN` si falla la sincronización.
   - [ ] **Pendiente**: Cron mensual (post-migración VPS), política de no pisar meses con liquidaciones finalizadas, y consumo real de `ImpuestoTramo` en el motor de cálculo.
 - [x] **Checkbox "Usar sueldo mínimo legal" en edición de trabajador** — implementado 2026-08-10. Columna `Worker.sueldoMinimoAuto` (BOOLEAN, default false). En el formulario de edición, al marcar el checkbox se deshabilita el input de sueldo base y se usa el último `sueldoMinimo` de `IndicadorMensual`. Tras cada sincronización exitosa de indicadores, `sync.ts` actualiza automáticamente todos los trabajadores con `sueldoMinimoAuto=true` al nuevo mínimo.
-- [ ] **Libro de Remuneraciones**: reporte mensual consolidado.
+- [x] **Libro de Remuneraciones**: reporte mensual consolidado — implementado 2026-08-10. API `GET /api/payroll/libro/[companyId]?year=&month=`, PDF legal landscape, UI en `/dashboard/libro`.
 - [ ] **Notificaciones por email**: envío automático de liquidaciones.
 - [ ] **CRUD de AFP**: administración de AFPs y sus tasas.
 - [ ] **Configuración de valores del sistema**: gestión de UF/UTM/Sueldo Mínimo desde la UI.
