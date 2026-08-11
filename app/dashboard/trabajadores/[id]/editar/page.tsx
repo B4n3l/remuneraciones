@@ -21,6 +21,7 @@ export default function EditarTrabajadorPage({ params }: { params: Promise<{ id:
         fechaIngreso: "",
         tipoContrato: "INDEFINIDO",
         sueldoBase: "",
+        sueldoMinimoAuto: false,
         tipoGratificacion: "LEGAL_25",
         gratificacionPactada: "",
         bonoColacion: "",
@@ -31,6 +32,8 @@ export default function EditarTrabajadorPage({ params }: { params: Promise<{ id:
         isapre: "",
         planUF: "",
     });
+
+    const [sueldoMinimoActual, setSueldoMinimoActual] = useState<number | null>(null);
 
     const [rutError, setRutError] = useState("");
     const [error, setError] = useState("");
@@ -46,6 +49,9 @@ export default function EditarTrabajadorPage({ params }: { params: Promise<{ id:
 
                 if (workerRes.ok) {
                     const worker = await workerRes.json();
+                    if (worker.latestSueldoMinimo) {
+                        setSueldoMinimoActual(worker.latestSueldoMinimo);
+                    }
                     setFormData({
                         nombres: worker.nombres,
                         apellidoPaterno: worker.apellidoPaterno,
@@ -55,6 +61,7 @@ export default function EditarTrabajadorPage({ params }: { params: Promise<{ id:
                         fechaIngreso: new Date(worker.fechaIngreso).toISOString().split('T')[0],
                         tipoContrato: worker.tipoContrato,
                         sueldoBase: worker.sueldoBase.toString(),
+                        sueldoMinimoAuto: worker.sueldoMinimoAuto ?? false,
                         tipoGratificacion: worker.tipoGratificacion,
                         gratificacionPactada: worker.gratificacionPactada?.toString() || "",
                         bonoColacion: worker.bonoColacion?.toString() || "0",
@@ -101,8 +108,9 @@ export default function EditarTrabajadorPage({ params }: { params: Promise<{ id:
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        const { name, value, type } = e.target;
+        const checked = (e.target as HTMLInputElement).checked;
+        setFormData({ ...formData, [name]: type === "checkbox" ? checked : value });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -124,7 +132,10 @@ export default function EditarTrabajadorPage({ params }: { params: Promise<{ id:
                 cargo: formData.cargo,
                 fechaIngreso: new Date(formData.fechaIngreso).toISOString(),
                 tipoContrato: formData.tipoContrato,
-                sueldoBase: parseFloat(formData.sueldoBase),
+                sueldoBase: formData.sueldoMinimoAuto && sueldoMinimoActual
+                    ? sueldoMinimoActual
+                    : parseFloat(formData.sueldoBase),
+                sueldoMinimoAuto: formData.sueldoMinimoAuto,
                 tipoGratificacion: formData.tipoGratificacion,
                 bonoColacion: parseFloat(formData.bonoColacion) || 0,
                 bonoMovilizacion: parseFloat(formData.bonoMovilizacion) || 0,
@@ -304,8 +315,24 @@ export default function EditarTrabajadorPage({ params }: { params: Promise<{ id:
                                 min="0"
                                 value={formData.sueldoBase}
                                 onChange={handleChange}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                                disabled={formData.sueldoMinimoAuto}
+                                className={`w-full px-4 py-2 border rounded-md ${formData.sueldoMinimoAuto ? "bg-gray-100 text-gray-500" : "border-gray-300"}`}
                             />
+                            <label className="flex items-center mt-2 text-sm">
+                                <input
+                                    type="checkbox"
+                                    name="sueldoMinimoAuto"
+                                    checked={formData.sueldoMinimoAuto}
+                                    onChange={handleChange}
+                                    className="mr-2"
+                                />
+                                Usar sueldo mínimo legal
+                                {sueldoMinimoActual !== null && (
+                                    <span className="ml-1 text-gray-500">
+                                        (${sueldoMinimoActual.toLocaleString("es-CL")})
+                                    </span>
+                                )}
+                            </label>
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-2">Gratificación *</label>

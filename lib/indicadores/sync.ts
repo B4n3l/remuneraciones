@@ -116,6 +116,22 @@ export async function syncIndicadoresFromAPI(year: number, month: number) {
       });
     });
 
+    // If sueldoMinimo changed, update all workers flagged for auto minimum wage.
+    try {
+      if (validatedData.sueldoMinimo > 0) {
+        const updateCount = await prisma.worker.updateMany({
+          where: { sueldoMinimoAuto: true },
+          data: { sueldoBase: validatedData.sueldoMinimo },
+        });
+        if (updateCount.count > 0) {
+          console.log(`[sync] Updated ${updateCount.count} workers to new minimum wage ${validatedData.sueldoMinimo}`);
+        }
+      }
+    } catch (updateErr) {
+      console.error("[sync] Failed to update workers with sueldoMinimoAuto:", updateErr);
+      // Non-blocking: don't fail the sync if worker updates fail.
+    }
+
     return {
       success: true,
       message: `Indicadores para ${month}/${year} sincronizados correctamente.`,

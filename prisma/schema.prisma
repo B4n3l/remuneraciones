@@ -122,6 +122,7 @@ model Worker {
   
   // Salary Data
   sueldoBase      Decimal       @db.Decimal(12, 2)
+  sueldoMinimoAuto Boolean      @default(false) // si true, sueldoBase se actualiza automáticamente al sueldo mínimo legal
   tipoGratificacion TipoGratificacion
   gratificacionPactada Decimal?  @db.Decimal(12, 2) // only if PACTADA
   

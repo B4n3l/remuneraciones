@@ -41,7 +41,15 @@ export async function GET(
             }
         }
 
-        return NextResponse.json(worker);
+        const latestIndicador = await prisma.indicadorMensual.findFirst({
+            orderBy: [{ year: "desc" }, { month: "desc" }],
+            select: { sueldoMinimo: true },
+        });
+
+        return NextResponse.json({
+            ...worker,
+            latestSueldoMinimo: latestIndicador ? Number(latestIndicador.sueldoMinimo) : null,
+        });
     } catch (error) {
         console.error("Error fetching worker:", error);
         return NextResponse.json({ error: "Error al obtener trabajador" }, { status: 500 });
@@ -85,6 +93,21 @@ export async function PUT(
         }
 
         // Update worker
+        let sueldoBase = body.sueldoBase;
+        const sueldoMinimoAuto = body.sueldoMinimoAuto === true;
+
+        // Si el trabajador está marcado para sueldo mínimo automático,
+        // buscar el último indicador y forzar sueldoBase al mínimo legal.
+        if (sueldoMinimoAuto) {
+            const latestIndicador = await prisma.indicadorMensual.findFirst({
+                orderBy: [{ year: "desc" }, { month: "desc" }],
+                select: { sueldoMinimo: true },
+            });
+            if (latestIndicador) {
+                sueldoBase = Number(latestIndicador.sueldoMinimo);
+            }
+        }
+
         const updateData: any = {
             nombres: body.nombres,
             apellidoPaterno: body.apellidoPaterno,
@@ -92,7 +115,8 @@ export async function PUT(
             cargo: body.cargo,
             fechaIngreso: new Date(body.fechaIngreso),
             tipoContrato: body.tipoContrato,
-            sueldoBase: body.sueldoBase,
+            sueldoBase,
+            sueldoMinimoAuto,
             tipoGratificacion: body.tipoGratificacion,
             bonoColacion: body.bonoColacion || 0,
             bonoMovilizacion: body.bonoMovilizacion || 0,
