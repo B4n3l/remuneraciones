@@ -49,11 +49,12 @@ _Última actualización: 2026-08-10_
 - [ ] Migrar app + PostgreSQL + archivos desde Vercel/Supabase a un VPS con Dokploy. **Plan y runbook completo en [MIGRACION-VPS.md](MIGRACION-VPS.md)**. La auth (NextAuth JWT) es portable sin cambios; la migración de BD puede hacerse como paso intermedio independiente.
 
 ### Fase 2 (funcionalidades)
-- [ ] **Indicadores previsionales desde API propia** (reemplaza la idea original de mindicador.cl, que no trae tasas AFP ni asignación familiar). El usuario desarrollará la API; contrato JSON = misma estructura del schema Zod del POST `/api/admin/indicadores` (valores generales + `afpRates` + `cesantiaRates` + `asignacionFamiliar`), auth por API key. En esta app:
-  - `lib/indicadores/sync.ts`: fetch a la API + validación con el schema Zod existente (reutilizado) + upsert transaccional de `IndicadorMensual` y tablas hijas. Env: `INDICADORES_API_URL`, `INDICADORES_API_KEY`.
+- [ ] **Indicadores previsionales + tramos impuesto único desde API propia**. La API del usuario scrapea SII (tasas previsionales + tramos impuesto único segunda categoría) y sirve ambos. Contrato JSON = valores generales + `afpRates` + `cesantiaRates` + `asignacionFamiliar` + `impuestoTramos` (desde https://www.sii.cl/valores_y_fechas/impuesto_2da_categoria/impuesto{year}.htm), auth por API key. En esta app:
+  - `lib/indicadores/sync.ts`: fetch a la API + validación con schema Zod + upsert transaccional de `IndicadorMensual`, tablas hijas y nueva tabla `ImpuestoTramo`. Env: `INDICADORES_API_URL`, `INDICADORES_API_KEY`.
   - Botón "Sincronizar desde API" en `/dashboard/admin/indicadores`.
-  - Fallback on-the-fly en `payroll/calculate`: si no hay indicadores del mes, intentar sincronizar antes de devolver error (elimina el 90% del problema sin cron).
-  - Cron mensual — hacer **después** de la migración al VPS (nativo en Dokploy; en Vercel requeriría vercel.json).
+  - Fallback on-the-fly en `payroll/calculate`: si no hay indicadores del mes, intentar sincronizar antes de devolver error.
+  - Alerta por email (Resend) a superadmin si el scraping del SII falla (cambio de estructura HTML, 404, etc.).
+  - Cron mensual — hacer **después** de la migración al VPS.
   - Política: no pisar meses con liquidaciones finalizadas; la UI manual queda como override/fallback.
 - [ ] **Libro de Remuneraciones**: reporte mensual consolidado.
 - [ ] **Notificaciones por email**: envío automático de liquidaciones.
@@ -62,10 +63,10 @@ _Última actualización: 2026-08-10_
 - [ ] **Template PDF completo**: implementación final del diseño.
 
 ### Deuda técnica detectada
-- [ ] **Validación Zod en las API routes de payroll** (`calculate`, `save`, PUT de períodos): hoy no validan el body; Zod solo se usa en auth, contratos e indicadores.
-- [ ] **Tope de gratificación (4.75 SM/12) en el recálculo del editor**: `recalculatePayroll` en `app/dashboard/liquidaciones/[id]/editar/page.tsx` calcula la gratificación sin tope; el motor (`calcularGratificacion`) sí lo aplica. Con sueldos altos el editor puede mostrar una gratificación mayor a la legal.
-- [ ] **Impuesto único con tramos reales desde BD**: `calcularImpuesto` en `simple-engine.ts` usa tramos simplificados hardcodeados.
+- [x] **Validación Zod en las API routes de payroll** (`calculate`, `save`, PUT de períodos) — **resuelto 2026-08-10** (`6331fb8`).
+- [x] **Tope de gratificación (4.75 SM/12) en el recálculo del editor** — **resuelto 2026-08-10** (`bb303ba`).
 - [ ] **Split 50%/100% de horas extra en BD**: hoy la BD guarda solo la suma en `horasExtra`; el detalle vive en el texto del concepto y se reconstruye con regex al editar. Considerar columnas dedicadas si se necesita reporting por tipo.
+- [ ] **Impuesto único con tramos reales desde BD** — **movido a Fase 2** (se consolida con la API de indicadores previsionales).
 
 ## 📌 Notas operativas
 
