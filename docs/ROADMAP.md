@@ -62,6 +62,7 @@ _Última actualización: 2026-08-10_
 - [ ] **CRUD de AFP**: administración de AFPs y sus tasas.
 - [ ] **Configuración de valores del sistema**: gestión de UF/UTM/Sueldo Mínimo desde la UI.
 - [ ] **Template PDF completo**: implementación final del diseño.
+- [ ] **Anexos de contrato en ficha del trabajador**: junto a "Generar Contrato" y "Registrar Vacaciones", agregar "Generar Anexo de Contrato" (modificación de cláusulas, cambio de cargo, aumento de sueldo, etc.) con PDF firmado y almacenado en `DocumentoTrabajador`.
 
 ### Deuda técnica detectada
 - [x] **Validación Zod en las API routes de payroll** (`calculate`, `save`, PUT de períodos) — **resuelto 2026-08-10** (`6331fb8`).
@@ -73,3 +74,7 @@ _Última actualización: 2026-08-10_
 
 - **Migraciones**: este repo no usa migraciones formato Prisma; los SQL en `prisma/migrations/*.sql` se ejecutan manualmente en el Supabase SQL Editor, **antes** de desplegar el código que los requiere.
 - **Deploy**: push a `main` → autodeploy en Vercel (intranet.centrocontable.cl). Variables de entorno en Vercel.
+- **Variables de entorno pendientes** (bloqueadas hasta que el usuario desarrolle la API y renueve dominio):
+  - `INDICADORES_API_URL` — la API de indicadores previsionales + tramos impuesto único está en desarrollo.
+  - `INDICADORES_API_KEY` — auth de la API externa.
+  - `RESEND_API_KEY` + `RESEND_FROM_EMAIL` — requiere renovar dominio para envío de emails.
