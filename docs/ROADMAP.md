@@ -61,7 +61,7 @@ _Última actualización: 2026-08-10_
 - [ ] **Notificaciones por email**: envío automático de liquidaciones.
 - [x] **CRUD de AFP** — implementado 2026-08-10. API `GET/POST /api/admin/afp`, `PUT/DELETE /api/admin/afp/[id]` (soft delete), UI en `/dashboard/admin/afp`, link en Sidebar. Validación Zod + auth SUPER_ADMIN.
 - [ ] **Configuración de valores del sistema**: gestión de UF/UTM/Sueldo Mínimo desde la UI.
-- [ ] **Template PDF completo**: implementación final del diseño.
+- [x] **Template PDF completo**: rediseño profesional implementado 2026-08-10. Tipografía jerárquica, tablas Haberes/Descuentos side-by-side con zebra stripes, firma empleador, footer legal, sin cambios en la interfaz de props.
 - [x] **Anexos de contrato en ficha del trabajador** — implementado 2026-08-10. Modal de generación con campos de modificación (cargo, sueldo, jornada, otros, fecha efectiva), PDF legal con `@react-pdf/renderer`, listado de anexos generados con descarga.
 
 ### Deuda técnica detectada
