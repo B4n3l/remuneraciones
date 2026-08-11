@@ -11,6 +11,7 @@ import {
     ChartBarIcon,
     UserGroupIcon,
     BookOpenIcon,
+    BanknotesIcon,
 } from "@heroicons/react/24/outline";
 
 export default function Sidebar() {
@@ -51,6 +52,11 @@ export default function Sidebar() {
             name: "Indicadores",
             href: "/dashboard/admin/indicadores",
             icon: ChartBarIcon,
+        },
+        {
+            name: "AFPs",
+            href: "/dashboard/admin/afp",
+            icon: BanknotesIcon,
         },
         {
             name: "Usuarios",

@@ -59,10 +59,10 @@ _Última actualización: 2026-08-10_
 - [x] **Checkbox "Usar sueldo mínimo legal" en edición de trabajador** — implementado 2026-08-10. Columna `Worker.sueldoMinimoAuto` (BOOLEAN, default false). En el formulario de edición, al marcar el checkbox se deshabilita el input de sueldo base y se usa el último `sueldoMinimo` de `IndicadorMensual`. Tras cada sincronización exitosa de indicadores, `sync.ts` actualiza automáticamente todos los trabajadores con `sueldoMinimoAuto=true` al nuevo mínimo.
 - [x] **Libro de Remuneraciones**: reporte mensual consolidado — implementado 2026-08-10. API `GET /api/payroll/libro/[companyId]?year=&month=`, PDF legal landscape, UI en `/dashboard/libro`.
 - [ ] **Notificaciones por email**: envío automático de liquidaciones.
-- [ ] **CRUD de AFP**: administración de AFPs y sus tasas.
+- [x] **CRUD de AFP** — implementado 2026-08-10. API `GET/POST /api/admin/afp`, `PUT/DELETE /api/admin/afp/[id]` (soft delete), UI en `/dashboard/admin/afp`, link en Sidebar. Validación Zod + auth SUPER_ADMIN.
 - [ ] **Configuración de valores del sistema**: gestión de UF/UTM/Sueldo Mínimo desde la UI.
 - [ ] **Template PDF completo**: implementación final del diseño.
-- [ ] **Anexos de contrato en ficha del trabajador**: junto a "Generar Contrato" y "Registrar Vacaciones", agregar "Generar Anexo de Contrato" (modificación de cláusulas, cambio de cargo, aumento de sueldo, etc.) con PDF firmado y almacenado en `DocumentoTrabajador`.
+- [x] **Anexos de contrato en ficha del trabajador** — implementado 2026-08-10. Modal de generación con campos de modificación (cargo, sueldo, jornada, otros, fecha efectiva), PDF legal con `@react-pdf/renderer`, listado de anexos generados con descarga.
 
 ### Deuda técnica detectada
 - [x] **Validación Zod en las API routes de payroll** (`calculate`, `save`, PUT de períodos) — **resuelto 2026-08-10** (`6331fb8`).
