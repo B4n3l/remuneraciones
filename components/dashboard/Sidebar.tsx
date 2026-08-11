@@ -54,6 +54,11 @@ export default function Sidebar() {
             icon: ChartBarIcon,
         },
         {
+            name: "Configuración",
+            href: "/dashboard/admin/config",
+            icon: Cog6ToothIcon,
+        },
+        {
             name: "AFPs",
             href: "/dashboard/admin/afp",
             icon: BanknotesIcon,
