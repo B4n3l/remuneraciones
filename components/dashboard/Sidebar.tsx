@@ -10,6 +10,7 @@ import {
     ShieldCheckIcon,
     ChartBarIcon,
     UserGroupIcon,
+    BookOpenIcon,
 } from "@heroicons/react/24/outline";
 
 export default function Sidebar() {
@@ -35,6 +36,11 @@ export default function Sidebar() {
             name: "Liquidaciones",
             href: "/dashboard/liquidaciones",
             icon: DocumentTextIcon,
+        },
+        {
+            name: "Libro de Remuneraciones",
+            href: "/dashboard/libro",
+            icon: BookOpenIcon,
         },
         {
             name: "Configuración",
