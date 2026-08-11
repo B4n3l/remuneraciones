@@ -2,142 +2,260 @@ import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 
 const styles = StyleSheet.create({
     page: {
-        padding: 25,
-        fontSize: 9,
+        paddingTop: 30,
+        paddingBottom: 30,
+        paddingLeft: 25,
+        paddingRight: 25,
+        fontSize: 10,
         fontFamily: "Helvetica",
+        color: "#1a1a1a",
     },
+    /* ── Header ── */
     header: {
         marginBottom: 12,
-        borderBottom: "2 solid #000",
-        paddingBottom: 8,
+    },
+    headerTop: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 2,
+    },
+    companyName: {
+        fontSize: 14,
+        fontFamily: "Helvetica-Bold",
+        color: "#1a365d",
+    },
+    companyDetail: {
+        fontSize: 9,
+        color: "#1a365d",
+    },
+    headerDivider: {
+        borderBottom: "1 solid #333",
+        marginBottom: 12,
     },
     title: {
         fontSize: 16,
-        fontWeight: "bold",
+        fontFamily: "Helvetica-Bold",
         textAlign: "center",
-        marginBottom: 5,
+        color: "#1a1a1a",
     },
-    subtitle: {
-        fontSize: 12,
+    period: {
+        fontSize: 11,
         textAlign: "center",
-        marginBottom: 10,
-    },
-    companyInfo: {
-        marginBottom: 8,
-    },
-    companyName: {
-        fontSize: 11,
-        fontWeight: "bold",
-    },
-    workerSection: {
-        marginBottom: 10,
-        padding: 8,
-        backgroundColor: "#f5f5f5",
-    },
-    workerName: {
-        fontSize: 11,
-        fontWeight: "bold",
-        marginBottom: 3,
-    },
-    row: {
-        flexDirection: "row",
-        marginBottom: 3,
-    },
-    label: {
-        width: "40%",
-    },
-    value: {
-        width: "60%",
-    },
-    section: {
-        marginBottom: 8,
-    },
-    sectionTitle: {
-        fontSize: 10,
-        fontWeight: "bold",
-        marginBottom: 5,
-        backgroundColor: "#e0e0e0",
-        padding: 4,
-    },
-    subSectionTitle: {
-        fontSize: 9,
-        fontWeight: "bold",
-        marginBottom: 3,
-        marginTop: 3,
-        color: "#444",
-    },
-    itemRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
+        color: "#555",
+        marginTop: 2,
         marginBottom: 4,
-        paddingHorizontal: 5,
     },
-    itemLabel: {
+    /* ── Worker Info ── */
+    workerSection: {
+        flexDirection: "row",
+        backgroundColor: "#F8F9FA",
+        padding: 10,
+        marginBottom: 12,
+    },
+    workerLeft: {
         flex: 1,
     },
-    itemValue: {
-        width: 100,
+    workerRight: {
+        flex: 1,
+        borderLeft: "1 solid #e2e8f0",
+        paddingLeft: 12,
+    },
+    workerName: {
+        fontSize: 12,
+        fontFamily: "Helvetica-Bold",
+        marginBottom: 4,
+    },
+    workerRow: {
+        flexDirection: "row",
+        marginBottom: 2,
+    },
+    workerLabel: {
+        width: 65,
+        fontSize: 9,
+        color: "#555",
+    },
+    workerValue: {
+        flex: 1,
+        fontSize: 10,
+    },
+    workerInfoText: {
+        fontSize: 10,
+        marginBottom: 2,
+    },
+    /* ── Side-by-side tables ── */
+    tablesContainer: {
+        flexDirection: "row",
+        marginBottom: 6,
+    },
+    tableColumn: {
+        flex: 1,
+    },
+    tableColumnRight: {
+        flex: 1,
+        marginLeft: 12,
+    },
+    /* ── Section titles ── */
+    sectionTitle: {
+        fontSize: 12,
+        fontFamily: "Helvetica-Bold",
+        color: "#1a365d",
+        marginBottom: 6,
+        borderBottom: "1 solid #333",
+        paddingBottom: 3,
+    },
+    /* ── Table header ── */
+    tableHeaderRow: {
+        flexDirection: "row",
+        borderBottom: "1 solid #333",
+        paddingBottom: 4,
+        marginBottom: 2,
+    },
+    tableHeaderConcept: {
+        flex: 1,
+        fontSize: 9,
+        fontFamily: "Helvetica-Bold",
+    },
+    tableHeaderAmount: {
+        width: 80,
+        fontSize: 9,
+        fontFamily: "Helvetica-Bold",
         textAlign: "right",
     },
-    totalRow: {
+    /* ── Data rows ── */
+    tableDataRow: {
         flexDirection: "row",
-        justifyContent: "space-between",
-        marginTop: 5,
-        paddingTop: 5,
-        borderTop: "1 solid #000",
-        fontWeight: "bold",
+        paddingTop: 4,
+        paddingBottom: 4,
+        paddingLeft: 2,
+        paddingRight: 2,
     },
-    subtotalRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginTop: 3,
-        paddingTop: 3,
-        borderTop: "1 dashed #999",
+    tableCellConcept: {
+        flex: 1,
         fontSize: 9,
     },
-    liquidoSection: {
+    tableCellAmount: {
+        width: 80,
+        fontSize: 9,
+        textAlign: "right",
+    },
+    /* ── Sub-section label inside earnings ── */
+    subsectionLabel: {
+        fontSize: 8,
+        fontFamily: "Helvetica-Oblique",
+        color: "#888",
+        marginTop: 8,
+        marginBottom: 2,
+        paddingLeft: 2,
+        borderTop: "0.5 solid #e2e8f0",
+        paddingTop: 4,
+    },
+    /* ── Column totals ── */
+    columnTotalRow: {
+        flexDirection: "row",
+        borderTop: "0.5 solid #e2e8f0",
+        paddingTop: 4,
+        marginTop: 6,
+        paddingLeft: 2,
+        paddingRight: 2,
+    },
+    columnTotalLabel: {
+        flex: 1,
+        fontSize: 9,
+        fontFamily: "Helvetica-Bold",
+        color: "#555",
+    },
+    columnTotalAmount: {
+        width: 80,
+        fontSize: 9,
+        fontFamily: "Helvetica-Bold",
+        textAlign: "right",
+        color: "#555",
+    },
+    /* ── Summary footer ── */
+    summarySection: {
         marginTop: 12,
-        padding: 10,
-        backgroundColor: "#d4edda",
-        borderRadius: 5,
+    },
+    summaryRow: {
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        marginBottom: 4,
+    },
+    summaryLabel: {
+        width: 200,
+        fontSize: 10,
+        textAlign: "right",
+        fontFamily: "Helvetica-Bold",
+    },
+    summaryValue: {
+        width: 100,
+        fontSize: 10,
+        textAlign: "right",
     },
     liquidoRow: {
         flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
+        justifyContent: "flex-end",
+        borderTop: "1 solid #333",
+        paddingTop: 8,
+        marginTop: 6,
     },
     liquidoLabel: {
-        fontSize: 14,
-        fontWeight: "bold",
+        width: 200,
+        fontSize: 13,
+        fontFamily: "Helvetica-Bold",
+        textAlign: "right",
+        color: "#1a1a1a",
     },
     liquidoValue: {
-        fontSize: 18,
-        fontWeight: "bold",
+        width: 100,
+        fontSize: 13,
+        fontFamily: "Helvetica-Bold",
+        textAlign: "right",
+        color: "#1a1a1a",
     },
-    footer: {
-        marginTop: 30,
-        paddingTop: 20,
-        borderTop: "1 solid #ccc",
+    liquidoInWords: {
+        fontSize: 8,
+        fontFamily: "Helvetica-Oblique",
+        color: "#888",
+        textAlign: "right",
+        marginTop: 4,
     },
-    signatureSection: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginTop: 25,
-    },
-    signatureBox: {
-        width: "40%",
-        textAlign: "center",
+    /* ── Bottom ── */
+    bottomSection: {
+        marginTop: "auto",
+        paddingTop: 30,
     },
     signatureLine: {
-        borderTop: "1 solid #000",
-        marginTop: 30,
-        paddingTop: 4,
+        borderTop: "1 solid #333",
+        width: "55%",
+        marginLeft: "auto",
+        marginRight: "auto",
+        paddingTop: 6,
     },
-    confirmationText: {
-        marginTop: 50,
-        fontSize: 9,
+    signatureText: {
         textAlign: "center",
-        fontStyle: "italic",
+        fontSize: 9,
+        color: "#555",
+    },
+    dateRow: {
+        textAlign: "right",
+        fontSize: 9,
+        color: "#555",
+        marginTop: 16,
+        marginBottom: 8,
+    },
+    legalFooter: {
+        fontSize: 7,
+        fontFamily: "Helvetica-Oblique",
+        color: "#aaa",
+        textAlign: "center",
+        borderTop: "0.5 solid #e2e8f0",
+        paddingTop: 6,
+    },
+    pageNumber: {
+        fontSize: 8,
+        textAlign: "center",
+        color: "#aaa",
+        marginTop: 6,
     },
 });
 
@@ -170,7 +288,6 @@ function formatCurrency(value: number): string {
     }).format(value);
 }
 
-// Convert number to words in Spanish
 function numberToWords(num: number): string {
     const units = ["", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
     const teens = ["diez", "once", "doce", "trece", "catorce", "quince", "dieciséis", "diecisiete", "dieciocho", "diecinueve"];
@@ -232,9 +349,7 @@ function numberToWords(num: number): string {
     return convertMillions(num) + " pesos";
 }
 
-// Format RUT with dots and dash (12345678-9 -> 12.345.678-9)
 function formatRut(rut: string): string {
-    // Clean the RUT first (remove any existing formatting)
     const clean = rut.replace(/\./g, "").replace(/-/g, "").toUpperCase();
 
     if (clean.length < 2) return rut;
@@ -242,140 +357,212 @@ function formatRut(rut: string): string {
     const body = clean.slice(0, -1);
     const dv = clean.slice(-1);
 
-    // Add dots every 3 digits from right to left
     const formatted = body.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
     return `${formatted}-${dv}`;
 }
 
-// Check if an earning is "imponible" (taxable) based on concept name
 function isImponible(concepto: string): boolean {
     const noImponibles = ["Colación", "Movilización", "Viático", "Bono Colación", "Bono Movilización", "Bono Viático", "Bonos Variables"];
     return !noImponibles.some(ni => concepto.includes(ni));
 }
 
+function todayString(): string {
+    const d = new Date();
+    const months = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+    return `${d.getDate()} de ${months[d.getMonth()]} de ${d.getFullYear()}`;
+}
+
 export function PayslipPDF({ data }: { data: PayslipData }) {
-    // Separate earnings into imponibles and no imponibles
     const haberesImponibles = data.earnings.filter(e => isImponible(e.concepto));
     const haberesNoImponibles = data.earnings.filter(e => !isImponible(e.concepto));
 
     const totalImponibles = haberesImponibles.reduce((sum, e) => sum + e.monto, 0);
     const totalNoImponibles = haberesNoImponibles.reduce((sum, e) => sum + e.monto, 0);
 
+    const fullName = `${data.worker.nombres} ${data.worker.apellidoPaterno} ${data.worker.apellidoMaterno}`;
+
     return (
         <Document>
             <Page size="LETTER" style={styles.page}>
-                {/* Header */}
+                {/* ── Header ── */}
                 <View style={styles.header}>
-                    <Text style={styles.title}>LIQUIDACIÓN DE SUELDO</Text>
-                    <Text style={styles.subtitle}>{data.period}</Text>
-                </View>
-
-                {/* Company Info */}
-                <View style={styles.companyInfo}>
-                    <Text style={styles.companyName}>{data.company.razonSocial}</Text>
-                    <Text>RUT: {formatRut(data.company.rut)}</Text>
-                    {data.company.direccion && <Text>{data.company.direccion}</Text>}
-                </View>
-
-                {/* Worker Section */}
-                <View style={styles.workerSection}>
-                    <Text style={styles.workerName}>
-                        {data.worker.nombres} {data.worker.apellidoPaterno} {data.worker.apellidoMaterno}
+                    <View style={styles.headerTop}>
+                        <Text style={styles.companyName}>{data.company.razonSocial}</Text>
+                    </View>
+                    <Text style={styles.companyDetail}>
+                        RUT {formatRut(data.company.rut)}
+                        {data.company.direccion ? `  —  ${data.company.direccion}` : ""}
                     </Text>
-                    <View style={styles.row}>
-                        <Text style={styles.label}>RUT:</Text>
-                        <Text style={styles.value}>{formatRut(data.worker.rut)}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.label}>Cargo:</Text>
-                        <Text style={styles.value}>{data.worker.cargo}</Text>
-                    </View>
                 </View>
 
-                {/* Earnings Section */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>HABERES</Text>
+                <View style={styles.headerDivider} />
 
-                    {/* Haberes Imponibles */}
-                    {haberesImponibles.length > 0 && (
-                        <>
-                            <Text style={styles.subSectionTitle}>Haberes Imponibles</Text>
-                            {haberesImponibles.map((item, idx) => (
-                                <View key={idx} style={styles.itemRow}>
-                                    <Text style={styles.itemLabel}>{item.concepto}</Text>
-                                    <Text style={styles.itemValue}>{formatCurrency(item.monto)}</Text>
-                                </View>
-                            ))}
-                            <View style={styles.subtotalRow}>
-                                <Text>Subtotal Imponibles</Text>
-                                <Text style={styles.itemValue}>{formatCurrency(totalImponibles)}</Text>
-                            </View>
-                        </>
-                    )}
+                <Text style={styles.title}>LIQUIDACIÓN DE SUELDO</Text>
+                <Text style={styles.period}>{data.period}</Text>
 
-                    {/* Haberes No Imponibles */}
-                    {haberesNoImponibles.length > 0 && (
-                        <>
-                            <Text style={styles.subSectionTitle}>Haberes No Imponibles</Text>
-                            {haberesNoImponibles.map((item, idx) => (
-                                <View key={idx} style={styles.itemRow}>
-                                    <Text style={styles.itemLabel}>{item.concepto}</Text>
-                                    <Text style={styles.itemValue}>{formatCurrency(item.monto)}</Text>
-                                </View>
-                            ))}
-                            <View style={styles.subtotalRow}>
-                                <Text>Subtotal No Imponibles</Text>
-                                <Text style={styles.itemValue}>{formatCurrency(totalNoImponibles)}</Text>
-                            </View>
-                        </>
-                    )}
-
-                    <View style={styles.totalRow}>
-                        <Text>TOTAL HABERES</Text>
-                        <Text style={styles.itemValue}>{formatCurrency(data.totalHaberes)}</Text>
-                    </View>
-                </View>
-
-                {/* Deductions Section */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>DESCUENTOS</Text>
-                    {data.deductions.map((item, idx) => (
-                        <View key={idx} style={styles.itemRow}>
-                            <Text style={styles.itemLabel}>{item.concepto}</Text>
-                            <Text style={styles.itemValue}>-{formatCurrency(item.monto)}</Text>
+                {/* ── Worker Info ── */}
+                <View style={styles.workerSection}>
+                    <View style={styles.workerLeft}>
+                        <Text style={styles.workerName}>{fullName}</Text>
+                        <View style={styles.workerRow}>
+                            <Text style={styles.workerLabel}>RUT:</Text>
+                            <Text style={styles.workerValue}>{formatRut(data.worker.rut)}</Text>
                         </View>
-                    ))}
-                    <View style={styles.totalRow}>
-                        <Text>TOTAL DESCUENTOS</Text>
-                        <Text style={styles.itemValue}>-{formatCurrency(data.totalDescuentos)}</Text>
+                        <View style={styles.workerRow}>
+                            <Text style={styles.workerLabel}>Cargo:</Text>
+                            <Text style={styles.workerValue}>{data.worker.cargo}</Text>
+                        </View>
+                    </View>
+                    <View style={styles.workerRight}>
+                        <View style={styles.workerRow}>
+                            <Text style={styles.workerLabel}>Período:</Text>
+                            <Text style={styles.workerValue}>{data.period}</Text>
+                        </View>
+                        <View style={styles.workerRow}>
+                            <Text style={styles.workerLabel}>Emisión:</Text>
+                            <Text style={styles.workerValue}>{todayString()}</Text>
+                        </View>
                     </View>
                 </View>
 
-                {/* Liquido Section */}
-                <View style={styles.liquidoSection}>
+                {/* ── Tables: Haberes & Descuentos side by side ── */}
+                <View style={styles.tablesContainer}>
+                    {/* Haberes Column */}
+                    <View style={styles.tableColumn}>
+                        <Text style={styles.sectionTitle}>HABERES</Text>
+
+                        {/* Table header */}
+                        <View style={styles.tableHeaderRow}>
+                            <Text style={styles.tableHeaderConcept}>Concepto</Text>
+                            <Text style={styles.tableHeaderAmount}>Monto</Text>
+                        </View>
+
+                        {/* Imponibles */}
+                        {haberesImponibles.map((item, idx) => (
+                            <View
+                                key={`imp-${idx}`}
+                                style={[
+                                    styles.tableDataRow,
+                                    { backgroundColor: idx % 2 === 0 ? "#FFFFFF" : "#F8F9FA" },
+                                ]}
+                            >
+                                <Text style={styles.tableCellConcept}>{item.concepto}</Text>
+                                <Text style={styles.tableCellAmount}>{formatCurrency(item.monto)}</Text>
+                            </View>
+                        ))}
+
+                        {haberesNoImponibles.length > 0 && (
+                            <>
+                                <Text style={styles.subsectionLabel}>No imponibles</Text>
+                                {haberesNoImponibles.map((item, idx) => (
+                                    <View
+                                        key={`noimp-${idx}`}
+                                        style={[
+                                            styles.tableDataRow,
+                                            {
+                                                backgroundColor:
+                                                    (haberesImponibles.length + idx) % 2 === 0
+                                                        ? "#FFFFFF"
+                                                        : "#F8F9FA",
+                                            },
+                                        ]}
+                                    >
+                                        <Text style={styles.tableCellConcept}>{item.concepto}</Text>
+                                        <Text style={styles.tableCellAmount}>{formatCurrency(item.monto)}</Text>
+                                    </View>
+                                ))}
+                            </>
+                        )}
+
+                        {/* Subtotal Imponible */}
+                        {haberesNoImponibles.length > 0 && (
+                            <View style={styles.columnTotalRow}>
+                                <Text style={styles.columnTotalLabel}>Subtotal imponible</Text>
+                                <Text style={styles.columnTotalAmount}>{formatCurrency(totalImponibles)}</Text>
+                            </View>
+                        )}
+                    </View>
+
+                    {/* Descuentos Column */}
+                    <View style={styles.tableColumnRight}>
+                        <Text style={styles.sectionTitle}>DESCUENTOS</Text>
+
+                        <View style={styles.tableHeaderRow}>
+                            <Text style={styles.tableHeaderConcept}>Concepto</Text>
+                            <Text style={styles.tableHeaderAmount}>Monto</Text>
+                        </View>
+
+                        {data.deductions.length === 0 ? (
+                            <View style={styles.tableDataRow}>
+                                <Text style={[styles.tableCellConcept, { color: "#999" }]}>
+                                    Sin descuentos
+                                </Text>
+                                <Text style={[styles.tableCellAmount, { color: "#999" }]}>
+                                    —
+                                </Text>
+                            </View>
+                        ) : (
+                            data.deductions.map((item, idx) => (
+                                <View
+                                    key={`ded-${idx}`}
+                                    style={[
+                                        styles.tableDataRow,
+                                        { backgroundColor: idx % 2 === 0 ? "#FFFFFF" : "#F8F9FA" },
+                                    ]}
+                                >
+                                    <Text style={styles.tableCellConcept}>{item.concepto}</Text>
+                                    <Text style={styles.tableCellAmount}>
+                                        -{formatCurrency(item.monto)}
+                                    </Text>
+                                </View>
+                            ))
+                        )}
+                    </View>
+                </View>
+
+                {/* ── Summary ── */}
+                <View style={styles.summarySection}>
+                    <View style={styles.summaryRow}>
+                        <Text style={styles.summaryLabel}>Total Haberes</Text>
+                        <Text style={styles.summaryValue}>{formatCurrency(data.totalHaberes)}</Text>
+                    </View>
+                    <View style={styles.summaryRow}>
+                        <Text style={styles.summaryLabel}>Total Descuentos</Text>
+                        <Text style={styles.summaryValue}>-{formatCurrency(data.totalDescuentos)}</Text>
+                    </View>
                     <View style={styles.liquidoRow}>
-                        <Text style={styles.liquidoLabel}>LÍQUIDO A PAGAR</Text>
+                        <Text style={styles.liquidoLabel}>Líquido a pagar</Text>
                         <Text style={styles.liquidoValue}>{formatCurrency(data.liquido)}</Text>
                     </View>
+                    <Text style={styles.liquidoInWords}>
+                        {numberToWords(data.liquido)}
+                    </Text>
                 </View>
 
-                {/* Signatures */}
-                <View style={styles.signatureSection}>
-                    <View style={styles.signatureBox}>
-                        <Text style={styles.signatureLine}>Firma Empleador</Text>
+                {/* ── Bottom ── */}
+                <View style={styles.bottomSection}>
+                    <View style={styles.signatureLine}>
+                        <Text style={styles.signatureText}>Firma Empleador</Text>
                     </View>
-                    <View style={styles.signatureBox}>
-                        <Text style={styles.signatureLine}>Firma Trabajador</Text>
-                    </View>
-                </View>
 
-                {/* Confirmation Text */}
-                <Text style={styles.confirmationText}>
-                    Recibí conforme la cantidad de {numberToWords(data.liquido)}
-                </Text>
+                    <Text style={styles.dateRow}>Santiago, {todayString()}</Text>
+
+                    <Text style={styles.legalFooter}>
+                        Documento generado electrónicamente según Art. 2 de la Ley 19.799 — No requiere firma holográfica
+                    </Text>
+
+                    <Text
+                        style={styles.pageNumber}
+                        render={({ pageNumber, totalPages }) =>
+                            `Página ${pageNumber} de ${totalPages}`
+                        }
+                    />
+                </View>
             </Page>
         </Document>
     );
 }
-
