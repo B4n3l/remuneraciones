@@ -36,6 +36,8 @@ _Última actualización: 2026-08-10_
 ## 🔜 Pendiente
 
 ### Inmediato (retomar próxima sesión)
+- [x] **Drift de BD: modelo Contract sin migración SQL** — 2026-08-27: el modelo `Contract` + enum `ContractType` estaban en `schema.prisma` desde el commit `09e1e1e` (2026-01-09) sin SQL asociado; crear un contrato en producción lanzaba `type "public.ContractType" does not exist` (42704). Resuelto: SQL de fix en `prisma/migrations/add_contract_table.sql` ejecutado en Supabase SQL Editor y confirmado (el contrato se guardó).
+- [ ] **Migración de datos opcional: normalizar jornadas viejas** — contratos existentes guardan `jornada` con valores largos ("Completa (45 horas semanales)"); el select nuevo solo tiene Completa/Parcial/Part-time. Opcional: UPDATE en SQL Editor para normalizar. No urgente: solo afecta al editar contratos viejos.
 - [ ] **Confirmar en producción que "Registrar Vacaciones" genera el comprobante end-to-end** tras el fix de `fechaRegreso` (commit `1deabd0`, pusheado 2026-07-15, sin confirmar todavía por el usuario). Si falla, revisar log de Vercel para el mensaje exacto de Prisma. (Nota: los commits de la sesión 2026-08-03 fueron pusheados hoy 2026-08-10; ya se puede probar en producción.)
 - [ ] **fechaRegreso debería ser siguiente día hábil, no endDate + 1 calendario** — si la vacación termina viernes, el comprobante dice que regresa sábado; legalmente debería ser lunes. Requiere usar `calcularDiasHabiles`/`esFeriadoChile` para encontrar el siguiente día hábil.
 - [x] **Bug Decimal en `/dashboard/trabajadores`** (la lista, no la ficha) — **resuelto y pusheado 2026-08-10**.
@@ -63,6 +65,7 @@ _Última actualización: 2026-08-10_
 - [ ] **Configuración de valores del sistema**: gestión de UF/UTM/Sueldo Mínimo desde la UI.
 - [x] **Template PDF completo**: rediseño profesional implementado 2026-08-10. Tipografía jerárquica, tablas Haberes/Descuentos side-by-side con zebra stripes, firma empleador, footer legal, sin cambios en la interfaz de props.
 - [x] **Anexos de contrato en ficha del trabajador** — implementado 2026-08-10. Modal de generación con campos de modificación (cargo, sueldo, jornada, otros, fecha efectiva), PDF legal con `@react-pdf/renderer`, listado de anexos generados con descarga.
+- [x] **Contratos: edición + acciones con iconos + jornada 42 hrs** — 2026-08-27. Página `/dashboard/contratos/[id]/editar` (precarga y PUT), PUT en `/api/contracts/[id]` con validación zod y chequeo de acceso, acciones de listado con iconos (Editar / Descargar PDF), y opciones de jornada corregidas a Completa/Parcial/Part-time (Ley 21.561). Pendiente: push a main para desplegar.
 
 ### Deuda técnica detectada
 - [x] **Validación Zod en las API routes de payroll** (`calculate`, `save`, PUT de períodos) — **resuelto 2026-08-10** (`6331fb8`).

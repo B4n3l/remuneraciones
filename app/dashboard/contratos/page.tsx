@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { DocumentTextIcon, PlusIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { DocumentTextIcon, PlusIcon, PencilIcon, PrinterIcon } from "@heroicons/react/24/outline";
 
 interface Contract {
     id: string;
@@ -191,13 +191,22 @@ export default function ContractsPage() {
                                         {new Date(contract.startDate).toLocaleDateString("es-CL")}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <button
-                                            onClick={() => handleDownloadPDF(contract.id)}
-                                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-900"
-                                        >
-                                            <ArrowDownTrayIcon className="h-4 w-4" />
-                                            Descargar PDF
-                                        </button>
+                                        <div className="flex items-center gap-3">
+                                            <Link
+                                                href={`/dashboard/contratos/${contract.id}/editar`}
+                                                title="Editar contrato"
+                                                className="text-gray-500 hover:text-blue-600"
+                                            >
+                                                <PencilIcon className="h-5 w-5" />
+                                            </Link>
+                                            <button
+                                                onClick={() => handleDownloadPDF(contract.id)}
+                                                title="Descargar PDF"
+                                                className="text-gray-500 hover:text-blue-600"
+                                            >
+                                                <PrinterIcon className="h-5 w-5" />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

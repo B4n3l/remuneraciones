@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -43,18 +44,24 @@ interface Worker {
     sueldoBase: number;
 }
 
-export default function NewContractPage() {
+export default function EditContractPage() {
     const router = useRouter();
+    const params = useParams();
+    const contractId = params.id as string;
+
     const [companies, setCompanies] = useState<Company[]>([]);
     const [workers, setWorkers] = useState<Worker[]>([]);
     const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
     const [loading, setLoading] = useState(false);
+    const [loadingData, setLoadingData] = useState(true);
+    const [notFound, setNotFound] = useState(false);
 
     const {
         register,
         handleSubmit,
         watch,
         setValue,
+        reset,
         formState: { errors },
     } = useForm<ContractForm>({
         resolver: zodResolver(contractSchema),
@@ -67,6 +74,49 @@ export default function NewContractPage() {
     useEffect(() => {
         fetchCompanies();
     }, []);
+
+    useEffect(() => {
+        const fetchContract = async () => {
+            try {
+                const response = await fetch(`/api/contracts/${contractId}`);
+                if (response.status === 404) {
+                    setNotFound(true);
+                    return;
+                }
+                if (!response.ok) {
+                    console.error("Error fetching contract:", response.status);
+                    setNotFound(true);
+                    return;
+                }
+                const data = await response.json();
+                reset({
+                    companyId: data.companyId,
+                    workerId: data.workerId,
+                    type: data.type,
+                    startDate: data.startDate.slice(0, 10),
+                    endDate: data.endDate ? data.endDate.slice(0, 10) : "",
+                    cargo: data.cargo,
+                    jornada: data.jornada,
+                    schedule: data.schedule,
+                    workplace: data.workplace,
+                    baseSalary: Number(data.baseSalary),
+                    benefits: data.benefits || "",
+                    obraDetails: data.obraDetails || "",
+                    legalRep: data.legalRep,
+                    legalRepRut: data.legalRepRut,
+                });
+                if (data.companyId) {
+                    fetchWorkers(data.companyId);
+                }
+            } catch (error) {
+                console.error("Error fetching contract:", error);
+                setNotFound(true);
+            } finally {
+                setLoadingData(false);
+            }
+        };
+        fetchContract();
+    }, [contractId]);
 
     useEffect(() => {
         if (selectedCompanyId) {
@@ -115,8 +165,8 @@ export default function NewContractPage() {
     const onSubmit = async (data: ContractForm) => {
         setLoading(true);
         try {
-            const response = await fetch("/api/contracts", {
-                method: "POST",
+            const response = await fetch(`/api/contracts/${contractId}`, {
+                method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),
             });
@@ -125,21 +175,48 @@ export default function NewContractPage() {
                 router.push("/dashboard/contratos");
             } else {
                 const error = await response.json();
-                alert(`Error: ${error.error || "No se pudo crear el contrato"}`);
+                alert(`Error: ${error.error || "No se pudo actualizar el contrato"}`);
             }
         } catch (error) {
-            console.error("Error creating contract:", error);
-            alert("Error al crear el contrato");
+            console.error("Error updating contract:", error);
+            alert("Error al actualizar el contrato");
         } finally {
             setLoading(false);
         }
     };
 
+    if (loadingData) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-gray-600">Cargando contrato...</div>
+            </div>
+        );
+    }
+
+    if (notFound) {
+        return (
+            <div className="max-w-4xl mx-auto space-y-6">
+                <div className="bg-white rounded-lg shadow p-12 text-center">
+                    <h1 className="text-2xl font-bold text-gray-900">Contrato no encontrado</h1>
+                    <p className="text-gray-600 mt-2">
+                        El contrato que intenta editar no existe o no tiene acceso a él.
+                    </p>
+                    <Link
+                        href="/dashboard/contratos"
+                        className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+                    >
+                        Volver a Contratos
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="max-w-4xl mx-auto space-y-6">
             <div>
-                <h1 className="text-3xl font-bold">Nuevo Contrato de Trabajo</h1>
-                <p className="text-gray-600 mt-1">Complete la información del contrato</p>
+                <h1 className="text-3xl font-bold">Editar Contrato de Trabajo</h1>
+                <p className="text-gray-600 mt-1">Modifique la información del contrato</p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-lg shadow p-6 space-y-6">
@@ -411,7 +488,7 @@ export default function NewContractPage() {
                         disabled={loading}
                         className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {loading ? "Creando..." : "Crear Contrato"}
+                        {loading ? "Guardando..." : "Guardar Cambios"}
                     </button>
                 </div>
             </form>
