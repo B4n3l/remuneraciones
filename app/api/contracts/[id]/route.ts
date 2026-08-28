@@ -83,6 +83,8 @@ export async function GET(
                 companyEmail: contract.company.email || undefined,
                 companyDomicilio: contract.company.direccion,
                 companyComuna: contract.company.comuna,
+                tipoGratificacion: contract.worker.tipoGratificacion,
+                gratificacionPactada: contract.worker.gratificacionPactada ? Number(contract.worker.gratificacionPactada) : undefined,
                 legalRep: contract.legalRep,
                 legalRepRut: contract.legalRepRut,
                 workerName: `${contract.worker.nombres} ${contract.worker.apellidoPaterno} ${contract.worker.apellidoMaterno}`,

@@ -107,6 +107,8 @@ export interface ContractData {
     formaPago?: string;
     periodicidad?: string;
     minutosColacion?: number;
+    tipoGratificacion?: "PACTADA" | "LEGAL_25";
+    gratificacionPactada?: number; // solo si tipoGratificacion === "PACTADA"
 }
 
 function formatRut(rut: string): string {
@@ -233,7 +235,7 @@ export function ContractPdf({ data }: { data: ContractData }) {
                     </Text>
                 </View>
 
-                {/* QUINTO: Beneficios y forma de pago */}
+                {/* QUINTO: Beneficios, pago y gratificación */}
                 <View style={styles.section}>
                     <Text style={styles.clauseTitle}>QUINTO</Text>
                     <Text style={styles.text}>
@@ -242,7 +244,16 @@ export function ContractPdf({ data }: { data: ContractData }) {
                                 El empleador se compromete a pagar al trabajador los siguientes beneficios: <B>{data.benefits}</B>.{" "}
                             </>
                         )}
-                        Las remuneraciones se pagarán <B>{periodicidad}</B>, por iguales períodos vencidos mediante <B>{formaPago}</B> en moneda nacional, y del monto de ellas el Empleador hará las deducciones previsionales que establecen las leyes vigentes.
+                        Las remuneraciones se pagarán <B>{periodicidad}</B>, por iguales períodos vencidos en moneda nacional, y del monto de ellas el Empleador hará las deducciones previsionales que establecen las leyes vigentes.{" "}
+                        {data.tipoGratificacion === "PACTADA" && data.gratificacionPactada ? (
+                            <>
+                                Además, el Empleador pagará al trabajador una gratificación pactada de <B>{formatCurrency(data.gratificacionPactada)}</B> por mes.
+                            </>
+                        ) : (
+                            <>
+                                Además, el Empleador pagará al trabajador una gratificación legal equivalente al 25% de la remuneración mensual, con un tope de 4,75 ingresos mínimos mensuales, conforme a los artículos 47 y 50 del Código del Trabajo.
+                            </>
+                        )}
                     </Text>
                 </View>
 

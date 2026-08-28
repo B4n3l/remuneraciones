@@ -93,6 +93,8 @@ export async function POST(
                 formaPago: contractData.formaPago || undefined,
                 periodicidad: contractData.periodicidad || undefined,
                 minutosColacion: contractData.minutosColacion ?? 30,
+                tipoGratificacion: worker.tipoGratificacion,
+                gratificacionPactada: worker.gratificacionPactada ? Number(worker.gratificacionPactada) : undefined,
             };
 
             // Render PDF to buffer
