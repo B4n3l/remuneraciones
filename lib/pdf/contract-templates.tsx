@@ -1,4 +1,6 @@
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import type { ReactNode } from "react";
+import { numeroEnPalabras } from "@/lib/numero-en-palabras";
 
 const styles = StyleSheet.create({
     page: {
@@ -70,27 +72,41 @@ export interface ContractData {
     // Company
     companyName: string;
     companyRut: string;
-    companyAddress: string;
+    companyEmail?: string;
+    companyDomicilio: string;
+    companyComuna: string;
     legalRep: string;
     legalRepRut: string;
 
-    // Worker
+    // Worker (datos personales)
     workerName: string;
     workerRut: string;
-    workerAddress: string;
-    workerNationality: string;
+    workerEmail?: string;
+    workerNacimiento?: string; // fecha de nacimiento formateada
+    workerNacionalidad?: string;
+    workerEstadoCivil?: string;
+    workerProfesion?: string;
+    workerDomicilio?: string;
+    workerComuna?: string;
+    workerCiudad?: string;
 
     // Contract details
     type: "INDEFINIDO" | "PLAZO_FIJO" | "OBRA_FAENA";
     startDate: string;
-    endDate?: string; // For plazo fijo
+    endDate?: string; // Solo para PLAZO_FIJO
+    fechaIngreso: string; // fecha de ingreso del trabajador, formateada
     cargo: string;
     jornada: string;
     schedule: string;
     workplace: string;
+    comunaTrabajo?: string;
     baseSalary: number;
+    sueldoEnPalabras?: string; // si se omite, se calcula con numeroEnPalabras
     benefits?: string;
-    obraDetails?: string; // For obra/faena
+    obraDetails?: string; // Solo para OBRA_FAENA
+    formaPago?: string;
+    periodicidad?: string;
+    minutosColacion?: number;
 }
 
 function formatRut(rut: string): string {
@@ -110,110 +126,188 @@ function formatCurrency(value: number): string {
     }).format(value);
 }
 
-// Indefinido Contract Template
-export function IndefinidoContract({ data }: { data: ContractData }) {
+/** Fragmento en negrita dentro del texto del contrato. */
+function B({ children }: { children: ReactNode }) {
+    return <Text style={styles.bold}>{children}</Text>;
+}
+
+/**
+ * Template único de contrato de trabajo (10 cláusulas, formato legal chileno).
+ * El texto varía según `data.type` en las cláusulas PRIMERO y SÉPTIMO.
+ * Los campos opcionales vacíos se omiten elegantemente (sin dejar comas huérfanas).
+ */
+export function ContractPdf({ data }: { data: ContractData }) {
+    const nacionalidad = data.workerNacionalidad || "Chilena";
+    const formaPago = data.formaPago || "Transferencia bancaria";
+    const periodicidad = data.periodicidad || "Mensualmente";
+    const minutosColacion = data.minutosColacion ?? 30;
+    const sueldoEnPalabras = data.sueldoEnPalabras || numeroEnPalabras(data.baseSalary);
+
     return (
         <Document>
             <Page size="LETTER" style={styles.page}>
-                <Text style={styles.title}>Contrato de Trabajo a Plazo Indefinido</Text>
+                <Text style={styles.title}>Contrato de Trabajo</Text>
 
-                {/* Parties */}
+                {/* Identificación de las partes */}
                 <View style={styles.section}>
                     <Text style={styles.text}>
-                        En <Text style={styles.bold}>{data.companyAddress}</Text>, a <Text style={styles.bold}>{data.startDate}</Text>,
-                        entre <Text style={styles.bold}>{data.companyName}</Text>, RUT <Text style={styles.bold}>{formatRut(data.companyRut)}</Text>,
-                        representada por don(ña) <Text style={styles.bold}>{data.legalRep}</Text>,
-                        RUT <Text style={styles.bold}>{formatRut(data.legalRepRut)}</Text>, en adelante "el Empleador",
-                        y don(ña) <Text style={styles.bold}>{data.workerName}</Text>,
-                        RUT <Text style={styles.bold}>{formatRut(data.workerRut)}</Text>, de nacionalidad <Text style={styles.bold}>{data.workerNationality}</Text>,
-                        domiciliado(a) en <Text style={styles.bold}>{data.workerAddress}</Text>, en adelante "el Trabajador",
-                        se ha convenido el siguiente contrato de trabajo:
+                        En <B>{data.companyComuna}</B>, a <B>{data.startDate}</B>, entre la Empresa <B>{data.companyName}</B>, RUT <B>{formatRut(data.companyRut)}</B>
+                        {data.companyEmail && (
+                            <>{", correo electrónico "}<B>{data.companyEmail}</B></>
+                        )}
+                        {", representada por don/doña "}
+                        <B>{data.legalRep}</B>
+                        {", RUT "}
+                        <B>{formatRut(data.legalRepRut)}</B>
+                        {", con domicilio en "}
+                        <B>{data.companyDomicilio}</B>
+                        {", comuna de "}
+                        <B>{data.companyComuna}</B>
+                        {', en adelante "el empleador", y don/doña '}
+                        <B>{data.workerName}</B>
+                        {", de nacionalidad "}
+                        <B>{nacionalidad}</B>
+                        {data.workerNacimiento && (
+                            <>{", nacido(a) el "}<B>{data.workerNacimiento}</B></>
+                        )}
+                        {", cédula de identidad Nº "}
+                        <B>{formatRut(data.workerRut)}</B>
+                        {data.workerEmail && (
+                            <>{", correo electrónico "}<B>{data.workerEmail}</B></>
+                        )}
+                        {data.workerDomicilio && (
+                            <>{", domiciliado(a) en "}<B>{data.workerDomicilio}</B></>
+                        )}
+                        {data.workerComuna && (
+                            <>{", comuna "}<B>{data.workerComuna}</B></>
+                        )}
+                        {data.workerCiudad && (
+                            <>{", de la ciudad de "}<B>{data.workerCiudad}</B></>
+                        )}
+                        {data.workerProfesion && (
+                            <>{", de profesión u oficio "}<B>{data.workerProfesion}</B></>
+                        )}
+                        {data.workerEstadoCivil && (
+                            <>{", de estado civil "}<B>{data.workerEstadoCivil}</B></>
+                        )}
+                        {', en adelante "el trabajador", se ha convenido el siguiente contrato de trabajo.'}
                     </Text>
                 </View>
 
-                {/* PRIMERA: Naturaleza de los servicios */}
+                {/* PRIMERO: Naturaleza de los servicios */}
                 <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>PRIMERA: NATURALEZA DE LOS SERVICIOS</Text>
+                    <Text style={styles.clauseTitle}>PRIMERO</Text>
                     <Text style={styles.text}>
-                        El Trabajador se compromete a desempeñar el cargo de <Text style={styles.bold}>{data.cargo}</Text>,
-                        prestando servicios en <Text style={styles.bold}>{data.workplace}</Text>,
-                        y cumpliendo con todas las funciones y responsabilidades propias del cargo,
-                        así como aquellas que le sean encomendadas por el Empleador en el ámbito de sus competencias.
+                        El trabajador se compromete y obliga a ejecutar el trabajo de <B>{data.cargo}</B> que se le encomienda.
+                        {data.type === "OBRA_FAENA" && (
+                            <> para la realización de la obra o faena que se detalla: <B>{data.obraDetails}</B>.</>
+                        )}
                     </Text>
                 </View>
 
-                {/* SEGUNDA: Jornada de trabajo */}
+                {/* SEGUNDO: Lugar de trabajo */}
                 <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>SEGUNDA: JORNADA DE TRABAJO</Text>
+                    <Text style={styles.clauseTitle}>SEGUNDO</Text>
                     <Text style={styles.text}>
-                        La jornada de trabajo será de tipo <Text style={styles.bold}>{data.jornada}</Text>,
-                        con el siguiente horario: <Text style={styles.bold}>{data.schedule}</Text>.
-                    </Text>
-                    <Text style={styles.text}>
-                        El Trabajador tendrá derecho a 15 días hábiles de vacaciones anuales,
-                        de acuerdo a lo establecido en el Código del Trabajo.
+                        Los servicios se prestarán en <B>{data.workplace}</B>
+                        {data.comunaTrabajo && (
+                            <>{", comuna de "}<B>{data.comunaTrabajo}</B></>
+                        )}
+                        {", sin perjuicio de la facultad del empleador de alterar, por causa justificada, la naturaleza de los servicios, o el sitio o recinto en que ellos han de prestarse, con la sola limitación de que se trate de labores similares y que el nuevo sitio o recinto quede dentro de la misma localidad o ciudad, conforme a lo señalado en el artículo 12º del Código del Trabajo."}
                     </Text>
                 </View>
 
-                {/* TERCERA: Remuneración */}
+                {/* TERCERO: Jornada de trabajo */}
                 <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>TERCERA: REMUNERACIÓN</Text>
+                    <Text style={styles.clauseTitle}>TERCERO</Text>
                     <Text style={styles.text}>
-                        El Empleador pagará al Trabajador una remuneración mensual de <Text style={styles.bold}>{formatCurrency(data.baseSalary)}</Text>
-                        (PESOS CHILENOS), pagadera el último día hábil de cada mes.
-                    </Text>
-                    {data.benefits && (
-                        <Text style={styles.text}>
-                            Adicionalmente, el Trabajador recibirá los siguientes beneficios: {data.benefits}
-                        </Text>
-                    )}
-                    <Text style={styles.text}>
-                        Sobre esta remuneración se efectuarán los descuentos legales correspondientes
-                        (cotizaciones previsionales, de salud y otros establecidos por ley).
+                        La jornada de trabajo será <B>{data.jornada}</B>, según el siguiente horario: <B>{data.schedule}</B>, con <B>{minutosColacion}</B> minutos de descanso destinados a colación.
                     </Text>
                 </View>
 
-                {/* CUARTA: Duración */}
+                {/* CUARTO: Remuneración */}
                 <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>CUARTA: DURACIÓN</Text>
+                    <Text style={styles.clauseTitle}>CUARTO</Text>
                     <Text style={styles.text}>
-                        El presente contrato es a plazo indefinido y comenzará a regir a partir del <Text style={styles.bold}>{data.startDate}</Text>.
+                        El empleador se compromete a remunerar los servicios del trabajador con un sueldo base mensual de <B>{formatCurrency(data.baseSalary)}</B> (<B>{sueldoEnPalabras}</B>) que será liquidado y pagado, mediante <B>{formaPago}</B>, por mes vencido, por períodos vencidos y en forma proporcional a los días trabajados.
                     </Text>
                 </View>
 
-                {/* QUINTA: Obligaciones */}
+                {/* QUINTO: Beneficios y forma de pago */}
                 <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>QUINTA: OBLIGACIONES DEL TRABAJADOR</Text>
-                    <Text style={styles.text}>El Trabajador se compromete a:</Text>
-                    <Text style={styles.indented}>a) Cumplir con el Reglamento Interno de la empresa.</Text>
-                    <Text style={styles.indented}>b) Mantener confidencialidad sobre información de la empresa.</Text>
-                    <Text style={styles.indented}>c) Cumplir con las normas de higiene y seguridad.</Text>
-                    <Text style={styles.indented}>d) Realizar sus labores con diligencia y buena fe.</Text>
-                </View>
-
-                {/* SEXTA: Término */}
-                <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>SEXTA: TÉRMINO DEL CONTRATO</Text>
+                    <Text style={styles.clauseTitle}>QUINTO</Text>
                     <Text style={styles.text}>
-                        El presente contrato podrá terminar por las causales establecidas en el Artículo 159, 160 y 161 del Código del Trabajo,
-                        o por mutuo acuerdo de las partes.
+                        {data.benefits && (
+                            <>
+                                El empleador se compromete a pagar al trabajador los siguientes beneficios: <B>{data.benefits}</B>.{" "}
+                            </>
+                        )}
+                        Las remuneraciones se pagarán <B>{periodicidad}</B>, por iguales períodos vencidos mediante <B>{formaPago}</B> en moneda nacional, y del monto de ellas el Empleador hará las deducciones previsionales que establecen las leyes vigentes.
                     </Text>
                 </View>
 
-                {/* Signatures */}
+                {/* SEXTO: Obligaciones del trabajador */}
+                <View style={styles.section}>
+                    <Text style={styles.clauseTitle}>SEXTO</Text>
+                    <Text style={styles.text}>
+                        El trabajador se compromete y obliga expresamente a cumplir las instrucciones que le sean impartidas por su jefe inmediato o por la gerencia de la empresa, en relación a su trabajo, y acatar en todas sus partes las normas del Reglamento Interno de Orden, Higiene y Seguridad (cuando exista en la empresa), las que declara conocer y que forman parte integrante del presente contrato, reglamento del cual se le entrega un ejemplar.
+                    </Text>
+                </View>
+
+                {/* SÉPTIMO: Duración */}
+                <View style={styles.section}>
+                    <Text style={styles.clauseTitle}>SÉPTIMO</Text>
+                    <Text style={styles.text}>
+                        {data.type === "INDEFINIDO" && (
+                            <>El presente contrato será indefinido y sólo podrá ponérsele término en conformidad a la legislación vigente.</>
+                        )}
+                        {data.type === "PLAZO_FIJO" && (
+                            <>El presente contrato será a plazo fijo, durará hasta <B>{data.endDate}</B> y sólo podrá ponérsele término en conformidad a la legislación vigente.</>
+                        )}
+                        {data.type === "OBRA_FAENA" && (
+                            <>El presente contrato será por obra o faena determinada, regirá desde <B>{data.startDate}</B> y terminará al concluir la obra o faena, de conformidad a la legislación vigente.</>
+                        )}
+                    </Text>
+                </View>
+
+                {/* OCTAVO: Fecha de ingreso */}
+                <View style={styles.section}>
+                    <Text style={styles.clauseTitle}>OCTAVO</Text>
+                    <Text style={styles.text}>
+                        Se deja constancia que el trabajador ingresó al servicio del empleador el <B>{data.fechaIngreso}</B>.
+                    </Text>
+                </View>
+
+                {/* NOVENO: Domicilio y jurisdicción */}
+                <View style={styles.section}>
+                    <Text style={styles.clauseTitle}>NOVENO</Text>
+                    <Text style={styles.text}>
+                        Para todos los efectos derivados del presente contrato las partes fijan domicilio en la ciudad de <B>{data.workerCiudad || data.companyComuna}</B> y se someten a la Jurisdicción de sus Tribunales.
+                    </Text>
+                </View>
+
+                {/* DÉCIMO: Ejemplares */}
+                <View style={styles.section}>
+                    <Text style={styles.clauseTitle}>DÉCIMO</Text>
+                    <Text style={styles.text}>
+                        El presente contrato se firma en 2 ejemplares, declarando el trabajador haber recibido en este acto un ejemplar de dicho instrumento, que es el fiel reflejo de la relación laboral convenida.
+                    </Text>
+                </View>
+
+                {/* Firmas */}
                 <View style={styles.signatures}>
                     <View style={styles.signatureBox}>
                         <Text style={styles.signatureLine}>
                             {data.legalRep}{"\n"}
                             RUT {formatRut(data.legalRepRut)}{"\n"}
-                            Empleador
+                            EMPLEADOR
                         </Text>
                     </View>
                     <View style={styles.signatureBox}>
                         <Text style={styles.signatureLine}>
                             {data.workerName}{"\n"}
                             RUT {formatRut(data.workerRut)}{"\n"}
-                            Trabajador
+                            TRABAJADOR
                         </Text>
                     </View>
                 </View>
@@ -227,239 +321,16 @@ export function IndefinidoContract({ data }: { data: ContractData }) {
     );
 }
 
-// Plazo Fijo Contract Template
-export function PlazoFijoContract({ data }: { data: ContractData }) {
-    return (
-        <Document>
-            <Page size="LETTER" style={styles.page}>
-                <Text style={styles.title}>Contrato de Trabajo a Plazo Fijo</Text>
-
-                {/* Parties */}
-                <View style={styles.section}>
-                    <Text style={styles.text}>
-                        En <Text style={styles.bold}>{data.companyAddress}</Text>, a <Text style={styles.bold}>{data.startDate}</Text>,
-                        entre <Text style={styles.bold}>{data.companyName}</Text>, RUT <Text style={styles.bold}>{formatRut(data.companyRut)}</Text>,
-                        representada por don(ña) <Text style={styles.bold}>{data.legalRep}</Text>,
-                        RUT <Text style={styles.bold}>{formatRut(data.legalRepRut)}</Text>, en adelante "el Empleador",
-                        y don(ña) <Text style={styles.bold}>{data.workerName}</Text>,
-                        RUT <Text style={styles.bold}>{formatRut(data.workerRut)}</Text>, de nacionalidad <Text style={styles.bold}>{data.workerNationality}</Text>,
-                        domiciliado(a) en <Text style={styles.bold}>{data.workerAddress}</Text>, en adelante "el Trabajador",
-                        se ha convenido el siguiente contrato de trabajo a plazo fijo:
-                    </Text>
-                </View>
-
-                {/* PRIMERA: Naturaleza de los servicios */}
-                <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>PRIMERA: NATURALEZA DE LOS SERVICIOS</Text>
-                    <Text style={styles.text}>
-                        El Trabajador se compromete a desempeñar el cargo de <Text style={styles.bold}>{data.cargo}</Text>,
-                        prestando servicios en <Text style={styles.bold}>{data.workplace}</Text>.
-                    </Text>
-                </View>
-
-                {/* SEGUNDA: Jornada de trabajo */}
-                <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>SEGUNDA: JORNADA DE TRABAJO</Text>
-                    <Text style={styles.text}>
-                        La jornada de trabajo será de tipo <Text style={styles.bold}>{data.jornada}</Text>,
-                        con el siguiente horario: <Text style={styles.bold}>{data.schedule}</Text>.
-                    </Text>
-                </View>
-
-                {/* TERCERA: Remuneración */}
-                <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>TERCERA: REMUNERACIÓN</Text>
-                    <Text style={styles.text}>
-                        El Empleador pagará al Trabajador una remuneración mensual de <Text style={styles.bold}>{formatCurrency(data.baseSalary)}</Text>,
-                        pagadera el último día hábil de cada mes, con los descuentos legales correspondientes.
-                    </Text>
-                    {data.benefits && (
-                        <Text style={styles.text}>
-                            Beneficios adicionales: {data.benefits}
-                        </Text>
-                    )}
-                </View>
-
-                {/* CUARTA: Duración y Renovación */}
-                <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>CUARTA: DURACIÓN Y RENOVACIÓN</Text>
-                    <Text style={styles.text}>
-                        El presente contrato tendrá una duración determinada,
-                        iniciando el <Text style={styles.bold}>{data.startDate}</Text> y
-                        finalizando el <Text style={styles.bold}>{data.endDate}</Text>.
-                    </Text>
-                    <Text style={styles.text}>
-                        Si el Trabajador continúa prestando servicios con conocimiento del Empleador después del vencimiento del plazo,
-                        el contrato se transformará en indefinido, de acuerdo al Artículo 159 N°4 del Código del Trabajo.
-                    </Text>
-                    <Text style={styles.text}>
-                        Este contrato podrá renovarse por mutuo acuerdo de las partes,
-                        siempre que la suma de los períodos no exceda un año.
-                    </Text>
-                </View>
-
-                {/* QUINTA: Obligaciones */}
-                <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>QUINTA: OBLIGACIONES DEL TRABAJADOR</Text>
-                    <Text style={styles.text}>El Trabajador se compromete a:</Text>
-                    <Text style={styles.indented}>a) Cumplir con el Reglamento Interno de la empresa.</Text>
-                    <Text style={styles.indented}>b) Mantener confidencialidad sobre información de la empresa.</Text>
-                    <Text style={styles.indented}>c) Cumplir con las normas de higiene y seguridad.</Text>
-                </View>
-
-                {/* SEXTA: Término */}
-                <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>SEXTA: TÉRMINO DEL CONTRATO</Text>
-                    <Text style={styles.text}>
-                        Además del vencimiento del plazo, este contrato podrá terminar por las causales del Código del Trabajo.
-                    </Text>
-                </View>
-
-                {/* Signatures */}
-                <View style={styles.signatures}>
-                    <View style={styles.signatureBox}>
-                        <Text style={styles.signatureLine}>
-                            {data.legalRep}{"\n"}
-                            RUT {formatRut(data.legalRepRut)}{"\n"}
-                            Empleador
-                        </Text>
-                    </View>
-                    <View style={styles.signatureBox}>
-                        <Text style={styles.signatureLine}>
-                            {data.workerName}{"\n"}
-                            RUT {formatRut(data.workerRut)}{"\n"}
-                            Trabajador
-                        </Text>
-                    </View>
-                </View>
-
-                <Text style={styles.footer}>
-                    Contrato a Plazo Fijo - Código del Trabajo de Chile, Artículo 159 N°4
-                </Text>
-            </Page>
-        </Document>
-    );
+// Wrappers por tipo de contrato (compatibilidad con las rutas que importan
+// las funciones específicas).
+export function IndefinidoContract({ data }: { data: ContractData }) {
+    return <ContractPdf data={{ ...data, type: "INDEFINIDO" }} />;
 }
 
-// Obra/Faena Contract Template
+export function PlazoFijoContract({ data }: { data: ContractData }) {
+    return <ContractPdf data={{ ...data, type: "PLAZO_FIJO" }} />;
+}
+
 export function ObraFaenaContract({ data }: { data: ContractData }) {
-    return (
-        <Document>
-            <Page size="LETTER" style={styles.page}>
-                <Text style={styles.title}>Contrato de Trabajo por Obra o Faena</Text>
-
-                {/* Parties */}
-                <View style={styles.section}>
-                    <Text style={styles.text}>
-                        En <Text style={styles.bold}>{data.companyAddress}</Text>, a <Text style={styles.bold}>{data.startDate}</Text>,
-                        entre <Text style={styles.bold}>{data.companyName}</Text>, RUT <Text style={styles.bold}>{formatRut(data.companyRut)}</Text>,
-                        representada por don(ña) <Text style={styles.bold}>{data.legalRep}</Text>,
-                        RUT <Text style={styles.bold}>{formatRut(data.legalRepRut)}</Text>, en adelante "el Empleador",
-                        y don(ña) <Text style={styles.bold}>{data.workerName}</Text>,
-                        RUT <Text style={styles.bold}>{formatRut(data.workerRut)}</Text>, de nacionalidad <Text style={styles.bold}>{data.workerNationality}</Text>,
-                        domiciliado(a) en <Text style={styles.bold}>{data.workerAddress}</Text>, en adelante "el Trabajador",
-                        se ha convenido el siguiente contrato de trabajo por obra o faena determinada:
-                    </Text>
-                </View>
-
-                {/* PRIMERA: Obra o Faena */}
-                <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>PRIMERA: OBRA O FAENA DETERMINADA</Text>
-                    <Text style={styles.text}>
-                        El Trabajador se compromete a desempeñar el cargo de <Text style={styles.bold}>{data.cargo}</Text>,
-                        para la realización de la siguiente obra o faena:
-                    </Text>
-                    <Text style={[styles.text, { marginLeft: 20, marginTop: 5 }]}>
-                        {data.obraDetails || "Obra o faena específica a desarrollar según instrucciones del empleador."}
-                    </Text>
-                    <Text style={styles.text}>
-                        El contrato terminará automáticamente al concluir la obra o faena para la cual fue contratado.
-                    </Text>
-                </View>
-
-                {/* SEGUNDA: Lugar de prestación */}
-                <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>SEGUNDA: LUGAR DE PRESTACIÓN DE SERVICIOS</Text>
-                    <Text style={styles.text}>
-                        El Trabajador prestará sus servicios en <Text style={styles.bold}>{data.workplace}</Text>,
-                        pudiendo el Empleador disponer cambios de ubicación cuando las necesidades de la obra lo requieran.
-                    </Text>
-                </View>
-
-                {/* TERCERA: Jornada de trabajo */}
-                <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>TERCERA: JORNADA DE TRABAJO</Text>
-                    <Text style={styles.text}>
-                        La jornada de trabajo será de tipo <Text style={styles.bold}>{data.jornada}</Text>,
-                        con el siguiente horario: <Text style={styles.bold}>{data.schedule}</Text>.
-                    </Text>
-                </View>
-
-                {/* CUARTA: Remuneración */}
-                <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>CUARTA: REMUNERACIÓN</Text>
-                    <Text style={styles.text}>
-                        El Empleador pagará al Trabajador una remuneración mensual de <Text style={styles.bold}>{formatCurrency(data.baseSalary)}</Text>,
-                        con los descuentos legales correspondientes.
-                    </Text>
-                    {data.benefits && (
-                        <Text style={styles.text}>
-                            Beneficios: {data.benefits}
-                        </Text>
-                    )}
-                </View>
-
-                {/* QUINTA: Vigencia */}
-                <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>QUINTA: VIGENCIA</Text>
-                    <Text style={styles.text}>
-                        El presente contrato regirá desde el <Text style={styles.bold}>{data.startDate}</Text> y
-                        terminará al concluir la obra o faena para la cual fue contratado el Trabajador.
-                    </Text>
-                    <Text style={styles.text}>
-                        El Empleador notificará al Trabajador con al menos 5 días de anticipación la conclusión de la obra o faena.
-                    </Text>
-                </View>
-
-                {/* SEXTA: Obligaciones */}
-                <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>SEXTA: OBLIGACIONES DEL TRABAJADOR</Text>
-                    <Text style={styles.text}>El Trabajador se compromete a:</Text>
-                    <Text style={styles.indented}>a) Cumplir con el Reglamento Interno.</Text>
-                    <Text style={styles.indented}>b) Completar la obra o faena en los términos acordados.</Text>
-                    <Text style={styles.indented}>c) Cumplir normas de seguridad.</Text>
-                </View>
-
-                {/* SÉPTIMA: Término */}
-                <View style={styles.section}>
-                    <Text style={styles.clauseTitle}>SÉPTIMA: TÉRMINO</Text>
-                    <Text style={styles.text}>
-                        Este contrato terminará por conclusión de la obra o faena, o por las causales del Código del Trabajo.
-                    </Text>
-                </View>
-
-                {/* Signatures */}
-                <View style={styles.signatures}>
-                    <View style={styles.signatureBox}>
-                        <Text style={styles.signatureLine}>
-                            {data.legalRep}{"\n"}
-                            RUT {formatRut(data.legalRepRut)}{"\n"}
-                            Empleador
-                        </Text>
-                    </View>
-                    <View style={styles.signatureBox}>
-                        <Text style={styles.signatureLine}>
-                            {data.workerName}{"\n"}
-                            RUT {formatRut(data.workerRut)}{"\n"}
-                            Trabajador
-                        </Text>
-                    </View>
-                </View>
-
-                <Text style={styles.footer}>
-                    Contrato por Obra o Faena - Código del Trabajo de Chile, Artículo 159 N°5
-                </Text>
-            </Page>
-        </Document>
-    );
+    return <ContractPdf data={{ ...data, type: "OBRA_FAENA" }} />;
 }

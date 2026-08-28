@@ -70,7 +70,7 @@ export async function PUT(
         }
 
         const body = await request.json();
-        const { razonSocial, rut, direccion, comuna } = body;
+        const { razonSocial, rut, direccion, comuna, email } = body;
 
         const company = await prisma.company.update({
             where: { id },
@@ -79,6 +79,7 @@ export async function PUT(
                 rut,
                 direccion,
                 comuna,
+                email: email !== undefined ? (email || null) : undefined,
             },
         });
 

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { IndefinidoContract, PlazoFijoContract, ObraFaenaContract } from "@/lib/pdf/contract-templates";
+import { numeroEnPalabras } from "@/lib/numero-en-palabras";
 
 const contractSchema = z.object({
     companyId: z.string(),
@@ -19,9 +20,18 @@ const contractSchema = z.object({
     baseSalary: z.number().positive("Sueldo debe ser positivo"),
     benefits: z.string().optional(),
     obraDetails: z.string().optional(), // Required for OBRA_FAENA
+    // Detalles de pago y colación
+    formaPago: z.string().optional(),
+    periodicidad: z.string().optional(),
+    minutosColacion: z.number().int().positive().optional(),
+    comunaTrabajo: z.string().optional(),
     legalRep: z.string().min(1, "Representante legal requerido"),
     legalRepRut: z.string().min(1, "RUT del representante requerido"),
 });
+
+// Formatea una fecha al estilo chileno: "28 de agosto de 2026"
+const fechaCL = (fecha: Date) =>
+    fecha.toLocaleDateString("es-CL", { year: "numeric", month: "long", day: "numeric" });
 
 export async function GET(
     request: Request,
@@ -70,23 +80,37 @@ export async function GET(
             const contractData = {
                 companyName: contract.company.razonSocial,
                 companyRut: contract.company.rut,
-                companyAddress: `${contract.company.direccion}, ${contract.company.comuna}`,
+                companyEmail: contract.company.email || undefined,
+                companyDomicilio: contract.company.direccion,
+                companyComuna: contract.company.comuna,
                 legalRep: contract.legalRep,
                 legalRepRut: contract.legalRepRut,
                 workerName: `${contract.worker.nombres} ${contract.worker.apellidoPaterno} ${contract.worker.apellidoMaterno}`,
                 workerRut: contract.worker.rut,
-                workerAddress: "Dirección del trabajador", // TODO: Add to worker model
-                workerNationality: "Chilena", // TODO: Add to worker model
+                workerEmail: contract.worker.email || undefined,
+                workerNacimiento: contract.worker.fechaNacimiento ? fechaCL(contract.worker.fechaNacimiento) : undefined,
+                workerNacionalidad: contract.worker.nacionalidad || "Chilena",
+                workerEstadoCivil: contract.worker.estadoCivil || undefined,
+                workerProfesion: contract.worker.profesion || undefined,
+                workerDomicilio: contract.worker.domicilio || undefined,
+                workerComuna: contract.worker.comuna || undefined,
+                workerCiudad: contract.worker.ciudad || undefined,
                 type: contract.type,
-                startDate: contract.startDate.toLocaleDateString("es-CL", { year: "numeric", month: "long", day: "numeric" }),
-                endDate: contract.endDate?.toLocaleDateString("es-CL", { year: "numeric", month: "long", day: "numeric" }),
+                startDate: fechaCL(contract.startDate),
+                endDate: contract.endDate ? fechaCL(contract.endDate) : undefined,
+                fechaIngreso: fechaCL(contract.worker.fechaIngreso),
                 cargo: contract.cargo,
                 jornada: contract.jornada,
                 schedule: contract.schedule,
                 workplace: contract.workplace,
+                comunaTrabajo: contract.comunaTrabajo || undefined,
                 baseSalary: Number(contract.baseSalary),
+                sueldoEnPalabras: numeroEnPalabras(Number(contract.baseSalary)),
                 benefits: contract.benefits || undefined,
                 obraDetails: contract.obraDetails || undefined,
+                formaPago: contract.formaPago || undefined,
+                periodicidad: contract.periodicidad || undefined,
+                minutosColacion: contract.minutosColacion ?? 30,
             };
 
             let pdfDocument;
@@ -178,6 +202,10 @@ export async function PUT(
                 baseSalary: validated.baseSalary,
                 benefits: validated.benefits,
                 obraDetails: validated.obraDetails,
+                formaPago: validated.formaPago || null,
+                periodicidad: validated.periodicidad || null,
+                minutosColacion: validated.minutosColacion ?? null,
+                comunaTrabajo: validated.comunaTrabajo || null,
                 legalRep: validated.legalRep,
                 legalRepRut: validated.legalRepRut,
             },

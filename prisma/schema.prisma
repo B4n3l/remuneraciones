@@ -77,6 +77,7 @@ model Company {
   comuna    String
   legalRep  String?  // Representante legal
   legalRepRut String? // RUT del representante
+  email     String?  // Correo electrónico de la empresa
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -113,6 +114,14 @@ model Worker {
   apellidoPaterno String
   apellidoMaterno String
   rut             String
+  fechaNacimiento DateTime?  // para contratos/finiquitos (art. 10 Código del Trabajo)
+  nacionalidad    String?    @default("Chilena")
+  estadoCivil     String?    // Soltero/a, Casado/a, Viudo/a, Divorciado/a, Conviviente civil
+  profesion       String?    // Profesión u oficio
+  domicilio       String?    // Domicilio particular
+  comuna          String?
+  ciudad          String?
+  email           String?
   
   // Employment Data
   cargo           String
@@ -475,6 +484,10 @@ model Contract {
   baseSalary    Decimal      @db.Decimal(10, 2)
   benefits      String?      @db.Text // Description of benefits
   obraDetails   String?      @db.Text // For OBRA_FAENA type
+  formaPago     String?      @default("Transferencia bancaria")
+  periodicidad  String?      @default("Mensualmente")
+  minutosColacion Int?       @default(30)
+  comunaTrabajo String?
   legalRep      String       // Representante legal
   legalRepRut   String       // RUT del representante
   createdAt     DateTime     @default(now())

@@ -15,6 +15,7 @@ export default function EditarEmpresaPage({ params }: { params: Promise<{ id: st
         razonSocial: "",
         direccion: "",
         comuna: "",
+        email: "",
     });
     const [rutError, setRutError] = useState("");
     const [error, setError] = useState("");
@@ -31,6 +32,7 @@ export default function EditarEmpresaPage({ params }: { params: Promise<{ id: st
                         razonSocial: data.razonSocial,
                         direccion: data.direccion,
                         comuna: data.comuna,
+                        email: data.email || "",
                     });
                 } else {
                     setError("Error al cargar la empresa");
@@ -203,6 +205,24 @@ export default function EditarEmpresaPage({ params }: { params: Promise<{ id: st
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Santiago"
                         />
+                    </div>
+
+                    <div>
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                            Correo Electrónico
+                        </label>
+                        <input
+                            id="email"
+                            name="email"
+                            type="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="contacto@empresa.cl"
+                        />
+                        <p className="mt-1 text-xs text-gray-500">
+                            Opcional: aparecerá en los contratos de trabajo
+                        </p>
                     </div>
 
                     <div className="flex gap-4">

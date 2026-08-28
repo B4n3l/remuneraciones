@@ -4,6 +4,7 @@ import { pdf } from "@react-pdf/renderer";
 import { IndefinidoContract, PlazoFijoContract, ObraFaenaContract } from "@/lib/pdf/contract-templates";
 import { VacationVoucher } from "@/lib/pdf/vacation-templates";
 import { AnexoContract } from "@/lib/pdf/anexo-template";
+import { numeroEnPalabras } from "@/lib/numero-en-palabras";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import React from 'react';
@@ -61,23 +62,37 @@ export async function POST(
             const pdfData = {
                 companyName: worker.company.razonSocial,
                 companyRut: worker.company.rut,
-                companyAddress: worker.company.direccion,
+                companyEmail: worker.company.email || undefined,
+                companyDomicilio: worker.company.direccion,
+                companyComuna: worker.company.comuna,
                 legalRep: contractData.legalRep || worker.company.legalRep || "Representante Legal",
                 legalRepRut: contractData.legalRepRut || worker.company.legalRepRut || "",
                 workerName: `${worker.nombres} ${worker.apellidoPaterno} ${worker.apellidoMaterno}`,
                 workerRut: worker.rut,
-                workerAddress: "Domicilio del Trabajador", // This should be in worker model, but using placeholder for now
-                workerNationality: "Chilena", // Placeholder
+                workerEmail: worker.email || undefined,
+                workerNacimiento: worker.fechaNacimiento ? format(new Date(worker.fechaNacimiento), "PPP", { locale: es }) : undefined,
+                workerNacionalidad: worker.nacionalidad || "Chilena",
+                workerEstadoCivil: worker.estadoCivil || undefined,
+                workerProfesion: worker.profesion || undefined,
+                workerDomicilio: worker.domicilio || undefined,
+                workerComuna: worker.comuna || undefined,
+                workerCiudad: worker.ciudad || undefined,
                 type: contractData.type,
                 startDate: format(new Date(contractData.startDate), "PPP", { locale: es }),
                 endDate: contractData.endDate ? format(new Date(contractData.endDate), "PPP", { locale: es }) : undefined,
+                fechaIngreso: format(new Date(worker.fechaIngreso), "PPP", { locale: es }),
                 cargo: contractData.cargo,
                 jornada: contractData.jornada,
                 schedule: contractData.schedule,
                 workplace: contractData.workplace,
+                comunaTrabajo: contractData.comunaTrabajo || undefined,
                 baseSalary: Number(contractData.baseSalary),
+                sueldoEnPalabras: numeroEnPalabras(Number(contractData.baseSalary)),
                 benefits: contractData.benefits || undefined,
-                obraDetails: contractData.obraDetails || undefined
+                obraDetails: contractData.obraDetails || undefined,
+                formaPago: contractData.formaPago || undefined,
+                periodicidad: contractData.periodicidad || undefined,
+                minutosColacion: contractData.minutosColacion ?? 30,
             };
 
             // Render PDF to buffer

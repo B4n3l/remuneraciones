@@ -17,6 +17,15 @@ export default function EditarTrabajadorPage({ params }: { params: Promise<{ id:
         apellidoPaterno: "",
         apellidoMaterno: "",
         rut: "",
+        // Datos personales (opcionales, para contratos/finiquitos)
+        fechaNacimiento: "",
+        nacionalidad: "",
+        estadoCivil: "",
+        profesion: "",
+        domicilio: "",
+        comuna: "",
+        ciudad: "",
+        email: "",
         cargo: "",
         fechaIngreso: "",
         tipoContrato: "INDEFINIDO",
@@ -57,6 +66,15 @@ export default function EditarTrabajadorPage({ params }: { params: Promise<{ id:
                         apellidoPaterno: worker.apellidoPaterno,
                         apellidoMaterno: worker.apellidoMaterno,
                         rut: formatRut(worker.rut),
+                        // Datos personales
+                        fechaNacimiento: worker.fechaNacimiento ? new Date(worker.fechaNacimiento).toISOString().split('T')[0] : "",
+                        nacionalidad: worker.nacionalidad || "",
+                        estadoCivil: worker.estadoCivil || "",
+                        profesion: worker.profesion || "",
+                        domicilio: worker.domicilio || "",
+                        comuna: worker.comuna || "",
+                        ciudad: worker.ciudad || "",
+                        email: worker.email || "",
                         cargo: worker.cargo,
                         fechaIngreso: new Date(worker.fechaIngreso).toISOString().split('T')[0],
                         tipoContrato: worker.tipoContrato,
@@ -129,6 +147,15 @@ export default function EditarTrabajadorPage({ params }: { params: Promise<{ id:
                 nombres: formData.nombres.toUpperCase(),
                 apellidoPaterno: formData.apellidoPaterno.toUpperCase(),
                 apellidoMaterno: formData.apellidoMaterno.toUpperCase(),
+                // Datos personales: cadena vacía -> null en el backend
+                fechaNacimiento: formData.fechaNacimiento ? new Date(formData.fechaNacimiento).toISOString() : "",
+                nacionalidad: formData.nacionalidad,
+                estadoCivil: formData.estadoCivil,
+                profesion: formData.profesion,
+                domicilio: formData.domicilio,
+                comuna: formData.comuna,
+                ciudad: formData.ciudad,
+                email: formData.email,
                 cargo: formData.cargo,
                 fechaIngreso: new Date(formData.fechaIngreso).toISOString(),
                 tipoContrato: formData.tipoContrato,
@@ -255,6 +282,98 @@ export default function EditarTrabajadorPage({ params }: { params: Promise<{ id:
                                 placeholder="12.345.678-9"
                             />
                             <p className="mt-1 text-xs text-gray-500">El RUT no se puede modificar</p>
+                        </div>
+                    </div>
+
+                    {/* Datos personales adicionales (art. 10 Código del Trabajo) */}
+                    <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Fecha de Nacimiento</label>
+                            <input
+                                type="date"
+                                name="fechaNacimiento"
+                                value={formData.fechaNacimiento}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Nacionalidad</label>
+                            <input
+                                type="text"
+                                name="nacionalidad"
+                                value={formData.nacionalidad}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                                placeholder="Chilena"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Estado Civil</label>
+                            <select
+                                name="estadoCivil"
+                                value={formData.estadoCivil}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                            >
+                                <option value="">Seleccione</option>
+                                <option value="Soltero/a">Soltero/a</option>
+                                <option value="Casado/a">Casado/a</option>
+                                <option value="Viudo/a">Viudo/a</option>
+                                <option value="Divorciado/a">Divorciado/a</option>
+                                <option value="Conviviente civil">Conviviente civil</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Profesión u Oficio</label>
+                            <input
+                                type="text"
+                                name="profesion"
+                                value={formData.profesion}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Domicilio</label>
+                            <input
+                                type="text"
+                                name="domicilio"
+                                value={formData.domicilio}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Comuna</label>
+                            <input
+                                type="text"
+                                name="comuna"
+                                value={formData.comuna}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Ciudad</label>
+                            <input
+                                type="text"
+                                name="ciudad"
+                                value={formData.ciudad}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Correo Electrónico</label>
+                            <input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                                placeholder="trabajador@empresa.cl"
+                            />
                         </div>
                     </div>
                 </div>

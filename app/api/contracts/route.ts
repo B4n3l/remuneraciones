@@ -16,6 +16,11 @@ const contractSchema = z.object({
     baseSalary: z.number().positive("Sueldo debe ser positivo"),
     benefits: z.string().optional(),
     obraDetails: z.string().optional(), // Required for OBRA_FAENA
+    // Detalles de pago y colación
+    formaPago: z.string().optional(),
+    periodicidad: z.string().optional(),
+    minutosColacion: z.number().int().positive().optional(),
+    comunaTrabajo: z.string().optional(),
     legalRep: z.string().min(1, "Representante legal requerido"),
     legalRepRut: z.string().min(1, "RUT del representante requerido"),
 });
@@ -139,6 +144,10 @@ export async function POST(request: Request) {
                 baseSalary: validated.baseSalary,
                 benefits: validated.benefits,
                 obraDetails: validated.obraDetails,
+                formaPago: validated.formaPago || null,
+                periodicidad: validated.periodicidad || null,
+                minutosColacion: validated.minutosColacion ?? null,
+                comunaTrabajo: validated.comunaTrabajo || null,
                 legalRep: validated.legalRep,
                 legalRepRut: validated.legalRepRut,
             },

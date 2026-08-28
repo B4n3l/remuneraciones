@@ -112,6 +112,18 @@ export async function PUT(
             nombres: body.nombres,
             apellidoPaterno: body.apellidoPaterno,
             apellidoMaterno: body.apellidoMaterno,
+            // Datos personales: si el campo viene (aunque sea ""), se actualiza;
+            // si no viene, se preserva el valor existente.
+            fechaNacimiento: body.fechaNacimiento !== undefined
+                ? (body.fechaNacimiento ? new Date(body.fechaNacimiento) : null)
+                : undefined,
+            nacionalidad: body.nacionalidad !== undefined ? (body.nacionalidad || null) : undefined,
+            estadoCivil: body.estadoCivil !== undefined ? (body.estadoCivil || null) : undefined,
+            profesion: body.profesion !== undefined ? (body.profesion || null) : undefined,
+            domicilio: body.domicilio !== undefined ? (body.domicilio || null) : undefined,
+            comuna: body.comuna !== undefined ? (body.comuna || null) : undefined,
+            ciudad: body.ciudad !== undefined ? (body.ciudad || null) : undefined,
+            email: body.email !== undefined ? (body.email || null) : undefined,
             cargo: body.cargo,
             fechaIngreso: new Date(body.fechaIngreso),
             tipoContrato: body.tipoContrato,

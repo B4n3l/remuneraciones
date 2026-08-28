@@ -8,6 +8,7 @@ const companySchema = z.object({
     razonSocial: z.string().min(1, "La razón social es requerida"),
     direccion: z.string().min(1, "La dirección es requerida"),
     comuna: z.string().min(1, "La comuna es requerida"),
+    email: z.union([z.string().email("Correo electrónico inválido"), z.literal("")]).optional(),
 });
 
 // GET all companies
@@ -78,7 +79,11 @@ export async function POST(request: Request) {
         // Create company and associate with current user
         const company = await prisma.company.create({
             data: {
-                ...validatedData,
+                rut: validatedData.rut,
+                razonSocial: validatedData.razonSocial,
+                direccion: validatedData.direccion,
+                comuna: validatedData.comuna,
+                email: validatedData.email || null,
                 users: {
                     create: {
                         userId: session.user.id,

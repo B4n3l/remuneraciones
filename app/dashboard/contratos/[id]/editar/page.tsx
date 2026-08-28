@@ -20,6 +20,11 @@ const contractSchema = z.object({
     baseSalary: z.number().positive("Sueldo debe ser positivo"),
     benefits: z.string().optional(),
     obraDetails: z.string().optional(),
+    // Detalles de pago y colación
+    formaPago: z.string().optional(),
+    periodicidad: z.string().optional(),
+    minutosColacion: z.number().int().positive().optional(),
+    comunaTrabajo: z.string().optional(),
     legalRep: z.string().min(1, "Representante legal requerido"),
     legalRepRut: z.string().min(1, "RUT del representante requerido"),
 });
@@ -65,6 +70,11 @@ export default function EditContractPage() {
         formState: { errors },
     } = useForm<ContractForm>({
         resolver: zodResolver(contractSchema),
+        defaultValues: {
+            formaPago: "Transferencia bancaria",
+            periodicidad: "Mensualmente",
+            minutosColacion: 30,
+        },
     });
 
     const selectedType = watch("type");
@@ -102,6 +112,10 @@ export default function EditContractPage() {
                     baseSalary: Number(data.baseSalary),
                     benefits: data.benefits || "",
                     obraDetails: data.obraDetails || "",
+                    formaPago: data.formaPago || "",
+                    periodicidad: data.periodicidad || "",
+                    minutosColacion: data.minutosColacion ?? 30,
+                    comunaTrabajo: data.comunaTrabajo || "",
                     legalRep: data.legalRep,
                     legalRepRut: data.legalRepRut,
                 });
@@ -408,6 +422,65 @@ export default function EditContractPage() {
                             {errors.baseSalary && (
                                 <p className="text-red-600 text-sm mt-1">{errors.baseSalary.message}</p>
                             )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Forma de Pago
+                                </label>
+                                <select
+                                    {...register("formaPago")}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                >
+                                    <option value="">Seleccione</option>
+                                    <option value="Transferencia bancaria">Transferencia bancaria</option>
+                                    <option value="Cheque">Cheque</option>
+                                    <option value="Efectivo">Efectivo</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Periodicidad
+                                </label>
+                                <select
+                                    {...register("periodicidad")}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                >
+                                    <option value="">Seleccione</option>
+                                    <option value="Mensualmente">Mensualmente</option>
+                                    <option value="Quincenalmente">Quincenalmente</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Minutos de Colación
+                                </label>
+                                <input
+                                    type="number"
+                                    {...register("minutosColacion", { valueAsNumber: true })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="30"
+                                />
+                                {errors.minutosColacion && (
+                                    <p className="text-red-600 text-sm mt-1">{errors.minutosColacion.message}</p>
+                                )}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Comuna del Lugar de Trabajo
+                                </label>
+                                <input
+                                    type="text"
+                                    {...register("comunaTrabajo")}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="Ej: Concepción"
+                                />
+                            </div>
                         </div>
 
                         <div>
