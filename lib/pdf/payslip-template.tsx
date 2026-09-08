@@ -224,14 +224,14 @@ const styles = StyleSheet.create({
     /* ── Bottom ── */
     bottomSection: {
         marginTop: "auto",
-        paddingTop: 30,
+        paddingTop: 8,
     },
     /* ── Recibo de pago (certificado) ── */
     certificateBox: {
         border: "0.75 solid #333",
         padding: 10,
-        marginTop: 14,
-        marginBottom: 20,
+        marginTop: 6,
+        marginBottom: 14,
     },
     certificateText: {
         fontSize: 8,
