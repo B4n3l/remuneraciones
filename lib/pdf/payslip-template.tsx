@@ -226,11 +226,27 @@ const styles = StyleSheet.create({
         marginTop: "auto",
         paddingTop: 30,
     },
+    /* ── Recibo de pago (certificado) ── */
+    certificateBox: {
+        border: "0.75 solid #333",
+        padding: 10,
+        marginTop: 14,
+        marginBottom: 20,
+    },
+    certificateText: {
+        fontSize: 8,
+        lineHeight: 1.5,
+        textAlign: "justify",
+    },
+    signaturesRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
+    signatureBox: {
+        width: "45%",
+    },
     signatureLine: {
         borderTop: "1 solid #333",
-        width: "55%",
-        marginLeft: "auto",
-        marginRight: "auto",
         paddingTop: 6,
     },
     signatureText: {
@@ -531,8 +547,24 @@ export function PayslipPDF({ data }: { data: PayslipData }) {
 
                 {/* ── Bottom ── */}
                 <View style={styles.bottomSection}>
-                    <View style={styles.signatureLine}>
-                        <Text style={styles.signatureText}>Firma Empleador</Text>
+                    {/* Recibo de pago: certificado del trabajador */}
+                    <View style={styles.certificateBox}>
+                        <Text style={styles.certificateText}>
+                            {`CERTIFICO QUE HE RECIBIDO DE ${data.company.razonSocial.toUpperCase()} LA SUMA DE ${numberToWords(data.liquido).toUpperCase()}.- A MI ENTERA SATISFACCIÓN Y NO TENGO CARGO NI COBRO ALGUNO QUE HACER POR NINGUNO DE LOS CONCEPTOS COMPRENDIDOS EN ESTA LIQUIDACIÓN. EL TRABAJADOR RECIBE CONFORME SU COPIA DE LIQUIDACIÓN.`}
+                        </Text>
+                    </View>
+
+                    <View style={styles.signaturesRow}>
+                        <View style={styles.signatureBox}>
+                            <View style={styles.signatureLine}>
+                                <Text style={styles.signatureText}>Firma Trabajador</Text>
+                            </View>
+                        </View>
+                        <View style={styles.signatureBox}>
+                            <View style={styles.signatureLine}>
+                                <Text style={styles.signatureText}>Firma Empleador</Text>
+                            </View>
+                        </View>
                     </View>
 
                     <Text
