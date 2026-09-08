@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     certificateBox: {
         border: "0.75 solid #333",
         padding: 10,
-        marginTop: 6,
+        marginTop: -44,
         marginBottom: 14,
     },
     certificateText: {
