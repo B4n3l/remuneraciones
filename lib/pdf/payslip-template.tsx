@@ -223,15 +223,15 @@ const styles = StyleSheet.create({
     },
     /* ── Bottom ── */
     bottomSection: {
-        marginTop: 12,
+        marginTop: "auto",
         paddingTop: 4,
     },
     /* ── Recibo de pago (certificado) ── */
     certificateBox: {
         border: "0.75 solid #333",
         padding: 8,
-        marginTop: 0,
-        marginBottom: 10,
+        marginTop: 14,
+        marginBottom: 0,
     },
     certificateText: {
         fontSize: 8,
@@ -545,15 +545,15 @@ export function PayslipPDF({ data }: { data: PayslipData }) {
                     </Text>
                 </View>
 
-                {/* ── Bottom ── */}
-                <View style={styles.bottomSection}>
-                    {/* Recibo de pago: certificado del trabajador */}
-                    <View style={styles.certificateBox}>
-                        <Text style={styles.certificateText}>
-                            {`CERTIFICO QUE HE RECIBIDO DE ${data.company.razonSocial.toUpperCase()} LA SUMA DE ${numberToWords(data.liquido).toUpperCase()}.- A MI ENTERA SATISFACCIÓN Y NO TENGO CARGO NI COBRO ALGUNO QUE HACER POR NINGUNO DE LOS CONCEPTOS COMPRENDIDOS EN ESTA LIQUIDACIÓN. EL TRABAJADOR RECIBE CONFORME SU COPIA DE LIQUIDACIÓN.`}
-                        </Text>
-                    </View>
+                {/* Recibo de pago: certificado del trabajador — fluye tras el resumen */}
+                <View style={styles.certificateBox}>
+                    <Text style={styles.certificateText}>
+                        {`CERTIFICO QUE HE RECIBIDO DE ${data.company.razonSocial.toUpperCase()} LA SUMA DE ${numberToWords(data.liquido).toUpperCase()}.- A MI ENTERA SATISFACCIÓN Y NO TENGO CARGO NI COBRO ALGUNO QUE HACER POR NINGUNO DE LOS CONCEPTOS COMPRENDIDOS EN ESTA LIQUIDACIÓN. EL TRABAJADOR RECIBE CONFORME SU COPIA DE LIQUIDACIÓN.`}
+                    </Text>
+                </View>
 
+                {/* ── Bottom: firmas + número de página anclados al fondo ── */}
+                <View style={styles.bottomSection}>
                     <View style={styles.signaturesRow}>
                         <View style={styles.signatureBox}>
                             <View style={styles.signatureLine}>
