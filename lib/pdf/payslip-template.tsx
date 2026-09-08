@@ -152,7 +152,8 @@ const styles = StyleSheet.create({
     /* ── Column totals ── */
     columnTotalRow: {
         flexDirection: "row",
-        borderTop: "0.5 solid #e2e8f0",
+        borderTop: "0.5 solid #cbd5e1",
+        backgroundColor: "#F1F5F9",
         paddingTop: 4,
         marginTop: 6,
         paddingLeft: 2,
@@ -443,13 +444,7 @@ export function PayslipPDF({ data }: { data: PayslipData }) {
 
                         {/* Imponibles */}
                         {haberesImponibles.map((item, idx) => (
-                            <View
-                                key={`imp-${idx}`}
-                                style={[
-                                    styles.tableDataRow,
-                                    { backgroundColor: idx % 2 === 0 ? "#FFFFFF" : "#F8F9FA" },
-                                ]}
-                            >
+                            <View key={`imp-${idx}`} style={styles.tableDataRow}>
                                 <Text style={styles.tableCellConcept}>{item.concepto}</Text>
                                 <Text style={styles.tableCellAmount}>{formatCurrency(item.monto)}</Text>
                             </View>
@@ -465,18 +460,7 @@ export function PayslipPDF({ data }: { data: PayslipData }) {
                             <>
                                 <Text style={styles.subsectionLabel}>No imponibles</Text>
                                 {haberesNoImponibles.map((item, idx) => (
-                                    <View
-                                        key={`noimp-${idx}`}
-                                        style={[
-                                            styles.tableDataRow,
-                                            {
-                                                backgroundColor:
-                                                    (haberesImponibles.length + idx) % 2 === 0
-                                                        ? "#FFFFFF"
-                                                        : "#F8F9FA",
-                                            },
-                                        ]}
-                                    >
+                                    <View key={`noimp-${idx}`} style={styles.tableDataRow}>
                                         <Text style={styles.tableCellConcept}>{item.concepto}</Text>
                                         <Text style={styles.tableCellAmount}>{formatCurrency(item.monto)}</Text>
                                     </View>
@@ -511,19 +495,23 @@ export function PayslipPDF({ data }: { data: PayslipData }) {
                             </View>
                         ) : (
                             data.deductions.map((item, idx) => (
-                                <View
-                                    key={`ded-${idx}`}
-                                    style={[
-                                        styles.tableDataRow,
-                                        { backgroundColor: idx % 2 === 0 ? "#FFFFFF" : "#F8F9FA" },
-                                    ]}
-                                >
+                                <View key={`ded-${idx}`} style={styles.tableDataRow}>
                                     <Text style={styles.tableCellConcept}>{item.concepto}</Text>
                                     <Text style={styles.tableCellAmount}>
                                         -{formatCurrency(item.monto)}
                                     </Text>
                                 </View>
                             ))
+                        )}
+
+                        {/* Total Descuentos — dentro de la columna, con el mismo fondo de totales */}
+                        {data.deductions.length > 0 && (
+                            <View style={styles.columnTotalRow}>
+                                <Text style={styles.columnTotalLabel}>Total Descuentos</Text>
+                                <Text style={styles.columnTotalAmount}>
+                                    -{formatCurrency(data.totalDescuentos)}
+                                </Text>
+                            </View>
                         )}
                     </View>
                 </View>
