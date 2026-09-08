@@ -378,15 +378,6 @@ function isImponible(concepto: string): boolean {
     return !noImponibles.some(ni => concepto.includes(ni));
 }
 
-function todayString(): string {
-    const d = new Date();
-    const months = [
-        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-    ];
-    return `${d.getDate()} de ${months[d.getMonth()]} de ${d.getFullYear()}`;
-}
-
 export function PayslipPDF({ data }: { data: PayslipData }) {
     const haberesImponibles = data.earnings.filter(e => isImponible(e.concepto));
     const haberesNoImponibles = data.earnings.filter(e => !isImponible(e.concepto));
@@ -432,10 +423,6 @@ export function PayslipPDF({ data }: { data: PayslipData }) {
                         <View style={styles.workerRow}>
                             <Text style={styles.workerLabel}>Período:</Text>
                             <Text style={styles.workerValue}>{data.period}</Text>
-                        </View>
-                        <View style={styles.workerRow}>
-                            <Text style={styles.workerLabel}>Emisión:</Text>
-                            <Text style={styles.workerValue}>{todayString()}</Text>
                         </View>
                     </View>
                 </View>
