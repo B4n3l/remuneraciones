@@ -455,6 +455,12 @@ export function PayslipPDF({ data }: { data: PayslipData }) {
                             </View>
                         ))}
 
+                        {/* Total Imponible — siempre visible, tras el último ítem imponible */}
+                        <View style={styles.columnTotalRow}>
+                            <Text style={styles.columnTotalLabel}>Total Imponible</Text>
+                            <Text style={styles.columnTotalAmount}>{formatCurrency(totalImponibles)}</Text>
+                        </View>
+
                         {haberesNoImponibles.length > 0 && (
                             <>
                                 <Text style={styles.subsectionLabel}>No imponibles</Text>
@@ -475,15 +481,13 @@ export function PayslipPDF({ data }: { data: PayslipData }) {
                                         <Text style={styles.tableCellAmount}>{formatCurrency(item.monto)}</Text>
                                     </View>
                                 ))}
-                            </>
-                        )}
 
-                        {/* Subtotal Imponible */}
-                        {haberesNoImponibles.length > 0 && (
-                            <View style={styles.columnTotalRow}>
-                                <Text style={styles.columnTotalLabel}>Subtotal imponible</Text>
-                                <Text style={styles.columnTotalAmount}>{formatCurrency(totalImponibles)}</Text>
-                            </View>
+                                {/* Total No Imponible — tras los ítems no imponibles */}
+                                <View style={styles.columnTotalRow}>
+                                    <Text style={styles.columnTotalLabel}>Total No Imponible</Text>
+                                    <Text style={styles.columnTotalAmount}>{formatCurrency(totalNoImponibles)}</Text>
+                                </View>
+                            </>
                         )}
                     </View>
 

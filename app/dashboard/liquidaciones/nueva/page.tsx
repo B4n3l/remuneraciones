@@ -465,7 +465,7 @@ export default function NuevaLiquidacionPage() {
                                             <span>{formatCurrency(payroll.bonos)}</span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-gray-600">Base Imponible</span>
+                                            <span className="text-gray-600">Total Imponible</span>
                                             <span>{formatCurrency(payroll.imponible)}</span>
                                         </div>
                                         <div className="border-t border-blue-200 pt-2 mt-2">

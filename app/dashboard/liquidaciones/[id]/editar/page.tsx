@@ -563,7 +563,16 @@ export default function EditPayrollPage({ params }: { params: Promise<{ id: stri
                                             </div>
                                         ))}
 
-                                        <div className="border-t pt-3 flex justify-between font-semibold text-green-700">
+                                        {/* Total Imponible — suma de haberes no bono (sueldo + HE + gratificación) */}
+                                        <div className="border-t pt-3 flex justify-between font-semibold text-gray-700">
+                                            <span>Total Imponible</span>
+                                            <span>{formatCurrency(
+                                                item.earnings
+                                                    .filter(e => !isBono(e.concepto))
+                                                    .reduce((sum, e) => sum + Number(e.monto), 0)
+                                            )}</span>
+                                        </div>
+                                        <div className="pt-1 flex justify-between font-semibold text-green-700">
                                             <span>Total Haberes</span>
                                             <span>{formatCurrency(item.totalHaberes)}</span>
                                         </div>

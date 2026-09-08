@@ -115,6 +115,14 @@ export default function PeriodDetailPage({ params }: { params: Promise<{ id: str
         }).format(value);
     };
 
+    const isBonoConcepto = (concepto: string) => {
+        const lower = concepto.toLowerCase();
+        return lower.includes('bono') ||
+            lower.includes('colación') ||
+            lower.includes('movilización') ||
+            lower.includes('viático');
+    };
+
     const formatPeriod = (yearMonth: string) => {
         const [year, month] = yearMonth.split("-");
         const months = [
@@ -322,7 +330,15 @@ export default function PeriodDetailPage({ params }: { params: Promise<{ id: str
                                             </div>
                                         ))}
                                         <div className="border-t border-green-200 pt-2 mt-2">
-                                            <div className="flex justify-between font-semibold text-green-800">
+                                            <div className="flex justify-between font-semibold text-gray-700">
+                                                <span>Total Imponible</span>
+                                                <span>{formatCurrency(
+                                                    selectedItem.earnings
+                                                        .filter((e) => !isBonoConcepto(e.concepto))
+                                                        .reduce((sum, e) => sum + Number(e.monto), 0)
+                                                )}</span>
+                                            </div>
+                                            <div className="flex justify-between font-semibold text-green-800 mt-1">
                                                 <span>Total Haberes</span>
                                                 <span>{formatCurrency(Number(selectedItem.totalHaberes))}</span>
                                             </div>
