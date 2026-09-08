@@ -3,7 +3,7 @@ import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 const styles = StyleSheet.create({
     page: {
         paddingTop: 30,
-        paddingBottom: 30,
+        paddingBottom: 20,
         paddingLeft: 25,
         paddingRight: 25,
         fontSize: 10,
@@ -229,13 +229,13 @@ const styles = StyleSheet.create({
     /* ── Recibo de pago (certificado) ── */
     certificateBox: {
         border: "0.75 solid #333",
-        padding: 10,
-        marginTop: -44,
-        marginBottom: 14,
+        padding: 7,
+        marginTop: 0,
+        marginBottom: 10,
     },
     certificateText: {
-        fontSize: 8,
-        lineHeight: 1.5,
+        fontSize: 7.5,
+        lineHeight: 1.35,
         textAlign: "justify",
     },
     signaturesRow: {
