@@ -155,6 +155,7 @@ const styles = StyleSheet.create({
         borderTop: "0.5 solid #cbd5e1",
         backgroundColor: "#F1F5F9",
         paddingTop: 4,
+        paddingBottom: 5,
         marginTop: 6,
         paddingLeft: 2,
         paddingRight: 2,
@@ -236,13 +237,6 @@ const styles = StyleSheet.create({
         textAlign: "center",
         fontSize: 9,
         color: "#555",
-    },
-    dateRow: {
-        textAlign: "right",
-        fontSize: 9,
-        color: "#555",
-        marginTop: 16,
-        marginBottom: 8,
     },
     legalFooter: {
         fontSize: 7,
@@ -540,12 +534,6 @@ export function PayslipPDF({ data }: { data: PayslipData }) {
                     <View style={styles.signatureLine}>
                         <Text style={styles.signatureText}>Firma Empleador</Text>
                     </View>
-
-                    <Text style={styles.dateRow}>Santiago, {todayString()}</Text>
-
-                    <Text style={styles.legalFooter}>
-                        Documento generado electrónicamente según Art. 2 de la Ley 19.799 — No requiere firma holográfica
-                    </Text>
 
                     <Text
                         style={styles.pageNumber}
