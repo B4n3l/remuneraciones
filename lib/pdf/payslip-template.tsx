@@ -223,19 +223,19 @@ const styles = StyleSheet.create({
     },
     /* ── Bottom ── */
     bottomSection: {
-        marginTop: "auto",
-        paddingTop: 8,
+        marginTop: 12,
+        paddingTop: 4,
     },
     /* ── Recibo de pago (certificado) ── */
     certificateBox: {
         border: "0.75 solid #333",
-        padding: 7,
+        padding: 8,
         marginTop: 0,
         marginBottom: 10,
     },
     certificateText: {
-        fontSize: 7.5,
-        lineHeight: 1.35,
+        fontSize: 8,
+        lineHeight: 1.4,
         textAlign: "justify",
     },
     signaturesRow: {
