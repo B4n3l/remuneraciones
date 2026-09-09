@@ -53,13 +53,13 @@ Remaining authored: API P1 ~330 · P2 ~310 · repo rutas+UI ~240 (repo-lib ~240 
 
 ## Phase 4: Repo routes & admin UI (next repo PR, after repo-lib merge)
 
-- [ ] 4.1 `app/api/admin/indicadores/route.ts`: split rates min(0).max(100); POST derives + writes
-- [ ] 4.2 `[id]/route.ts` PUT: parse via indicadorSchema (security fix); split fields + derive
-- [ ] 4.3 duplicate/route.ts: copy split fields + derive
-- [ ] 4.4 config/route.ts: defaults sisRate 2.0 + split fields + derive
-- [ ] 4.5 calculate/route.ts (~82): guard pre-fallback; finalized → missing-indicators error
-- [ ] 4.6 page.tsx: 3 editable rates (0.9/0.5/2.0); seguroSocial read-only
-- [ ] 4.7 Verify: lint, tsc, build; sync vs Dokploy URL + X-API-Key; PUT sans rates 400, with 200
+- [x] 4.1 `app/api/admin/indicadores/route.ts`: split rates min(0).max(100); POST derives + writes
+- [x] 4.2 `[id]/route.ts` PUT: parse via indicadorSchema (security fix); split fields + derive
+- [x] 4.3 duplicate/route.ts: copy split fields + derive
+- [x] 4.4 config/route.ts: defaults sisRate 2.0 + split fields + derive
+- [x] 4.5 calculate/route.ts (~82): guard pre-fallback; finalized → missing-indicators error
+- [x] 4.6 page.tsx: 3 editable rates (0.9/0.5/2.0); seguroSocial read-only
+- [x] 4.7 Verify: lint, tsc, build; sync vs Dokploy URL + X-API-Key; PUT sans rates 400, with 200
 
 ## Phase 5: Manual rollout & validation (ops — outside apply)
 

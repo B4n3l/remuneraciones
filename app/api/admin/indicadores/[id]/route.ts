@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { baseIndicadorSchema } from "@/lib/indicadores/schema";
+import { deriveSeguroSocialRate } from "@/lib/indicadores/rates";
 
 // GET: Get single indicador by ID
 export async function GET(
@@ -63,38 +65,42 @@ export async function PUT(
         const { id } = await params;
         const body = await request.json();
 
+        // Security fix: validate the payload instead of writing raw body.
+        const validatedData = baseIndicadorSchema.parse(body);
+
         // Update main indicador
-        const indicador = await prisma.indicadorMensual.update({
+        await prisma.indicadorMensual.update({
             where: { id },
             data: {
-                valorUF: body.valorUF,
-                valorUTM: body.valorUTM,
-                valorUTA: body.valorUTA,
-                sueldoMinimo: body.sueldoMinimo,
-                sueldoMinimoCasaPart: body.sueldoMinimoCasaPart,
-                sueldoMinimoMenores: body.sueldoMinimoMenores,
-                sueldoMinimoNoRem: body.sueldoMinimoNoRem,
-                topeImponibleAFP: body.topeImponibleAFP,
-                topeImponibleINP: body.topeImponibleINP,
-                topeSeguroCesantia: body.topeSeguroCesantia,
-                sisRate: body.sisRate,
-                seguroSocialRate: body.seguroSocialRate,
-                apvTopeMensualUF: body.apvTopeMensualUF,
-                apvTopeAnualUF: body.apvTopeAnualUF,
-            },
-            include: {
-                afpRates: true,
-                cesantiaRates: true,
-                asignacionFamiliar: true,
+                valorUF: validatedData.valorUF,
+                valorUTM: validatedData.valorUTM,
+                valorUTA: validatedData.valorUTA,
+                sueldoMinimo: validatedData.sueldoMinimo,
+                sueldoMinimoCasaPart: validatedData.sueldoMinimoCasaPart,
+                sueldoMinimoMenores: validatedData.sueldoMinimoMenores,
+                sueldoMinimoNoRem: validatedData.sueldoMinimoNoRem,
+                topeImponibleAFP: validatedData.topeImponibleAFP,
+                topeImponibleINP: validatedData.topeImponibleINP,
+                topeSeguroCesantia: validatedData.topeSeguroCesantia,
+                sisRate: validatedData.sisRate,
+                rentabilidadProtegidaRate: validatedData.rentabilidadProtegidaRate,
+                expectativaVidaRate: validatedData.expectativaVidaRate,
+                seguroSocialRate: deriveSeguroSocialRate(
+                    validatedData.rentabilidadProtegidaRate,
+                    validatedData.expectativaVidaRate,
+                    validatedData.sisRate,
+                ),
+                apvTopeMensualUF: validatedData.apvTopeMensualUF,
+                apvTopeAnualUF: validatedData.apvTopeAnualUF,
             },
         });
 
         // Update AFP rates if provided
-        if (body.afpRates) {
+        if (validatedData.afpRates) {
             // Delete existing and recreate
             await prisma.aFPHistorico.deleteMany({ where: { indicadorId: id } });
             await prisma.aFPHistorico.createMany({
-                data: body.afpRates.map((afp: { afpNombre: string; cargoTrabajador: number; cargoEmpleador: number; totalAPagar: number; independiente: number }) => ({
+                data: validatedData.afpRates.map((afp) => ({
                     indicadorId: id,
                     ...afp,
                 })),
@@ -102,10 +108,10 @@ export async function PUT(
         }
 
         // Update cesantia rates if provided
-        if (body.cesantiaRates) {
+        if (validatedData.cesantiaRates) {
             await prisma.cesantiaHistorico.deleteMany({ where: { indicadorId: id } });
             await prisma.cesantiaHistorico.createMany({
-                data: body.cesantiaRates.map((c: { tipoContrato: string; empleador: number; trabajador: number }) => ({
+                data: validatedData.cesantiaRates.map((c) => ({
                     indicadorId: id,
                     ...c,
                 })),
@@ -113,10 +119,10 @@ export async function PUT(
         }
 
         // Update asignacion familiar if provided
-        if (body.asignacionFamiliar) {
+        if (validatedData.asignacionFamiliar) {
             await prisma.asignacionFamiliarHistorico.deleteMany({ where: { indicadorId: id } });
             await prisma.asignacionFamiliarHistorico.createMany({
-                data: body.asignacionFamiliar.map((a: { tramo: string; monto: number; rentaDesde: number; rentaHasta: number | null }) => ({
+                data: validatedData.asignacionFamiliar.map((a) => ({
                     indicadorId: id,
                     ...a,
                 })),
@@ -135,6 +141,9 @@ export async function PUT(
 
         return NextResponse.json(updated);
     } catch (error) {
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({ error: error.issues }, { status: 400 });
+        }
         console.error("Error updating indicador:", error);
         return NextResponse.json(
             { error: "Error al actualizar indicador" },

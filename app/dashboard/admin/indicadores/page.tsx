@@ -43,6 +43,8 @@ interface Indicador {
     topeImponibleINP: number;
     topeSeguroCesantia: number;
     sisRate: number;
+    rentabilidadProtegidaRate: number | null;
+    expectativaVidaRate: number | null;
     seguroSocialRate: number;
     apvTopeMensualUF: number;
     apvTopeAnualUF: number;
@@ -93,8 +95,9 @@ export default function IndicadoresPage() {
         topeImponibleAFP: 89.9,
         topeImponibleINP: 60,
         topeSeguroCesantia: 135.1,
-        sisRate: 1.54,
-        seguroSocialRate: 0.9,
+        sisRate: 2.0,
+        rentabilidadProtegidaRate: 0.9,
+        expectativaVidaRate: 0.5,
         apvTopeMensualUF: 50,
         apvTopeAnualUF: 600,
     });
@@ -182,8 +185,9 @@ export default function IndicadoresPage() {
             topeImponibleAFP: 89.9,
             topeImponibleINP: 60,
             topeSeguroCesantia: 135.1,
-            sisRate: 1.54,
-            seguroSocialRate: 0.9,
+            sisRate: 2.0,
+            rentabilidadProtegidaRate: 0.9,
+            expectativaVidaRate: 0.5,
             apvTopeMensualUF: 50,
             apvTopeAnualUF: 600,
         });
@@ -225,7 +229,8 @@ export default function IndicadoresPage() {
             topeImponibleINP: Number(indicador.topeImponibleINP),
             topeSeguroCesantia: Number(indicador.topeSeguroCesantia),
             sisRate: Number(indicador.sisRate),
-            seguroSocialRate: Number(indicador.seguroSocialRate),
+            rentabilidadProtegidaRate: Number(indicador.rentabilidadProtegidaRate ?? 0),
+            expectativaVidaRate: Number(indicador.expectativaVidaRate ?? 0),
             apvTopeMensualUF: Number(indicador.apvTopeMensualUF),
             apvTopeAnualUF: Number(indicador.apvTopeAnualUF),
         });
@@ -658,7 +663,7 @@ export default function IndicadoresPage() {
                             {/* Tasas */}
                             <div>
                                 <h3 className="font-medium text-gray-900 mb-3">Tasas (%)</h3>
-                                <div className="grid grid-cols-4 gap-4">
+                                <div className="grid grid-cols-3 gap-4">
                                     <div>
                                         <label className="block text-sm text-gray-600 mb-1">SIS</label>
                                         <input
@@ -670,14 +675,35 @@ export default function IndicadoresPage() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm text-gray-600 mb-1">Seguro Social</label>
+                                        <label className="block text-sm text-gray-600 mb-1">Rentabilidad Protegida</label>
                                         <input
                                             type="number"
                                             step="0.01"
-                                            value={formData.seguroSocialRate}
-                                            onChange={(e) => setFormData({ ...formData, seguroSocialRate: parseFloat(e.target.value) || 0 })}
+                                            value={formData.rentabilidadProtegidaRate}
+                                            onChange={(e) => setFormData({ ...formData, rentabilidadProtegidaRate: parseFloat(e.target.value) || 0 })}
                                             className="w-full border rounded-lg px-3 py-2 text-gray-900"
                                         />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-600 mb-1">Expectativa de Vida</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            value={formData.expectativaVidaRate}
+                                            onChange={(e) => setFormData({ ...formData, expectativaVidaRate: parseFloat(e.target.value) || 0 })}
+                                            className="w-full border rounded-lg px-3 py-2 text-gray-900"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-600 mb-1">Seguro Social (auto)</label>
+                                        <input
+                                            type="number"
+                                            step="0.001"
+                                            value={(formData.sisRate + formData.rentabilidadProtegidaRate + formData.expectativaVidaRate).toFixed(3)}
+                                            disabled
+                                            className="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-500 cursor-not-allowed"
+                                        />
+                                        <p className="text-xs text-gray-400 mt-1">Derivado: SIS + 0.9 + 0.5</p>
                                     </div>
                                     <div>
                                         <label className="block text-sm text-gray-600 mb-1">APV Mensual (UF)</label>

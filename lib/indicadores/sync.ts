@@ -27,11 +27,12 @@ export async function syncIndicadoresFromAPI(year: number, month: number) {
 
   let responseData: unknown;
   try {
-    const url = new URL(INDICADORES_API_URL);
-    url.searchParams.set("year", String(year));
-    url.searchParams.set("month", String(month));
+    // Flat contract lives at `/api/v1/indicadores/{year}/{month}` (path params,
+    // not query params). The deployed Python API rejects query-param lookups.
+    const baseUrl = INDICADORES_API_URL.replace(/\/+$/, "");
+    const url = `${baseUrl}/${year}/${month}`;
 
-    const res = await fetch(url.toString(), {
+    const res = await fetch(url, {
       headers: {
         "X-API-Key": INDICADORES_API_KEY,
       },
