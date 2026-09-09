@@ -1,20 +1,9 @@
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { indicadorSchema } from "@/app/api/admin/indicadores/route";
 import { sendAlertEmail } from "@/lib/email";
-
-const externalIndicadorSchema = indicadorSchema.extend({
-  impuestoTramos: z
-    .array(
-      z.object({
-        desde: z.coerce.number(),
-        hasta: z.coerce.number().nullable(),
-        factor: z.coerce.number(),
-        cantidadRebajar: z.coerce.number(),
-      })
-    )
-    .optional(),
-});
+import { externalIndicadorSchema } from "./schema";
+import { checkPeriodoFinalizado } from "./period-guard";
+import { deriveSeguroSocialRate } from "./rates";
 
 const INDICADORES_API_URL = process.env.INDICADORES_API_URL;
 const INDICADORES_API_KEY = process.env.INDICADORES_API_KEY;
@@ -25,6 +14,15 @@ export async function syncIndicadoresFromAPI(year: number, month: number) {
       success: false,
       error: "Faltan variables de entorno INDICADORES_API_URL o INDICADORES_API_KEY",
     };
+  }
+
+  // Finalized-period guard: abort before any network call if a PayrollPeriod
+  // for this yearMonth is LIQUIDADA/PAGADA (data integrity).
+  try {
+    await checkPeriodoFinalizado(year, month);
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    return { success: false, error: errorMessage };
   }
 
   let responseData: unknown;
@@ -90,7 +88,13 @@ export async function syncIndicadoresFromAPI(year: number, month: number) {
           topeImponibleINP: validatedData.topeImponibleINP,
           topeSeguroCesantia: validatedData.topeSeguroCesantia,
           sisRate: validatedData.sisRate,
-          seguroSocialRate: validatedData.seguroSocialRate,
+          rentabilidadProtegidaRate: validatedData.rentabilidadProtegidaRate,
+          expectativaVidaRate: validatedData.expectativaVidaRate,
+          seguroSocialRate: deriveSeguroSocialRate(
+            validatedData.rentabilidadProtegidaRate,
+            validatedData.expectativaVidaRate,
+            validatedData.sisRate,
+          ),
           apvTopeMensualUF: validatedData.apvTopeMensualUF,
           apvTopeAnualUF: validatedData.apvTopeAnualUF,
           afpRates: validatedData.afpRates
