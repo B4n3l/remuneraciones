@@ -70,7 +70,10 @@ describe("GET /indicadores validation", () => {
 
 describe("GET /indicadores cache & fetch", () => {
   it("returns 404 when no data is available for the month", async () => {
-    const res = await makeApp().request("/indicadores?year=2026&month=3", {
+    // The real pipeline is the default; inject a "no data" scraper to assert the
+    // 404 contract (null → 404) without touching real sources.
+    const noData: IndicadoresScraper = { fetch: async () => null };
+    const res = await makeApp(noData).request("/indicadores?year=2026&month=3", {
       headers: AUTH,
     });
     expect(res.status).toBe(404);

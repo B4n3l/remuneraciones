@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import type { Config } from "./config.js";
-import { createCache } from "./cache.js";
+import { createCache, type IndicadoresCache } from "./cache.js";
 import type { IndicadoresScraper } from "./scraper.js";
-import { stubScraper } from "./scraper.js";
+import { createIndicadoresScraper } from "./scrapers/index.js";
 import { healthRoutes } from "./routes/health.js";
 import { indicadoresRoutes } from "./routes/indicadores.js";
 import { cronRoutes } from "./routes/cron.js";
@@ -10,16 +10,18 @@ import { cronRoutes } from "./routes/cron.js";
 export interface AppOptions {
   config: Config;
   scraper?: IndicadoresScraper;
+  cache?: IndicadoresCache;
 }
 
 /**
- * Builds the Hono app. The scraper is injectable so tests can supply a fake
- * without touching real sources; it defaults to the PR1a stub.
+ * Builds the Hono app. The scraper and cache are injectable so tests can supply
+ * fakes; both default to the real pipeline (Previred + SII + mindicador fallback)
+ * and a fresh in-memory cache.
  */
 export function createApp(options: AppOptions): Hono {
   const config = options.config;
-  const scraper = options.scraper ?? stubScraper;
-  const cache = createCache();
+  const scraper = options.scraper ?? createIndicadoresScraper(config);
+  const cache = options.cache ?? createCache();
 
   const app = new Hono();
 

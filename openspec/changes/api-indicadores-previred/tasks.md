@@ -37,12 +37,12 @@ PR1a+PR1b = stacked PR1; PR1a opens chain; strategy pending.
 
 ## Phase 2: Microservice scrapers & cron (PR1b)
 
-- [ ] 2.1 Create `src/parsers/numeric.ts`: es-CL parsing (1.234,56)
-- [ ] 2.2 Create `src/parsers/previred-v1.ts`: anchored sections; ParseError w/ missing fields
-- [ ] 2.3 Create `src/scrapers/{previred,sii,fallback}.ts`; fallback mindicador (UF/UTM/UTA)
-- [ ] 2.4 Create `src/cron.ts` (day 1–3 06:00) + `src/alert.ts`
-- [ ] 2.5 No-partial-serve: incomplete → alert + error, never serve
-- [ ] 2.6 Vitest: numeric, drift fixtures, top tramo hasta=null
+- [x] 2.1 Create `src/parsers/numeric.ts`: es-CL parsing (1.234,56)
+- [x] 2.2 Create `src/parsers/previred-v1.ts`: anchored sections; ParseError w/ missing fields
+- [x] 2.3 Create `src/scrapers/{previred,sii,fallback}.ts`; fallback mindicador (UF/UTM/UTA)
+- [x] 2.4 Create `src/cron.ts` (day 1–3 06:00) + `src/alert.ts`
+- [x] 2.5 No-partial-serve: incomplete → alert + error, never serve
+- [x] 2.6 Vitest: numeric, drift fixtures, top tramo hasta=null
 
 ## Phase 3: Schema, SQL & repo lib (PR2)
 
