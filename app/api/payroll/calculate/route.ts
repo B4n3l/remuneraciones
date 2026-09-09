@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { calculatePayroll } from "@/lib/payroll/simple-engine";
 import { syncIndicadoresFromAPI } from "@/lib/indicadores/sync";
+import { checkPeriodoFinalizado } from "@/lib/indicadores/period-guard";
 
 const calculateSchema = z.object({
     companyId: z.string().min(1, "companyId es requerido"),
@@ -79,6 +80,20 @@ export async function POST(request: Request) {
     });
 
     if (!indicadorMensual) {
+      // Finalized-period guard: a LIQUIDADA/PAGADA period must not trigger an
+      // on-the-fly sync (which could overwrite finalized data). Abort before
+      // any network call and surface the missing-indicators error.
+      try {
+        await checkPeriodoFinalizado(year, month);
+      } catch {
+        return NextResponse.json(
+          {
+            error: `No hay indicadores previsionales para ${month}/${year} y el período está finalizado.`,
+          },
+          { status: 400 }
+        );
+      }
+
       // Fallback: try syncing from external API on-the-fly
       try {
         const syncResult = await syncIndicadoresFromAPI(year, month);
