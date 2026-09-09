@@ -2,58 +2,12 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { baseIndicadorSchema } from "@/lib/indicadores/schema";
+import { deriveSeguroSocialRate } from "@/lib/indicadores/rates";
 
-// Validation schema for creating/updating indicadores
-export const indicadorSchema = z.object({
-    year: z.number().min(2020).max(2100),
-    month: z.number().min(1).max(12),
-
-    // Valores monetarios
-    valorUF: z.number().positive(),
-    valorUTM: z.number().positive(),
-    valorUTA: z.number().positive(),
-
-    // Sueldos mínimos
-    sueldoMinimo: z.number().positive(),
-    sueldoMinimoCasaPart: z.number().positive(),
-    sueldoMinimoMenores: z.number().positive(),
-    sueldoMinimoNoRem: z.number().positive(),
-
-    // Topes en UF
-    topeImponibleAFP: z.number().positive(),
-    topeImponibleINP: z.number().positive(),
-    topeSeguroCesantia: z.number().positive(),
-
-    // Tasas
-    sisRate: z.number().min(0).max(100),
-    seguroSocialRate: z.number().min(0).max(100),
-
-    // APV
-    apvTopeMensualUF: z.number().positive(),
-    apvTopeAnualUF: z.number().positive(),
-
-    // Related data (optional on create, can be added later)
-    afpRates: z.array(z.object({
-        afpNombre: z.string(),
-        cargoTrabajador: z.number(),
-        cargoEmpleador: z.number(),
-        totalAPagar: z.number(),
-        independiente: z.number(),
-    })).optional(),
-
-    cesantiaRates: z.array(z.object({
-        tipoContrato: z.string(),
-        empleador: z.number(),
-        trabajador: z.number(),
-    })).optional(),
-
-    asignacionFamiliar: z.array(z.object({
-        tramo: z.string(),
-        monto: z.number(),
-        rentaDesde: z.number(),
-        rentaHasta: z.number().nullable(),
-    })).optional(),
-});
+// Admin schema: base fields only. `seguroSocialRate` is derived server-side
+// (never accepted as input). `impuestoTramos` is excluded from admin input.
+export const indicadorSchema = baseIndicadorSchema;
 
 // GET: List all indicadores or filter by year
 export async function GET(request: Request) {
@@ -141,7 +95,13 @@ export async function POST(request: Request) {
                 topeImponibleINP: validatedData.topeImponibleINP,
                 topeSeguroCesantia: validatedData.topeSeguroCesantia,
                 sisRate: validatedData.sisRate,
-                seguroSocialRate: validatedData.seguroSocialRate,
+                rentabilidadProtegidaRate: validatedData.rentabilidadProtegidaRate,
+                expectativaVidaRate: validatedData.expectativaVidaRate,
+                seguroSocialRate: deriveSeguroSocialRate(
+                    validatedData.rentabilidadProtegidaRate,
+                    validatedData.expectativaVidaRate,
+                    validatedData.sisRate,
+                ),
                 apvTopeMensualUF: validatedData.apvTopeMensualUF,
                 apvTopeAnualUF: validatedData.apvTopeAnualUF,
                 afpRates: validatedData.afpRates ? {
