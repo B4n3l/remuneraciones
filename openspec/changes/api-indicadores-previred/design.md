@@ -2,90 +2,154 @@
 
 ## Technical Approach
 
-Two coordinated deliverables. (1) A new self-contained Node+TS microservice (`services/indicadores-api/`, Docker-ready, candidate to split into its own git repo at deploy time) that owns Previred PDF + SII circular scraping, monthly cron, in-memory cache, and serves the contract via `GET /indicadores` guarded by `X-API-Key`. (2) In-repo changes: Ley 21.735 split rates, derived `seguroSocialRate`, finalized-period guard, zod schemas, manual SQL migration, admin UI. Both specs (`previred-api`, `indicadores-sync`) are satisfied; the engine is untouched (verified: `simple-engine.ts` consumes no rate).
+Reuse and adapt the existing Python FastAPI service (`cgomezadolfo/API-Indicadores-Previsionales`) as the `previred-api` microservice, deploy it on Dokploy, and make it emit the flat English contract already required by `indicadores-sync`. The repo side keeps the previously designed schema/SQL/lib/routes/UI changes; only the upstream URL/key references are updated to point to the Python service.
 
 ## Architecture Decisions
 
-### Decision: Microservice stack
+### Decision: Legacy endpoint shape
 
 | Option | Tradeoff | Decision |
 |---|---|---|
-| Hono (node adapter) | ~10KB, TS-first, trivially Dockerized | **Chosen** |
-| Fastify | Rich plugins/validation, heavier footprint | Rejected — single endpoint, no plugin need |
-| Express | Mature but untyped core | Rejected |
+| Replace `GET /api/v1/indicadores/{year}/{month}` with flat contract | Breaking change, but the only consumer is the remuneraciones sync which has not switched on yet | **Chosen** |
+| Keep old Spanish nested shape under a new path | Extra maintenance; no known consumer | Rejected |
+| Version the path (`/v2/...`) | Requires repo sync URL change and leaves stale `/v1` | Rejected — spec mandates `/v1` flat |
 
-pino structured logging; zod contract validation (mirrors repo style); node-cron in-process (day 1–3, 06:00 America/Santiago) plus authed `POST /cron/refresh` for ops/external schedulers. Cache: in-memory `Map<"YYYY-MM", {data, fetchedAt}>` — single-instance service; the repo DB is the durable store. Redis only if multi-instance later (VPS). API key: `INDICADORES_SERVICE_API_KEY` env, constant-time compare (`crypto.timingSafeEqual`), `X-API-Key` header, `401` before any scrape/cache read.
+The old `build_period_response` is replaced by `build_flat_contract` on the public endpoint. Admin `PUT /api/v1/admin/indicadores/{year}/{month}` keeps the internal parser shape for manual backfill.
 
-### Decision: Parser versioning and no-partial-serve
-
-`parsePreviredV1(text, year, month)` extracts by anchored section headings with tolerant es-CL numeric parsing (`1.234,56`). Missing required field → `ParseError` listing the missing fields → alert + error response, never partial data (spec). SII tramos: top bracket `hasta=null`. Fallback: mindicador.cl for UF/UTM/UTA only; if still incomplete after fallback → alert, no serve. SII/Previred source URLs are env-configurable for drift recovery.
-
-### Decision: seguroSocialRate population (pending decision — resolved: option a)
+### Decision: SII impuestoTramos source
 
 | Option | Tradeoff | Decision |
 |---|---|---|
-| (a) Derive server-side at every write | Column always = rentaProtegida + expectativaVida + sis (0.9+0.5+2.0=3.4); keeps NOT NULL; audit-consistent | **Chosen** |
-| (b) Nullable, legacy-only | Requires ALTER DROP NOT NULL; column meaningless for new rows | Rejected |
-| (c) Drop from writes | NOT NULL fails on create; no consistency guarantee | Rejected |
+| Hard-code `https://www.sii.cl/valores_y_fechas/impuesto_2da_categoria/impuesto{year}.htm` | Works today for 2026, but URL pattern may drift | Rejected as only source |
+| Env-configurable `SII_CIRCULAR_URL` with optional `{year}` placeholder, parser anchored on "MENSUAL" and month heading | Robust to URL drift; manual discovery documented | **Chosen** |
 
-Shared helper `deriveSeguroSocialRate()` in `lib/indicadores/rates.ts` (sum, round 3 decimals), called from sync.ts, admin POST/PUT, duplicate, config create. Microservice contract excludes the field (decision #5), so `externalIndicadorSchema` omits it and sync derives before write. Existing rows: migration does NOT touch `seguroSocialRate` (spec: no overwrite). New columns are NULLABLE; backfilled only for rows `>= 2024-09` (Ley 21.735 in force) with the legal 0.9/0.5; earlier rows stay NULL — harmless, engine doesn't read them. UI: three split rates editable, `seguroSocialRate` read-only audit display.
+If the SII page is unreachable or the monthly table cannot be anchored, the scrape records `status=partial` and the read guard refuses to serve the period.
 
-### Decision: Finalized-period guard
+### Decision: impuestoTramos storage
 
-`checkPeriodoFinalizado(year, month)` in new `lib/indicadores/period-guard.ts`: `PayrollPeriod.findMany({ where: { yearMonth: `${year}-${String(month).padStart(2,"0")}`, status: { in: [LIQUIDADA, PAGADA] } } })` — non-empty aborts. Called inside `syncIndicadoresFromAPI` (covers manual sync and calculate fallback) and explicitly in the calculate route before the fallback fetch (avoids a wasted network call). BORRADOR/none → overwrite allowed (current delete+create).
+| Option | Tradeoff | Decision |
+|---|---|---|
+| Dedicated `impuesto_tramos` table (FK to `periods`) | Mirrors repo schema, queryable, easy to validate completeness | **Chosen** |
+| JSONB column on `periods` | Simpler schema, but harder to query/validate | Rejected |
+
+### Decision: Fixed Ley 21.735 rates
+
+| Option | Tradeoff | Decision |
+|---|---|---|
+| Constants in `app/config.py`, applied in flat builder | Single source of truth, easy to test, no scraper dependency | **Chosen** |
+| Hard-code in scraper | Would require re-scrape to change | Rejected |
+
+`RENTABILIDAD_PROTEGIDA_RATE = Decimal("0.9")`, `EXPECTATIVA_VIDA_RATE = Decimal("0.5")`. `sisRate` continues to be scraped from Previred.
+
+### Decision: No-partial-serve guard
+
+| Option | Tradeoff | Decision |
+|---|---|---|
+| Read guard rejects `status != "complete"` or missing SII tramos with `500 {error}` | Meets spec; safe failure | **Chosen** |
+| Serve partial data with a warning | Violates spec | Rejected |
+
+The guard lives in `app/services/indicators.py` and is called by the public GET endpoint before building the contract.
+
+### Decision: Error format
+
+| Option | Tradeoff | Decision |
+|---|---|---|
+| Global FastAPI exception handler returning `{ "error": string }` | Consistent 400/401/404/500 | **Chosen** |
+| Per-route wrappers | Easy to miss paths | Rejected |
 
 ## Data Flow
 
 ```
-Previred PDF ─┐
-SII circular ─┼─► parseV1 ─► zod contract ─► cache Map ─► GET /indicadores?year&month (X-API-Key)
-mindicador ───┘      │                                  ▲
-                     └─ ParseError ─► alert ── 404/500 ──┘
+SII circular ──┐
+Previred page ─┼─► scraper/parsers ─► normalized DB ─► flat builder ─► GET /api/v1/indicadores/{y}/{m}
+               │                                          │
+               └─ parse/validation failure ─► fetch_log + alert ◄┘
 
-Repo: sync.ts ─► guard? ─► fetch microservice ─► zod external ─► derive seguroSocial ─► tx delete+create
-      calculate/route ─► guard? ─► (skip sync, return missing-indicators 400)
+Repo: sync.ts ─► period guard ─► fetch API ─► externalIndicadorSchema ─► derive seguroSocialRate ─► Prisma tx
 ```
 
 ## File Changes
 
+### API-Indicadores-Previsionales (Python)
+
 | File | Action | Description |
 |---|---|---|
-| `services/indicadores-api/{src/{index,app,auth,cache,cron,contract,alert,config}.ts, src/routes/{health,indicadores,cron}.ts, src/scrapers/{previred,sii,fallback}.ts, src/parsers/{previred-v1,numeric}.ts, Dockerfile, .env.example, package.json, tsconfig.json}` | Create | Standalone microservice (own package.json; split-ready) |
-| `prisma/schema.prisma` | Modify | `rentabilidadProtegidaRate`, `expectativaVidaRate` — `Decimal? @db.Decimal(5,3)` on IndicadorMensual |
-| `prisma/migrations/add_ley21735_split_rates.sql` | Create | Idempotent `ADD COLUMN IF NOT EXISTS` + conditional backfill; no overwrite |
-| `lib/indicadores/rates.ts` | Create | Rate constants (0.9 / 0.5 / 2.0) + `deriveSeguroSocialRate` |
+| `app/config.py` | Modify | Add `sii_circular_url`, `rentabilidad_protegida_rate`, `expectativa_vida_rate` |
+| `app/models.py` | Modify | Add `ImpuestoTramo` model; relationship on `Period` |
+| `alembic/versions/...add_impuesto_tramos.py` | Create | New table `impuesto_tramos` |
+| `app/scraper/sii.py` | Create | Fetch SII circular and parse monthly brackets |
+| `app/scraper/previred.py` | Modify | Add `impuesto_tramos` to required sections |
+| `app/services/indicators.py` | Modify | Persist tramos; add `assert_complete_period`; add `build_flat_contract` |
+| `app/services/fetcher.py` | Modify | Call SII scraper, merge tramos into parsed data, log failures |
+| `app/routers/indicators.py` | Modify | Public endpoint returns flat contract; category endpoint kept for admin |
+| `app/main.py` | Modify | Global `{error}` exception handler |
+| `app/auth.py` | None | Already uses `X-API-Key` and constant-time hash compare |
+| `Dockerfile` / `docker-compose.yml` | Modify | Expose `SII_CIRCULAR_URL`, env-gated scheduler, healthcheck |
+| `tests/test_sii_parser.py` | Create | Fixtures + parser tests |
+| `tests/test_flat_contract.py` | Create | Builder completeness and fixed-rate tests |
+| `tests/test_api.py` | Modify | Assert flat contract shape on public GET |
+
+### remuneraciones (repo side)
+
+| File | Action | Description |
+|---|---|---|
+| `prisma/schema.prisma` | Modify | Add `rentabilidadProtegidaRate`, `expectativaVidaRate` to `IndicadorMensual` |
+| `prisma/migrations/add_ley21735_split_rates.sql` | Create | Idempotent additive columns; no overwrite of `seguroSocialRate` |
+| `lib/indicadores/rates.ts` | Create | Constants + `deriveSeguroSocialRate` |
 | `lib/indicadores/period-guard.ts` | Create | `checkPeriodoFinalizado` |
-| `lib/indicadores/sync.ts` | Modify | `baseIndicadorSchema`/`externalIndicadorSchema`, guard, derive, new fields |
-| `app/api/admin/indicadores/route.ts` | Modify | `indicadorSchema` split rates; POST derives + writes new fields |
-| `app/api/admin/indicadores/[id]/route.ts` | Modify | PUT new fields + derive (+ zod validation — currently writes raw body) |
-| `app/api/admin/indicadores/duplicate/route.ts` | Modify | Copy new fields + derive |
-| `app/api/admin/config/route.ts` | Modify | Defaults sisRate 2.0 + split fields + derive |
-| `app/api/payroll/calculate/route.ts` | Modify | Guard before fallback sync (line ~82) |
-| `app/dashboard/admin/indicadores/page.tsx` | Modify | 3 editable rates (default 0.9/0.5/2.0), seguroSocial read-only, interface |
-| `lib/payroll/simple-engine.ts` | None | Verified — no rate consumption |
+| `lib/indicadores/sync.ts` | Modify | Use path-params URL, zod split rates, guard, derive |
+| `app/api/admin/indicadores/route.ts` | Modify | Split rates in schema/POST; derive |
+| `app/api/admin/indicadores/[id]/route.ts` | Modify | PUT split rates + zod validation + derive |
+| `app/api/admin/indicadores/duplicate/route.ts` | Modify | Copy split rates + derive |
+| `app/api/admin/config/route.ts` | Modify | Default `sisRate` 2.0 + split fields |
+| `app/api/payroll/calculate/route.ts` | Modify | Guard before fallback sync |
+| `app/dashboard/admin/indicadores/page.tsx` | Modify | Editable split rates, `seguroSocialRate` read-only |
 
 ## Interfaces / Contracts
 
-`200` contract (no `seguroSocialRate`): `{ year, month, valorUF, valorUTM, valorUTA, sueldoMinimo, sueldoMinimoCasaPart, sueldoMinimoMenores, sueldoMinimoNoRem, topeImponibleAFP, topeImponibleINP, topeSeguroCesantia, sisRate, rentabilidadProtegidaRate, expectativaVidaRate, apvTopeMensualUF, apvTopeAnualUF, afpRates[], cesantiaRates[], asignacionFamiliar[], impuestoTramos[] }`. Errors: `{ error: string }` (401/400/404/500).
+Public `200` response body:
 
-Zod (repo): `baseIndicadorSchema` = current minus `seguroSocialRate`, split rates `number().min(0).max(100)`; `indicadorSchema = baseIndicadorSchema` (admin); `externalIndicadorSchema = baseIndicadorSchema.extend({ impuestoTramos })` (microservice). `seguroSocialRate` never in inputs — only derived.
+```json
+{
+  "year": 2026, "month": 6,
+  "valorUF": 40820.31, "valorUTM": 71506, "valorUTA": 858072,
+  "sueldoMinimo": 553553, "sueldoMinimoCasaPart": 553553,
+  "sueldoMinimoMenores": 412938, "sueldoMinimoNoRem": 356815,
+  "topeImponibleAFP": 90, "topeImponibleINP": 60,
+  "topeSeguroCesantia": 135.2,
+  "sisRate": 1.62,
+  "rentabilidadProtegidaRate": 0.9,
+  "expectativaVidaRate": 0.5,
+  "apvTopeMensualUF": 50, "apvTopeAnualUF": 600,
+  "afpRates": [...], "cesantiaRates": [...],
+  "asignacionFamiliar": [...],
+  "impuestoTramos": [{"desde", "hasta": null, "factor", "cantidadRebajar"}]
+}
+```
+
+Topes/APV are raw UF values. Errors: `{ "error": "..." }`.
 
 ## Testing Strategy
 
 | Layer | What | Approach |
 |---|---|---|
-| Unit (microservice) | parsers, es-CL numeric, tramos, contract | vitest (new dep in microservice only) |
-| Route (microservice) | 401 (no work), 400, 404, 200-cached | Hono `app.request` |
-| Repo | build, lint, guard behavior | `npm run build` + `npm run lint` + manual API checks + drift SQL query |
+| Unit (Python) | SII parser fixtures, flat builder, no-partial guard, fixed rates | pytest |
+| Route (Python) | 401 no-work, 400 params, 404 missing, 200 flat, 500 partial | `httpx` ASGI transport |
+| Repo | Build, lint, drift check, guard behavior | `npm run build` + `npm run lint` + manual API checks |
 
 ## Threat Matrix
 
-N/A — no shell/subprocess/VCS/PR-automation/executable-classification boundary in this change; the HTTP auth boundary is covered by spec scenarios (401 no-work, 400 params, 404 no-data).
+N/A — no shell/subprocess/VCS/PR-automation/executable-classification boundary; HTTP auth and no-partial-serve are covered by spec scenarios.
 
 ## Migration / Rollout
 
-1. Drift check first: user runs read-only `information_schema.columns` query on `IndicadorMensual` in Supabase SQL Editor and shares output (P2022/P2021 precedent). 2. Apply `add_ley21735_split_rates.sql` before deploying code. 3. Deploy microservice (local/Railway/Fly now, Docker for VPS later); set `INDICADORES_SERVICE_API_KEY` + URLs. 4. Deploy repo code. Rollback: `git revert` code; revoke microservice API key / disable cron; SQL is additive — no revert needed.
+1. **Repo DB**: run drift query, apply `add_ley21735_split_rates.sql`, regenerate Prisma client.
+2. **Python service**: add Alembic migration, merge to main, build Dokploy image in project `IndicadoresPrevisionales`, set `DATABASE_URL`, `ADMIN_API_KEY`, `SII_CIRCULAR_URL`, `SCHEDULER_ENABLED=true`.
+3. **Repo deploy**: update env `INDICADORES_API_URL` to `https://<dokploy-host>/api/v1/indicadores` and `INDICADORES_API_KEY`.
+4. **Validation**: hit health endpoint, trigger manual fetch, sync one period from repo, verify flat contract and DB rows.
+
+Rollback: disable Dokploy deployment / scheduler; repo code revert; DB migration is additive.
 
 ## Open Questions
 
-None — pending decision resolved (option a: derive server-side).
+- None — architecture decision (reuse Python service) is already taken.
