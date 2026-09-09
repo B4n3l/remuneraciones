@@ -46,12 +46,12 @@ PR1a+PR1b = stacked PR1; PR1a opens chain; strategy pending.
 
 ## Phase 3: Schema, SQL & repo lib (PR2)
 
-- [ ] 3.1 prisma/schema.prisma: add both split rates `Decimal? @db.Decimal(5,3)` to IndicadorMensual
-- [ ] 3.2 Create `prisma/migrations/add_ley21735_split_rates.sql`: idempotent ADD COLUMN, backfill `>= 2024-09`, keep seguroSocialRate
-- [ ] 3.3 Create `lib/indicadores/rates.ts`: constants + deriveSeguroSocialRate()
-- [ ] 3.4 Create `lib/indicadores/period-guard.ts`: checkPeriodoFinalizado blocks LIQUIDADA/PAGADA
-- [ ] 3.5 Modify `lib/indicadores/sync.ts`: base/external schemas, guard, derive; break route import cycle
-- [ ] 3.6 Verify: tsc, build; record drift SQL
+- [x] 3.1 prisma/schema.prisma: add both split rates `Decimal? @db.Decimal(5,3)` to IndicadorMensual
+- [x] 3.2 Create `prisma/migrations/add_ley21735_split_rates.sql`: idempotent ADD COLUMN, backfill `>= 2024-09`, keep seguroSocialRate
+- [x] 3.3 Create `lib/indicadores/rates.ts`: constants + deriveSeguroSocialRate()
+- [x] 3.4 Create `lib/indicadores/period-guard.ts`: checkPeriodoFinalizado blocks LIQUIDADA/PAGADA
+- [x] 3.5 Modify `lib/indicadores/sync.ts`: base/external schemas, guard, derive; break route import cycle
+- [x] 3.6 Verify: tsc, build; record drift SQL
 
 ## Phase 4: Repo routes & admin UI (PR3)
 
