@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { LEY_21735_RATES, deriveSeguroSocialRate } from "@/lib/indicadores/rates";
 
 const duplicateSchema = z.object({
     sourceYear: z.number(),
@@ -67,6 +68,18 @@ export async function POST(request: Request) {
             );
         }
 
+        // Derive split rates from source, falling back to legal constants for
+        // legacy rows predating the Ley 21.735 backfill (nullable columns).
+        const rentabilidadProtegidaRate =
+            source.rentabilidadProtegidaRate !== null
+                ? Number(source.rentabilidadProtegidaRate)
+                : LEY_21735_RATES.rentabilidadProtegidaRate;
+        const expectativaVidaRate =
+            source.expectativaVidaRate !== null
+                ? Number(source.expectativaVidaRate)
+                : LEY_21735_RATES.expectativaVidaRate;
+        const sisRate = Number(source.sisRate);
+
         // Create new indicador with duplicated data
         const newIndicador = await prisma.indicadorMensual.create({
             data: {
@@ -82,8 +95,14 @@ export async function POST(request: Request) {
                 topeImponibleAFP: source.topeImponibleAFP,
                 topeImponibleINP: source.topeImponibleINP,
                 topeSeguroCesantia: source.topeSeguroCesantia,
-                sisRate: source.sisRate,
-                seguroSocialRate: source.seguroSocialRate,
+                sisRate,
+                rentabilidadProtegidaRate,
+                expectativaVidaRate,
+                seguroSocialRate: deriveSeguroSocialRate(
+                    rentabilidadProtegidaRate,
+                    expectativaVidaRate,
+                    sisRate,
+                ),
                 apvTopeMensualUF: source.apvTopeMensualUF,
                 apvTopeAnualUF: source.apvTopeAnualUF,
                 afpRates: {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { LEY_21735_RATES, deriveSeguroSocialRate } from "@/lib/indicadores/rates";
 
 const configSchema = z.object({
     valorUF: z.coerce.number().positive(),
@@ -90,8 +91,14 @@ export async function PUT(request: NextRequest) {
                 topeImponibleAFP: 89.9,
                 topeImponibleINP: 60,
                 topeSeguroCesantia: 135.1,
-                sisRate: 1.54,
-                seguroSocialRate: 0.93,
+                sisRate: LEY_21735_RATES.sisRate,
+                rentabilidadProtegidaRate: LEY_21735_RATES.rentabilidadProtegidaRate,
+                expectativaVidaRate: LEY_21735_RATES.expectativaVidaRate,
+                seguroSocialRate: deriveSeguroSocialRate(
+                    LEY_21735_RATES.rentabilidadProtegidaRate,
+                    LEY_21735_RATES.expectativaVidaRate,
+                    LEY_21735_RATES.sisRate,
+                ),
                 apvTopeMensualUF: 50,
                 apvTopeAnualUF: 600,
             },
