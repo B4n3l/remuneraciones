@@ -1,0 +1,66 @@
+# openspec/config.yaml
+schema: spec-driven
+
+context: |
+  Tech stack: Next.js 16 (App Router) + React 19 + TypeScript 5 (strict) + Tailwind v4 +
+  Prisma 5.22 + PostgreSQL (Supabase) + NextAuth v5 (Auth.js).
+  Architecture: route groups (dashboard/portal/login/register) + API routes in app/api;
+  domain logic lives in lib/ (payroll/, pdf/, indicadores/, vacaciones/, feriados/) on the server.
+  Domain: Chilean multi-tenant payroll (multi-empresa, liquidaciones, PDF generation via @react-pdf/renderer).
+  DB conventions: NO prisma migrate. Schema changes are applied manually in the Supabase SQL Editor
+  BEFORE deploying the code that needs them; versioned reference SQL lives in prisma/migrations/*.sql.
+  Known DB drift: verify production via information_schema before writing migrations (P2022/P2021 seen before).
+  Deploy: push to main -> Vercel autodeploy (intranet.centrocontable.cl); NEXT_PUBLIC_* baked at build time.
+  Cross-session state: docs/ROADMAP.md is the source of truth; docs/MIGRACION-VPS.md covers VPS migration.
+
+strict_tdd: false
+
+testing:
+  strict_tdd: false
+  detected: "2026-09-08"
+  reason: "No test runner present (no test scripts, deps, dirs, or binaries). Standard Mode until a runner is added."
+  runner:
+    command: ""
+    framework: none
+  layers:
+    unit: false
+    integration: false
+    e2e: false
+  coverage:
+    available: false
+    command: ""
+  quality:
+    linter: "eslint"
+    linter_command: "npm run lint"
+    type_checker: "tsc"
+    type_checker_command: "npx tsc --noEmit"
+    formatter: none
+    formatter_command: ""
+
+rules:
+  proposal:
+    - Include rollback plan for DB-affecting changes (schema SQL must be applied manually before deploy)
+    - Flag when a change touches the Prisma schema: it requires a manual SQL migration first
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - Reference docs/ROADMAP.md state when a spec changes documented behavior
+  design:
+    - Follow existing server-centric layering: route handlers thin, logic in lib/
+    - Document DB drift risks (P2022/P2021) when the design touches the schema
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    guidelines:
+      - Follow existing code patterns and lib/ domain organization
+      - Do NOT run prisma migrate; never touch production credentials
+    tdd: false
+    test_command: ""
+  verify:
+    test_command: ""
+    build_command: "npm run build"
+    lint_command: "npm run lint"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
