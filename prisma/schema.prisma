@@ -299,10 +299,10 @@ model IndicadorMensual {
   topeSeguroCesantia    Decimal  @db.Decimal(10, 2)  // 135.1 UF Cesantía
   
   // Tasas generales
-  sisRate               Decimal  @db.Decimal(5, 3)   // 1.54% SIS
-  seguroSocialRate      Decimal  @db.Decimal(5, 3)   // 0.9% Expectativa vida
+  sisRate               Decimal  @db.Decimal(5, 3)   // 1.78% SIS (Ley 21.735)
+  seguroSocialRate      Decimal  @db.Decimal(5, 3)   // 3.4% Seguro social total (derivado: 0.9 + 0.72 + 1.78)
   rentabilidadProtegidaRate Decimal? @db.Decimal(5, 3) // 0.9% Rentabilidad protegida (Ley 21.735)
-  expectativaVidaRate       Decimal? @db.Decimal(5, 3) // 0.5% Expectativa de vida (Ley 21.735)
+  expectativaVidaRate       Decimal? @db.Decimal(5, 3) // 0.72% Expectativa de vida (Ley 21.735)
   
   // APV Topes (en UF)
   apvTopeMensualUF      Decimal  @db.Decimal(10, 2)  // 50 UF
