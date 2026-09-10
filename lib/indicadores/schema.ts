@@ -48,7 +48,7 @@ export const baseIndicadorSchema = z.object({
         cargoTrabajador: z.number(),
         cargoEmpleador: z.number(),
         totalAPagar: z.number(),
-        independiente: z.number(),
+        independiente: z.number().nullable(),
       }),
     )
     .optional(),

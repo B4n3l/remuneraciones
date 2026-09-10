@@ -32,14 +32,23 @@ If the SII page is unreachable or the monthly table cannot be anchored, the scra
 | Dedicated `impuesto_tramos` table (FK to `periods`) | Mirrors repo schema, queryable, easy to validate completeness | **Chosen** |
 | JSONB column on `periods` | Simpler schema, but harder to query/validate | Rejected |
 
-### Decision: Fixed Ley 21.735 rates
+### Decision: Scraped Ley 21.735 rates (changed during apply)
 
 | Option | Tradeoff | Decision |
 |---|---|---|
-| Constants in `app/config.py`, applied in flat builder | Single source of truth, easy to test, no scraper dependency | **Chosen** |
-| Hard-code in scraper | Would require re-scrape to change | Rejected |
+| Scrape `rentabilidadProtegidaRate`, `expectativaVidaRate` and `sisRate` from Previred's "Seguro Social" table | Reflects the current legal values Previred publishes (can change by calendar); adds a scraper dependency for these fields | **Chosen** |
+| Constants in `app/config.py` | Single source of truth, easy to test, but hardcodes a value that drifts (e.g. 0.5 vs the 0.72 Previred publishes) | Rejected |
 
-`RENTABILIDAD_PROTEGIDA_RATE = Decimal("0.9")`, `EXPECTATIVA_VIDA_RATE = Decimal("0.5")`. `sisRate` continues to be scraped from Previred.
+The three rates are scraped from the "Seguro Social" table (rows "Rentabilidad Protegida", "Expectativa de Vida", "Seguro de Invalidez y Sobrevivencia (SIS)"). With the Reforma de Pensiones (Ley 21.735, vigente agosto 2026) Previred publishes `0.90` / `0.72` / `1.78`. The flat builder reads the scraped values, not constants.
+
+### Decision: Previred layout drift (Reforma de Pensiones)
+
+The August 2026 page changed two tables and broke the parser (`status=partial`, 0 AFPs, missing SIS):
+
+- **AFP table** (`TASA COTIZACIÓN AFP`) now has **4 columns** per row — `AFP`, `Cargo del Trabajador`, `Cargo del Empleador`, `Total a Pagar` — the old "independiente (incl. SIS)" column is gone. The parser accepts 4-column rows and maps `tasa_independiente=None`; it keeps accepting the legacy 5-column shape for robustness.
+- **Seguro Social** now lives in the `SEGURO SOCIAL` table (3 rows: Rentabilidad Protegida, Expectativa de Vida, SIS) instead of the removed "SEGURO DE INVALIDEZ Y SOBREVIVENCIA" / "Tasa SIS" table.
+
+The parser fixture (`tests/fixtures/previred.html`) is refreshed with the real current page (august 2026) so these values are verified by the test suite.
 
 ### Decision: No-partial-serve guard
 
@@ -74,19 +83,19 @@ Repo: sync.ts ─► period guard ─► fetch API ─► externalIndicadorSchem
 
 | File | Action | Description |
 |---|---|---|
-| `app/config.py` | Modify | Add `sii_circular_url`, `rentabilidad_protegida_rate`, `expectativa_vida_rate` |
+| `app/config.py` | Modify | Add `sii_circular_url`; remove hardcoded Ley 21.735 rate constants |
 | `app/models.py` | Modify | Add `ImpuestoTramo` model; relationship on `Period` |
 | `alembic/versions/...add_impuesto_tramos.py` | Create | New table `impuesto_tramos` |
 | `app/scraper/sii.py` | Create | Fetch SII circular and parse monthly brackets |
-| `app/scraper/previred.py` | Modify | Add `impuesto_tramos` to required sections |
-| `app/services/indicators.py` | Modify | Persist tramos; add `assert_complete_period`; add `build_flat_contract` |
+| `app/scraper/previred.py` | Modify | Add `impuesto_tramos` to required sections; parse 4-column AFP table and Seguro Social rates |
+| `app/services/indicators.py` | Modify | Persist tramos; add `assert_complete_period`; add `build_flat_contract`; read scraped Ley 21.735 rates |
 | `app/services/fetcher.py` | Modify | Call SII scraper, merge tramos into parsed data, log failures |
 | `app/routers/indicators.py` | Modify | Public endpoint returns flat contract; category endpoint kept for admin |
 | `app/main.py` | Modify | Global `{error}` exception handler |
 | `app/auth.py` | None | Already uses `X-API-Key` and constant-time hash compare |
 | `Dockerfile` / `docker-compose.yml` | Modify | Expose `SII_CIRCULAR_URL`, env-gated scheduler, healthcheck |
 | `tests/test_sii_parser.py` | Create | Fixtures + parser tests |
-| `tests/test_flat_contract.py` | Create | Builder completeness and fixed-rate tests |
+| `tests/test_flat_contract.py` | Create | Builder completeness and scraped-rate tests |
 | `tests/test_api.py` | Modify | Assert flat contract shape on public GET |
 
 ### remuneraciones (repo side)
@@ -117,9 +126,9 @@ Public `200` response body:
   "sueldoMinimoMenores": 412938, "sueldoMinimoNoRem": 356815,
   "topeImponibleAFP": 90, "topeImponibleINP": 60,
   "topeSeguroCesantia": 135.2,
-  "sisRate": 1.62,
-  "rentabilidadProtegidaRate": 0.9,
-  "expectativaVidaRate": 0.5,
+  "sisRate": 1.78,
+  "rentabilidadProtegidaRate": 0.90,
+  "expectativaVidaRate": 0.72,
   "apvTopeMensualUF": 50, "apvTopeAnualUF": 600,
   "afpRates": [...], "cesantiaRates": [...],
   "asignacionFamiliar": [...],
@@ -133,7 +142,7 @@ Topes/APV are raw UF values. Errors: `{ "error": "..." }`.
 
 | Layer | What | Approach |
 |---|---|---|
-| Unit (Python) | SII parser fixtures, flat builder, no-partial guard, fixed rates | pytest |
+| Unit (Python) | SII parser fixtures, flat builder, no-partial guard, scraped rates | pytest |
 | Route (Python) | 401 no-work, 400 params, 404 missing, 200 flat, 500 partial | `httpx` ASGI transport |
 | Repo | Build, lint, drift check, guard behavior | `npm run build` + `npm run lint` + manual API checks |
 

@@ -23,20 +23,20 @@ The service MUST scrape the SII monthly circular for `impuestoTramos` and store 
 - WHEN the scraper runs
 - THEN the period MUST be treated as incomplete, MUST NOT be served, and MUST raise an alert
 
-### Requirement: Ley 21.735 fixed rates
+### Requirement: Ley 21.735 scraped rates
 
-The service MUST emit `rentabilidadProtegidaRate=0.9` and `expectativaVidaRate=0.5` for every period, and MUST continue scraping `sisRate` from Previred.
+The service MUST scrape the three Ley 21.735 rates (`rentabilidadProtegidaRate`, `expectativaVidaRate`, `sisRate`) from Previred's "Seguro Social" table and MUST NOT hardcode them, because Previred publishes the current legal values and can change them by calendar.
 
-- GIVEN a period is successfully scraped
+- GIVEN a period is successfully scraped from Previred
 - WHEN the flat contract is built
-- THEN `rentabilidadProtegidaRate` is `0.9` and `expectativaVidaRate` is `0.5`
-- AND `sisRate` reflects the value published by Previred for that month
+- THEN `rentabilidadProtegidaRate`, `expectativaVidaRate` and `sisRate` reflect the values published by Previred for that month (e.g. `0.90`, `0.72` and `1.78` for the Reforma de Pensiones, Ley 21.735, vigente agosto 2026)
+- AND a period missing any of these scraped rates MUST be treated as incomplete
 
 ### Requirement: No-partial-serve guard
 
 The service MUST NOT serve a period that is missing any required section (Previred or SII); incomplete periods MUST fail with an alert and return an error for that month.
 
-- GIVEN a scrape completes but `impuestoTramos`, any required Previred section, or any fixed-rate field is missing
+- GIVEN a scrape completes but `impuestoTramos`, any required Previred section, or any scraped Ley 21.735 rate is missing
 - WHEN `GET /api/v1/indicadores/{year}/{month}` is called
 - THEN the endpoint returns `500` with `{error: string}` and does not return partial indicator data
 - AND an alert is emitted naming the period and the missing sections
@@ -101,14 +101,14 @@ The `200` response body MUST match the flat English contract consumed by `indica
 
 ### Requirement: Scraping sources and transform
 
-The service MUST scrape Previred for UF/UTM/minimum-wage/top/AFP/cesantia values and the SII monthly circular for `impuestoTramos`. It MUST validate scraped data before persisting and MUST apply Ley 21.735 fixed rates.
+The service MUST scrape Previred for UF/UTM/minimum-wage/top/AFP/cesantia values and the SII monthly circular for `impuestoTramos`. It MUST validate scraped data before persisting and MUST scrape (not hardcode) the Ley 21.735 rates.
 
 (Previously: SII scraping was not required and rates were expected to come entirely from Previred parsing.)
 
 - GIVEN the Previred page and SII circular are available for the requested month
 - WHEN the cron or on-demand scrape runs
 - THEN the parsed values are validated and cached under the month key
-- AND `rentabilidadProtegidaRate=0.9`, `expectativaVidaRate=0.5`, and `sisRate` comes from Previred
+- AND `rentabilidadProtegidaRate`, `expectativaVidaRate`, and `sisRate` are scraped from Previred's "Seguro Social" table
 
 - GIVEN Previred or SII changes layout (format drift)
 - WHEN the parser cannot extract required values
@@ -159,4 +159,4 @@ None. No existing requirement is deleted; the service foundation, auth model, cr
 - **Reuse vs. rewrite**: Reuse the Python FastAPI service instead of a new Node/TS Hono service. This preserves the existing scraper, scheduler, tests, and admin tooling, but requires adding SII scraping and a flat-contract endpoint.
 - **Endpoint strategy**: The existing nested Spanish endpoints (`/api/v1/indicadores/{year}/{month}` returning the old shape) will be replaced or shadowed by the flat English contract. A decision is needed whether to keep the old shape under a different path for backward compatibility or remove it entirely.
 - **No-partial-serve vs. existing `status=partial`**: The current Python implementation stores `status=partial`. This spec changes behavior so partial periods are not served; implementation must reject reads for incomplete periods.
-- **Fixed rates**: `rentabilidadProtegidaRate` and `expectativaVidaRate` are hard-coded per Ley 21.735, not scraped, which removes dependency on Previred for those values.
+- **Scraped rates**: `rentabilidadProtegidaRate`, `expectativaVidaRate` and `sisRate` are scraped from Previred's "Seguro Social" table per Ley 21.735, not hardcoded, so the API always reflects the current legal values Previred publishes.

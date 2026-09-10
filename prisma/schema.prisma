@@ -340,7 +340,7 @@ model AFPHistorico {
   cargoTrabajador       Decimal  @db.Decimal(5, 3)  // 11.44%
   cargoEmpleador        Decimal  @db.Decimal(5, 3)  // 0.1%
   totalAPagar           Decimal  @db.Decimal(5, 3)  // 11.54%
-  independiente         Decimal  @db.Decimal(5, 3)  // 12.98%
+  independiente         Decimal? @db.Decimal(5, 3)  // null: Previred ya no publica la columna de independientes (Reforma de Pensiones)
   
   indicador             IndicadorMensual @relation(fields: [indicadorId], references: [id], onDelete: Cascade)
   
