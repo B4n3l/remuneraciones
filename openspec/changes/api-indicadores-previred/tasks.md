@@ -18,6 +18,7 @@ Remaining authored: API P1 ~330 · P2 ~310 · repo rutas+UI ~240 (repo-lib ~240 
 | A | SII data layer: config, model+migration, sii.py, persist/merge | API P1 | `pytest tests/test_sii_parser.py tests/test_parser.py` | N/A: live SII flaky; fixtures prove; live check 5.4 | Revert model/migration/sii/fetcher diffs |
 | B | Flat contract + no-partial guard + `{error}` + Docker env | API P2 | `pytest tests/test_flat_contract.py tests/test_api.py` | curl 2026/6 flat 200 (X-API-Key); partial → 500 `{error}` | Revert services/routers/main/Docker diffs |
 | C | Repo routes + admin UI; calculate guard | Repo PR (post repo-lib) | `npm run lint && npm run build` | PUT sans rates → 400; with → 200 | Revert route/page diffs |
+| D | Previred drift fix: 4-col AFP + scrape Seguro Social rates (Ley 21.735) | API P3 | `pytest tests/test_parser.py tests/test_flat_contract.py tests/test_api.py` | parser vs real page (ago 2026) | Revert parser/config/indicators/fixture diffs |
 
 ## Phase 1: Python API — SII data layer (API P1)
 
@@ -69,3 +70,15 @@ Remaining authored: API P1 ~330 · P2 ~310 · repo rutas+UI ~240 (repo-lib ~240 
 - [ ] 5.4 Merge API P1+P2; deploy Dokploy IndicadoresPrevisionales (DATABASE_URL, ADMIN_API_KEY, SII_CIRCULAR_URL, SCHEDULER_ENABLED=true)
 - [ ] 5.5 Repo env: `INDICADORES_API_URL=https://<dokploy>/api/v1/indicadores` + `INDICADORES_API_KEY`
 - [ ] 5.6 Validate: /health, manual fetch, sync one period; flat contract + DB rows
+
+## Phase 6: Python API — Previred drift fix (API P3, Ley 21.735 vigente ago 2026)
+
+- [x] 6.1 `app/scraper/previred.py`: AFP de 4 columnas (tasa_independiente=None, mantiene 5 columnas por robustez)
+- [x] 6.2 `app/scraper/previred.py`: scrapear `rentabilidad_protegida`/`expectativa_vida`/`sis` de la tabla "SEGURO SOCIAL" (reemplaza la tabla vieja de SIS)
+- [x] 6.3 `app/config.py`: quitar constantes hardcodeadas `RENTABILIDAD_PROTEGIDA_RATE`/`EXPECTATIVA_VIDA_RATE`
+- [x] 6.4 `app/services/indicators.py`: persistir las 3 tasas (seguro_social) y usar valores scrapeados en `build_flat_contract`
+- [x] 6.5 `app/routers/admin.py`: `rentabilidad_protegida` en `_NUMERIC_KEYS` (round-trip manual)
+- [x] 6.6 `validate()`: exigir las 3 tasas de seguro social (no-partial-serve)
+- [x] 6.7 Fixture `tests/fixtures/previred.html` reemplazado con la página real (ago 2026)
+- [x] 6.8 Tests actualizados: AFP 4 col, seguro social 0.90/0.72/1.78, `tasa_independiente=None`, flat contract 0.90/0.72
+- [x] 6.9 Verify: `pytest` completo verde (41 passed)
