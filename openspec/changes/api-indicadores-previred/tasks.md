@@ -64,12 +64,18 @@ Remaining authored: API P1 ~330 · P2 ~310 · repo rutas+UI ~240 (repo-lib ~240 
 
 ## Phase 5: Manual rollout & validation (ops — outside apply)
 
-- [ ] 5.1 Drift check: SQL migration vs Supabase `information_schema`
-- [ ] 5.2 Apply SQL on Supabase; `npx prisma generate`; no P2022/P2021
-- [ ] 5.3 Merge repo-lib PR; (re)base rutas+UI branch
-- [ ] 5.4 Merge API P1+P2; deploy Dokploy IndicadoresPrevisionales (DATABASE_URL, ADMIN_API_KEY, SII_CIRCULAR_URL, SCHEDULER_ENABLED=true)
-- [ ] 5.5 Repo env: `INDICADORES_API_URL=https://<dokploy>/api/v1/indicadores` + `INDICADORES_API_KEY`
-- [ ] 5.6 Validate: /health, manual fetch, sync one period; flat contract + DB rows
+- [x] 5.1 Drift check: SQL migration vs Supabase `information_schema`
+- [x] 5.2 Apply SQL on Supabase; `npx prisma generate`; no P2022/P2021
+- [x] 5.3 Merge repo-lib PR; (re)base rutas+UI branch
+- [x] 5.4 Merge API P1+P2; deploy Dokploy IndicadoresPrevisionales (DATABASE_URL, ADMIN_API_KEY, SII_CIRCULAR_URL, SCHEDULER_ENABLED=true)
+- [x] 5.5 Repo env: `INDICADORES_API_URL=https://<dokploy>/api/v1/indicadores` + `INDICADORES_API_KEY`
+- [x] 5.6 Validate: /health, manual fetch, sync one period; flat contract + DB rows
+
+> **Nota backfill histórico**: el backfill de `add_ley21735_split_rates.sql`
+> (0.9 / 0.5) es **aproximado pre-Reforma** — Ley 21.735 (vigente ago 2026)
+> publica 0.9 / 0.72 / 1.78. Los períodos finalizados retro-rellenados pueden
+> llevar tasas divididas imprecisas. Los períodos nuevos traen los valores
+> reales scrapeados de Previred (no se re-escribe el histórico).
 
 ## Phase 6: Python API — Previred drift fix (API P3, Ley 21.735 vigente ago 2026)
 

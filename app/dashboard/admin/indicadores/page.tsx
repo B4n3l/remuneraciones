@@ -10,7 +10,7 @@ interface AFPRate {
     cargoTrabajador: number;
     cargoEmpleador: number;
     totalAPagar: number;
-    independiente: number;
+    independiente: number | null;
 }
 
 interface CesantiaRate {
@@ -95,9 +95,9 @@ export default function IndicadoresPage() {
         topeImponibleAFP: 89.9,
         topeImponibleINP: 60,
         topeSeguroCesantia: 135.1,
-        sisRate: 2.0,
+        sisRate: 1.78,
         rentabilidadProtegidaRate: 0.9,
-        expectativaVidaRate: 0.5,
+        expectativaVidaRate: 0.72,
         apvTopeMensualUF: 50,
         apvTopeAnualUF: 600,
     });
@@ -185,9 +185,9 @@ export default function IndicadoresPage() {
             topeImponibleAFP: 89.9,
             topeImponibleINP: 60,
             topeSeguroCesantia: 135.1,
-            sisRate: 2.0,
+            sisRate: 1.78,
             rentabilidadProtegidaRate: 0.9,
-            expectativaVidaRate: 0.5,
+            expectativaVidaRate: 0.72,
             apvTopeMensualUF: 50,
             apvTopeAnualUF: 600,
         });
@@ -197,7 +197,7 @@ export default function IndicadoresPage() {
             cargoTrabajador: 11.0,
             cargoEmpleador: 0.1,
             totalAPagar: 11.1,
-            independiente: 12.5,
+            independiente: null,
         })));
         setCesantiaRates(CESANTIA_TIPOS.map(t => ({
             tipoContrato: t.value,
@@ -239,7 +239,7 @@ export default function IndicadoresPage() {
             cargoTrabajador: Number(a.cargoTrabajador),
             cargoEmpleador: Number(a.cargoEmpleador),
             totalAPagar: Number(a.totalAPagar),
-            independiente: Number(a.independiente),
+            independiente: a.independiente ?? null,
         })));
         setCesantiaRates(indicador.cesantiaRates.map(c => ({
             ...c,
@@ -794,10 +794,11 @@ export default function IndicadoresPage() {
                                                             <input
                                                                 type="number"
                                                                 step="0.01"
-                                                                value={afp.independiente}
+                                                                value={afp.independiente ?? ""}
                                                                 onChange={(e) => {
                                                                     const newRates = [...afpRates];
-                                                                    newRates[index].independiente = parseFloat(e.target.value) || 0;
+                                                                    newRates[index].independiente =
+                                                                        e.target.value === "" ? null : parseFloat(e.target.value);
                                                                     setAfpRates(newRates);
                                                                 }}
                                                                 className="w-20 border rounded px-2 py-1 text-gray-900"
